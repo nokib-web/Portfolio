@@ -86,7 +86,7 @@ const Header = () => {
                             className="flex items-center space-x-2 text-lg font-semibold text-gray-900 dark:text-white"
                         >
                             <span className="material-icons-outlined">north_east</span>
-                            <span>nokib-dev</span>
+                            <span>nokib.dev</span>
                         </motion.div>
                     </Link>
 
