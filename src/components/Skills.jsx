@@ -1,43 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaReact, FaHtml5, FaCss3Alt, FaJs, FaPython, FaGitAlt, FaDocker, FaAws, FaFigma } from 'react-icons/fa';
-import { SiNextdotjs, SiTailwindcss, SiTypescript, SiNodedotjs, SiExpress, SiMongodb, SiPostgresql } from 'react-icons/si';
+
+import { skills } from '../data/portfolioData';
 
 const Skills = () => {
-    const skills = [
-        {
-            category: "Frontend",
-            items: [
-                { name: "React", icon: <FaReact /> },
-                { name: "Next.js", icon: <SiNextdotjs /> },
-                { name: "Tailwind CSS", icon: <SiTailwindcss /> },
-                { name: "TypeScript", icon: <SiTypescript /> },
-                { name: "HTML5", icon: <FaHtml5 /> },
-                { name: "CSS3", icon: <FaCss3Alt /> },
-                { name: "JavaScript", icon: <FaJs /> },
-            ]
-        },
-        {
-            category: "Backend",
-            items: [
-                { name: "Node.js", icon: <SiNodedotjs /> },
-                { name: "Express", icon: <SiExpress /> },
-                { name: "MongoDB", icon: <SiMongodb /> },
-                { name: "PostgreSQL", icon: <SiPostgresql /> },
-                { name: "Python", icon: <FaPython /> },
-            ]
-        },
-        {
-            category: "Tools & DevOps",
-            items: [
-                { name: "Git", icon: <FaGitAlt /> },
-                { name: "Docker", icon: <FaDocker /> },
-                { name: "AWS", icon: <FaAws /> },
-                { name: "VS Code", icon: null },
-                { name: "Figma", icon: <FaFigma /> },
-            ]
-        }
-    ];
 
     return (
         <div className="max-w-4xl mx-auto">

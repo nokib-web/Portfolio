@@ -1,89 +1,114 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const MobileMenu = ({ isOpen, onClose }) => {
+const MobileMenu = ({ isOpen, onClose, activeSection }) => {
     const navItems = [
-        { name: "Introduction", path: "/" },
-        { name: "About Me", path: "/about" },
-        { name: "Projects", path: "/projects" },
-        { name: "Skills & Tools", path: "/skills" },
-        { name: "Experience", path: "/experience" },
-        { name: "Education", path: "/education" },
-        { name: "Contact", path: "/contact" },
-        { name: "Stats", path: "/stats" },
+        { name: "Introduction", path: "#hero", id: "hero", icon: "home" },
+        { name: "About Me", path: "#about", id: "about", icon: "person" },
+        { name: "Projects", path: "#projects", id: "projects", icon: "code" },
+        { name: "Skills & Tools", path: "#skills", id: "skills", icon: "handyman" },
+        { name: "Experience", path: "#experience", id: "experience", icon: "work" },
+        { name: "Education", path: "#education", id: "education", icon: "school" },
+        { name: "Contact", path: "#contact", id: "contact", icon: "mail" },
+        { name: "Stats", path: "#stats", id: "stats", icon: "insights" },
     ];
 
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 md:hidden">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onClose}
-            ></div>
-
-            {/* Menu Content */}
-            <div className="absolute right-0 top-0 h-full w-64 bg-white dark:bg-gray-900 shadow-xl p-6 overflow-y-auto">
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Menu</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-2 text-gray-500 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
+    return createPortal(
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed inset-0 z-[100] md:hidden font-body bg-slate-900/60 backdrop-blur-sm"
+                    onClick={onClose}
+                >
+                    <motion.div
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="absolute inset-0 bg-white dark:bg-slate-900 flex flex-col"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <span className="material-icons-outlined text-2xl">close</span>
-                    </button>
-                </div>
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center space-x-2 text-lg font-bold font-display text-slate-900 dark:text-white">
+                                <span className="material-icons-outlined text-primary-500">north_east</span>
+                                <span>nokib.dev</span>
+                            </div>
+                            <button
+                                onClick={onClose}
+                                className="p-2 text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <span className="material-icons-outlined text-2xl">close</span>
+                            </button>
+                        </div>
 
-                <nav className="flex flex-col space-y-4">
-                    {navItems.map((item) => (
-                        <NavLink
-                            key={item.name}
-                            to={item.path}
-                            onClick={onClose}
-                            className={({ isActive }) =>
-                                `px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                                    ? "bg-primary/10 text-primary"
-                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                }`
-                            }
-                        >
-                            {item.name}
-                        </NavLink>
-                    ))}
+                        {/* Menu Items */}
+                        <div className="flex-1 overflow-y-auto py-8 px-6 space-y-2">
+                            {navItems.map((item) => (
+                                <a
+                                    key={item.name}
+                                    href={item.path}
+                                    onClick={onClose}
+                                    className={`flex items-center px-6 py-4 text-lg font-medium rounded-2xl transition-all duration-300 ${activeSection === item.id
+                                        ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 shadow-sm"
+                                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200"
+                                        }`}
+                                >
+                                    <span className="material-icons-outlined mr-4 opacity-70">{item.icon}</span>
+                                    {item.name}
+                                </a>
+                            ))}
+                        </div>
 
-                    <div className="h-px bg-gray-200 dark:bg-gray-800 my-4"></div>
-
-                    <a
-                        className="px-4 py-2 flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                        href="https://drive.google.com/file/d/1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY/view?usp=sharing"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <span>Resume</span>
-                        <span className="material-icons-outlined text-sm">open_in_new</span>
-                    </a>
-                    <a
-                        className="px-4 py-2 flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                        href="https://www.linkedin.com/in/nazmulhasan-nokib/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <span>LinkedIn</span>
-                        <span className="material-icons-outlined text-sm">open_in_new</span>
-                    </a>
-                    <a
-                        className="px-4 py-2 flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium"
-                        href="https://github.com/nokib-web"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <span>Github</span>
-                        <span className="material-icons-outlined text-sm">open_in_new</span>
-                    </a>
-                </nav>
-            </div>
-        </div>
+                        {/* Footer Links */}
+                        <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                            <div className="flex justify-center space-x-6">
+                                <a
+                                    href="https://drive.google.com/uc?export=download&id=1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center space-y-1 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                                >
+                                    <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm">
+                                        <span className="material-icons-outlined">download</span>
+                                    </div>
+                                    <span className="text-xs font-medium">Resume</span>
+                                </a>
+                                <a
+                                    href="https://www.linkedin.com/in/nazmulhasan-nokib/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center space-y-1 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                                >
+                                    <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm">
+                                        <span className="material-icons-outlined">work</span>
+                                    </div>
+                                    <span className="text-xs font-medium">LinkedIn</span>
+                                </a>
+                                <a
+                                    href="https://github.com/nokib-web"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center space-y-1 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                                >
+                                    <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm">
+                                        <span className="material-icons-outlined">code</span>
+                                    </div>
+                                    <span className="text-xs font-medium">Github</span>
+                                </a>
+                            </div>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>,
+        document.body
     );
 };
 

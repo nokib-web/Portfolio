@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { createPortal } from 'react-dom';
+
 const ProjectModal = ({ project, onClose }) => {
     const [isVisible, setIsVisible] = useState(false);
 
@@ -20,8 +22,8 @@ const ProjectModal = ({ project, onClose }) => {
 
     if (!project) return null;
 
-    return (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+    return createPortal(
+        <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -33,9 +35,9 @@ const ProjectModal = ({ project, onClose }) => {
                 {/* Close Button */}
                 <button
                     onClick={handleClose}
-                    className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors z-10"
+                    className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-black/10 dark:hover:bg-white/10 rounded-full transition-colors z-30"
                 >
-                    <span className="material-icons-outlined text-gray-700 dark:text-gray-200">close</span>
+                    <span className="material-icons-outlined text-gray-700 dark:text-gray-200 bg-white/50 dark:bg-black/50 rounded-full p-1">close</span>
                 </button>
 
                 {/* Preview Image */}
@@ -61,9 +63,23 @@ const ProjectModal = ({ project, onClose }) => {
                         ))}
                     </div>
 
-                    <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                         {project.description}
                     </p>
+
+                    {project.keyPoints && (
+                        <div className="mb-8">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Key Features</h3>
+                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {project.keyPoints.map((point, index) => (
+                                    <li key={index} className="flex items-start text-gray-600 dark:text-gray-300">
+                                        <span className="material-icons-outlined text-primary text-sm mr-2 mt-1">check_circle</span>
+                                        <span className="text-sm">{point}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     <div className="flex flex-col sm:flex-row gap-4">
                         {project.liveLink && (
@@ -91,7 +107,8 @@ const ProjectModal = ({ project, onClose }) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
