@@ -17,6 +17,20 @@ export const projects = [
         ]
     },
     {
+        title: "StyleDecor",
+        description: "StyleDecor is a modern, full-stack web application designed to streamline the connection between clients and professional decorators. It offers a seamless booking experience with integrated payments, real-time status tracking, and role-based dashboards.",
+        tech: ["React", "Next.js", "Tailwind CSS", "TanStack Query", "Firebase", "Stripe", "Framer Motion", "Recharts"],
+        image: "/style-decor.png",
+        codeLink: "https://github.com/nokib-web/StyleDecor-Client",
+        liveLink: "https://style-decor-client-two.vercel.app/",
+        keyPoints: [
+            "Multi-role dashboards for Users, Decorators, and Admins",
+            "Secure Stripe payment integration with coupon system",
+            "Real-time booking tracking and project management",
+            "Interactive analytics dashboard with data visualization"
+        ]
+    },
+    {
         title: "NexCart",
         description: "NexCart is a full-featured e-commerce platform developed with Next.js, Tailwind CSS, and Stripe integration. The application includes product listing, category filtering, dynamic routing, real-time cart management, and a responsive, mobile-friendly UI. It is optimized for SEO, fast rendering, and provides a smooth, secure shopping experience from product discovery to checkout.",
         tech: ["Next.js", "React", "MongoDB", "JavaScript"],
