@@ -71,8 +71,93 @@ export const projects = [
             "Secure Authentication via Firebase",
             "Responsive Design for All Devices"
         ]
+    },
+    {
+        title: "SimpleEarn",
+        description: "A comprehensive micro-tasking and earning platform connecting workers, buyers, and admins. Features a robust coin-based economy, secure payments, and real-time notifications.",
+        tech: ["React", "Node.js", "MongoDB", "Express", "Firebase", "Stripe", "Tailwind CSS"],
+        image: "/simple-earn.png",
+        codeLink: "https://github.com/nokib-web/SimpleEarn-Client",
+        liveLink: "https://simpleearn-2387f.web.app/",
+        keyPoints: [
+            "Multi-role system (Worker, Buyer, Admin) with specialized dashboards",
+            "Secure payment integration via Stripe for coin purchases",
+            "Real-time notification system and withdrawal management",
+            "Gamified coin-based economy for task execution and distribution"
+        ]
+    },
+    {
+        title: "RecipeFinder",
+        description: "A premium culinary assistant powered by Spoonacular API, offering access to 360,000+ recipes with smart filtering, meal planning, and interactive cooking tools.",
+        tech: ["Next.js 15", "TypeScript", "Tailwind CSS", "Framer Motion", "Spoonacular API"],
+        image: "https://i.ibb.co.com/DHr3MFB2/abdelrahman-sarayreh-RIel-TXL5w-Vk-unsplash.jpg",
+        codeLink: "https://github.com/nokib-web/RecipeFinder",
+        liveLink: "https://recipe-finder-1.vercel.app/",
+        keyPoints: [
+            "Smart ingredient-based search ('In your Fridge' feature)",
+            "Interactive cooking mode with built-in timers and progress tracking",
+            "Comprehensive weekly meal planner and smart shopping list",
+            "Detailed nutritional analysis and achievement system for cooks"
+        ]
+    },
+    {
+        title: "PosBuzz",
+        description: "An enterprise-grade Point of Sale (POS) system designed for efficient inventory management, real-time sales tracking, and seamless checkout experiences.",
+        tech: ["NestJS", "PostgreSQL", "Prisma", "React", "TypeScript", "Ant Design", "TanStack Query"],
+        image: "/pos-buzz.png",
+        codeLink: "https://github.com/nokib-web/PosBuzz",
+        liveLink: "https://pos-buzz-frontend-beta.vercel.app/login",
+        keyPoints: [
+            "Fast checkout system with barcode scanning integration",
+            "Real-time inventory tracking with low stock alerts and supplier management",
+            "Role-Based Access Control (RBAC) for Admins and Cashiers",
+            "Interactive analytics dashboard with visualized sales trends via Recharts"
+        ]
+    },
+    {
+        title: "Custom Spark",
+        description: "A premium e-commerce landing page and product catalog featuring glassmorphic design, robust product management, and optimized SEO.",
+        tech: ["Next.js 15", "NextAuth.js", "Tailwind CSS v4", "Prisma", "PostgreSQL", "Zod"],
+        image: "/custom-spark.png",
+        codeLink: "https://github.com/nokib-web/CustomSpark",
+        liveLink: "https://custom-spark.vercel.app/",
+        keyPoints: [
+            "Stunning glassmorphic UI with fluid animations using Framer Motion",
+            "Secure authentication via Google OAuth and Credentials",
+            "Dynamic product catalog with real-time search, filtering, and sorting",
+            "SEO optimized with dynamic metadata and OpenGraph support"
+        ]
+    },
+    {
+        title: "Care.IO",
+        description: "A comprehensive healthcare service platform for booking caregivers, elderly care, and nurse services with automated invoicing.",
+        tech: ["Next.js 15", "MongoDB", "Tailwind CSS", "DaisyUI", "NextAuth.js", "Nodemailer"],
+        image: "/care-io.png",
+        codeLink: "https://github.com/nokib-web/Care.IO",
+        liveLink: "https://care-io-two.vercel.app/",
+        keyPoints: [
+            "Location-based service booking with dynamic cost calculation",
+            "Multi-level admin and user dashboards for booking management",
+            "Automatic email invoicing and real-time status updates via Nodemailer",
+            "Responsive, accessible design optimized for clinical and home care use"
+        ]
+    },
+    {
+        title: "Ramadan Countdown 2026",
+        description: "A spiritual companion app featuring a real-time countdown, Hijri calendar, and rotating inspirational content with a focus on premium aesthetics.",
+        tech: ["Next.js 16.1", "React 19", "Tailwind CSS 4", "Framer Motion", "next-themes"],
+        image: "/ramadan-countdown.png",
+        codeLink: "https://github.com/nokib-web/RamadanCountDown",
+        liveLink: "https://ramadan-count-down-wheat.vercel.app/",
+        keyPoints: [
+            "Dynamic countdown timer with automatic date calculation for Ramadan",
+            "Rotating Quranic verses and Hadiths with beautiful Arabic typography",
+            "PWA-ready with system-aware dark mode and interactive progress bars",
+            "Integrated social sharing and educational content about Islamic practices"
+        ]
     }
 ];
+
 
 export const skills = [
     {
