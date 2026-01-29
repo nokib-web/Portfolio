@@ -26,16 +26,16 @@ const Layout = ({ children }) => {
     }, [children]);
 
     return (
-        <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-body overflow-hidden relative">
+        <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-body relative">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 via-transparent to-blue-100/40 dark:from-purple-900/20 dark:via-transparent dark:to-blue-900/20 pointer-events-none" />
             <Header activeSection={activeSection} />
-            <div className="flex-1 flex max-w-7xl mx-auto w-full overflow-hidden relative z-10 pt-16">
-                <Sidebar activeSection={activeSection} />
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 flex flex-col scroll-smooth" id="scroll-container">
-                    <div className="flex-grow">
+            <div className="flex-1 w-full relative z-10 pt-16">
+                <div className="max-w-7xl mx-auto flex">
+                    <Sidebar activeSection={activeSection} />
+                    <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-8 lg:p-12 scroll-smooth" id="scroll-container">
                         {children}
-                    </div>
-                </main>
+                    </main>
+                </div>
             </div>
         </div>
     );
