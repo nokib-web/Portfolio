@@ -8,20 +8,49 @@ import { useGSAP } from '@gsap/react';
 const Hero = () => {
     const containerRef = useRef(null);
     const iconsRef = useRef([]);
+    const contentRef = useRef(null);
 
     useGSAP(() => {
+        // Floating icons animation
         iconsRef.current.forEach((icon, index) => {
             gsap.to(icon, {
-                x: `random(-50, 50, 5)`, // Random x movement
-                y: `random(-30, 30, 5)`, // Random y movement
-                rotation: `random(-15, 15)`, // Slight rotation
-                duration: `random(3, 6)`, // Random duration
-                repeat: -1, // Infinite loop
-                yoyo: true, // Go back and forth
-                ease: "sine.inOut", // Smooth ease
-                delay: `random(0, 2)` // Random start delay
+                x: `random(-50, 50, 5)`,
+                y: `random(-30, 30, 5)`,
+                rotation: `random(-15, 15)`,
+                duration: `random(3, 6)`,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut",
+                delay: `random(0, 2)`
             });
         });
+
+        // Hero content entrance
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+        tl.from(contentRef.current.querySelector('.hero-badge'), {
+            opacity: 0,
+            y: 20,
+            duration: 0.8,
+            delay: 0.2
+        })
+            .from(contentRef.current.querySelector('h1'), {
+                opacity: 0,
+                y: 30,
+                duration: 1,
+            }, "-=0.6")
+            .from(contentRef.current.querySelector('p'), {
+                opacity: 0,
+                y: 20,
+                duration: 0.8
+            }, "-=0.7")
+            .from(contentRef.current.querySelectorAll('.hero-btn'), {
+                opacity: 0,
+                y: 20,
+                stagger: 0.15,
+                duration: 0.8
+            }, "-=0.6");
+
     }, { scope: containerRef });
 
     const addToRefs = (el) => {
@@ -54,13 +83,9 @@ const Hero = () => {
                 </div>
             </div>
 
-            <div className="container mx-auto px-6 relative z-10 text-center">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                >
-                    <div className="inline-block px-4 py-1.5 mb-6 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 text-sm font-medium border border-primary-100 dark:border-primary-800">
+            <div className="container mx-auto px-6 relative z-10 text-center" ref={contentRef}>
+                <div>
+                    <div className="hero-badge inline-block px-4 py-1.5 mb-6 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 text-sm font-medium border border-primary-100 dark:border-primary-800">
                         ✨ Full-Stack Developer
                     </div>
                     <h1 className="text-5xl md:text-7xl font-bold font-display text-slate-900 dark:text-white mb-6 tracking-tight">
@@ -79,25 +104,21 @@ const Hero = () => {
                         I enjoy crafting responsive web solutions using modern technologies like <span className="text-slate-900 dark:text-slate-200 font-semibold">Next.js</span>, <span className="text-slate-900 dark:text-slate-200 font-semibold">React</span>, and <span className="text-slate-900 dark:text-slate-200 font-semibold">Node.js</span>.
                     </p>
                     <div className="mt-10 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                        <motion.a
+                        <a
                             href="#contact"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-primary-700 transition-all shadow-lg hover:shadow-primary-500/40 w-full sm:w-auto inline-flex items-center justify-center gap-2 cursor-pointer"
+                            className="hero-btn bg-primary-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-primary-700 transition-all shadow-lg hover:shadow-primary-500/40 w-full sm:w-auto inline-flex items-center justify-center gap-2 cursor-pointer"
                         >
                             Get in Touch
                             <span className="material-icons-outlined text-sm">arrow_forward</span>
-                        </motion.a>
-                        <motion.a
+                        </a>
+                        <a
                             href="#projects"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 px-8 py-4 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm hover:shadow-md w-full sm:w-auto inline-flex items-center justify-center cursor-pointer"
+                            className="hero-btn bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 px-8 py-4 rounded-xl font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm hover:shadow-md w-full sm:w-auto inline-flex items-center justify-center cursor-pointer"
                         >
                             View Projects
-                        </motion.a>
+                        </a>
                     </div>
-                </motion.div>
+                </div>
             </div>
         </section>
     );

@@ -1,13 +1,75 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ProjectModal from './ProjectModal';
 import { projects } from '../data/portfolioData';
 
+gsap.registerPlugin(ScrollTrigger);
+
 const Projects = () => {
     const [selectedProject, setSelectedProject] = useState(null);
+    const containerRef = useRef(null);
+
+    useGSAP(() => {
+        const headerTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".projects-header",
+                start: "top 85%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        headerTl.from(".projects-header .badge", {
+            opacity: 0,
+            scale: 0.8,
+            duration: 0.5
+        })
+            .from(".projects-header h2", {
+                opacity: 0,
+                y: 20,
+                duration: 0.6
+            }, "-=0.3")
+            .from(".projects-header p", {
+                opacity: 0,
+                y: 20,
+                duration: 0.6
+            }, "-=0.4");
+
+        // Projects Grid Animation
+        gsap.fromTo(".project-card",
+            { opacity: 0, y: 30 },
+            {
+                scrollTrigger: {
+                    trigger: ".projects-grid",
+                    start: "top 90%",
+                    toggleActions: "play none none none"
+                },
+                opacity: 1,
+                y: 0,
+                stagger: 0.1,
+                duration: 0.8,
+                ease: "power3.out",
+                onComplete: () => ScrollTrigger.refresh()
+            }
+        );
+
+        // "View All" button animation
+        gsap.from(".projects-cta", {
+            scrollTrigger: {
+                trigger: ".projects-cta",
+                start: "top 90%",
+                toggleActions: "play none none none"
+            },
+            opacity: 0,
+            y: 20,
+            duration: 0.6
+        });
+
+    }, { scope: containerRef });
 
     return (
-        <section className="relative py-20 md:py-32 overflow-hidden">
+        <section ref={containerRef} className="relative py-20 md:py-32 overflow-hidden">
             {/* Background Elements */}
             <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 via-white to-slate-50/50 dark:from-slate-950/50 dark:via-slate-900 dark:to-slate-950/50 pointer-events-none" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -15,72 +77,40 @@ const Projects = () => {
 
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Section Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-16 md:mb-20"
-                >
+                <div className="projects-header mb-16 md:mb-20">
                     <div className="flex flex-col items-center text-center space-y-4">
                         {/* Badge */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.1 }}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 border border-primary-200/50 dark:border-primary-700/30 shadow-sm"
-                        >
+                        <div className="badge inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 border border-primary-200/50 dark:border-primary-700/30 shadow-sm">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
                             </span>
                             <span className="text-xs font-bold text-primary-700 dark:text-primary-300 uppercase tracking-widest">Featured Work</span>
-                        </motion.div>
+                        </div>
 
                         {/* Title */}
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display text-slate-900 dark:text-white"
-                        >
+                        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display text-slate-900 dark:text-white">
                             Selected{' '}
                             <span className="bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400 bg-clip-text text-transparent">
                                 Projects
                             </span>
-                        </motion.h2>
+                        </h2>
 
                         {/* Description */}
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.3 }}
-                            className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed"
-                        >
+                        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
                             Crafting exceptional digital experiences with modern technologies.
                             Each project represents a unique challenge solved with innovation and precision.
-                        </motion.p>
+                        </p>
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Projects Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                <div className="projects-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     {projects.map((project, index) => (
-                        <motion.article
+                        <article
                             key={index}
-                            initial={{ opacity: 0, y: 40 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: "-100px" }}
-                            transition={{
-                                duration: 0.6,
-                                delay: index * 0.08,
-                                ease: [0.22, 1, 0.36, 1]
-                            }}
                             onClick={() => setSelectedProject(project)}
-                            className="group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 hover:shadow-2xl hover:shadow-primary-500/20 dark:hover:shadow-primary-500/10 transition-all duration-700 cursor-pointer"
+                            className="project-card group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 hover:shadow-2xl hover:shadow-primary-500/20 dark:hover:shadow-primary-500/10 transition-all duration-700 cursor-pointer"
                         >
                             {/* Gradient Border Effect */}
                             <div className="absolute inset-0 bg-gradient-to-br from-primary-500/0 via-primary-500/0 to-purple-500/0 group-hover:from-primary-500/10 group-hover:via-purple-500/10 group-hover:to-primary-500/10 transition-all duration-700 rounded-2xl pointer-events-none" />
@@ -161,18 +191,12 @@ const Projects = () => {
 
                             {/* Animated Border */}
                             <div className="absolute inset-0 rounded-2xl ring-2 ring-primary-500/0 group-hover:ring-primary-500/30 dark:group-hover:ring-primary-500/20 transition-all duration-700 pointer-events-none" />
-                        </motion.article>
+                        </article>
                     ))}
                 </div>
 
                 {/* View All Projects CTA */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.4 }}
-                    className="mt-16 text-center"
-                >
+                <div className="projects-cta mt-16 text-center">
                     <a
                         href="https://github.com/nokib-web"
                         target="_blank"
@@ -182,7 +206,7 @@ const Projects = () => {
                         <span>View All Projects on GitHub</span>
                         <span className="material-icons-outlined text-lg">arrow_outward</span>
                     </a>
-                </motion.div>
+                </div>
             </div>
 
             <ProjectModal

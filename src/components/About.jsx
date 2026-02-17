@@ -1,10 +1,75 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const About = () => {
-    return (
-        <div className="max-w-4xl mx-auto">
+    const containerRef = useRef(null);
 
-            <div className="flex items-center gap-3 mb-8">
+    useGSAP(() => {
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
+        });
+
+        // Header animation
+        tl.fromTo(".about-header",
+            { opacity: 0, x: -50 },
+            {
+                opacity: 1,
+                x: 0,
+                duration: 0.8,
+                ease: "power2.out"
+            }
+        );
+
+        // Image and content stagger
+        tl.fromTo(".about-image",
+            { opacity: 0, scale: 0.8 },
+            {
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                ease: "back.out(1.7)"
+            }, "-=0.4")
+            .fromTo(".about-content p",
+                { opacity: 0, y: 20 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    stagger: 0.2,
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, "-=0.6");
+
+        // Interests cards animation
+        gsap.fromTo(".interest-card",
+            { opacity: 0, y: 30 },
+            {
+                scrollTrigger: {
+                    trigger: ".interests-grid",
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                },
+                opacity: 1,
+                y: 0,
+                stagger: 0.15,
+                duration: 0.8,
+                ease: "power3.out"
+            }
+        );
+
+    }, { scope: containerRef });
+
+    return (
+        <div ref={containerRef} className="max-w-4xl mx-auto">
+
+            <div className="about-header flex items-center gap-3 mb-8">
                 <span className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
                     <span className="material-icons-outlined">person</span>
                 </span>
@@ -15,7 +80,7 @@ const About = () => {
 
             <div className="flex flex-col lg:flex-row gap-12">
 
-                <div className="lg:w-1/3">
+                <div className="lg:w-1/3 about-image">
                     <img
                         alt="Nokib Profile"
                         className="rounded-2xl shadow-lg w-full h-auto object-cover transform hover:scale-[1.02] transition-transform duration-500"
@@ -23,7 +88,7 @@ const About = () => {
                     />
                 </div>
 
-                <div className="lg:w-2/3">
+                <div className="lg:w-2/3 about-content">
                     <h2 className="text-3xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400 mb-6">
                         Crafting Digital Experiences with Purpose
                     </h2>
@@ -58,9 +123,9 @@ const About = () => {
             <div className="mt-20">
                 <h3 className="text-2xl font-bold font-display text-slate-900 dark:text-white mb-8">Personal Interests</h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="interests-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                    <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-8 rounded-2xl flex items-start space-x-4 shadow-sm hover:shadow-md transition-all">
+                    <div className="interest-card bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-8 rounded-2xl flex items-start space-x-4 shadow-sm hover:shadow-md transition-all">
 
                         <div className="bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 p-3 rounded-xl">
                             <span className="material-icons-outlined">edit_note</span>
@@ -75,7 +140,7 @@ const About = () => {
 
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-8 rounded-2xl flex items-start space-x-4 shadow-sm hover:shadow-md transition-all">
+                    <div className="interest-card bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-8 rounded-2xl flex items-start space-x-4 shadow-sm hover:shadow-md transition-all">
                         <div className="bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 p-3 rounded-xl">
                             <span className="material-icons-outlined">hiking</span>
                         </div>
@@ -87,7 +152,7 @@ const About = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-8 rounded-2xl flex items-start space-x-4 shadow-sm hover:shadow-md transition-all">
+                    <div className="interest-card bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-8 rounded-2xl flex items-start space-x-4 shadow-sm hover:shadow-md transition-all">
                         <div className="bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 p-3 rounded-xl">
                             <span className="material-icons-outlined">book</span>
                         </div>
@@ -102,9 +167,6 @@ const About = () => {
                 </div>
             </div>
         </div>
-
-
-
     );
 };
 
