@@ -38,7 +38,7 @@ export default {
         "background-dark": "#0F172A", // slate-900
       },
       fontFamily: {
-        display: ["Sora", "sans-serif"],
+        display: ["Outfit", "sans-serif"],
         body: ["Inter", "sans-serif"], // Adding Inter for body text if needed
       },
       borderRadius: {

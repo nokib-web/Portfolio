@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import MeshGradient from './Background/MeshGradient';
+import CustomCursor from './Common/CustomCursor';
 
 const Layout = ({ children }) => {
     const [activeSection, setActiveSection] = useState('hero');
@@ -27,7 +29,8 @@ const Layout = ({ children }) => {
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-body relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-100/40 via-transparent to-blue-100/40 dark:from-purple-900/20 dark:via-transparent dark:to-blue-900/20 pointer-events-none" />
+            <CustomCursor />
+            <MeshGradient />
             <Header activeSection={activeSection} />
             <div className="flex-1 w-full relative z-10 pt-16">
                 <div className="max-w-7xl mx-auto flex">
