@@ -155,6 +155,20 @@ export const projects = [
             "PWA-ready with system-aware dark mode and interactive progress bars",
             "Integrated social sharing and educational content about Islamic practices"
         ]
+    },
+    {
+        title: "Momentum",
+        description: "An enterprise-grade Project Management system with role-based access control, JWT authentication, and advanced project tracking. Built with a focus on UI/UX excellence and optimized server-state management.",
+        tech: ["React", "TypeScript", "Tailwind CSS", "TanStack Query", "Axios", "Framer Motion"],
+        image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        codeLink: "https://github.com/nokib-web/momentum-frontend",
+        liveLink: "https://momentum-frontend-two.vercel.app/",
+        keyPoints: [
+            "Secure JWT Authentication with Role-Based Access Control (RBAC)",
+            "Innovative Invite-only system for controlled user onboarding",
+            "Advanced Project Dashboard with real-time statistics",
+            "Optimized with TanStack Query for caching and efficient data fetching"
+        ]
     }
 ];
 
