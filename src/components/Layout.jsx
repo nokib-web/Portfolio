@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MeshGradient from './Background/MeshGradient';
@@ -6,6 +7,26 @@ import CustomCursor from './Common/CustomCursor';
 
 const Layout = ({ children }) => {
     const [activeSection, setActiveSection] = useState('hero');
+    const location = useLocation();
+
+    // Handle scroll to hash on route change/initial load
+    useEffect(() => {
+        if (location.hash) {
+            // Small delay to ensure content is rendered
+            const timer = setTimeout(() => {
+                const id = location.hash.replace('#', '');
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        } else if (location.pathname === '/') {
+            // If on home with no hash, scroll to top
+            const container = document.getElementById('scroll-container');
+            if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [location.pathname, location.hash]);
 
     useEffect(() => {
         const sections = ['hero', 'about', 'skills', 'experience', 'projects', 'education', 'contact', 'stats'];
@@ -14,7 +35,9 @@ const Layout = ({ children }) => {
                 if (entry.isIntersecting) {
                     setActiveSection(entry.target.id);
                     // Update URL hash without jumping
-                    window.history.replaceState(null, null, `#${entry.target.id}`);
+                    if (window.location.pathname === '/') {
+                        window.history.replaceState(null, null, `#${entry.target.id}`);
+                    }
                 }
             });
         }, { threshold: [0, 0.2, 0.5], rootMargin: "-40% 0px -55% 0px" });

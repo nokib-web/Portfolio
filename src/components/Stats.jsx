@@ -9,7 +9,7 @@ const statsData = [
     { label: "Years Experience", value: 1 },
     { label: "Projects Completed", value: 20 },
     { label: "Open Source Contribs", value: 10 },
-    { label: "Commits this Year", value: 530 },
+    { label: "Commits this Year", value: 540 },
 ];
 
 const Stats = () => {
