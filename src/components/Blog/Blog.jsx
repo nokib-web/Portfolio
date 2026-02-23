@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { getAllPosts } from '../../api/hashnode'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import Magnetic from '../Common/Magnetic'
+
+gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORIES = ['All', 'Development', 'Dailylife', 'Religion']
 
@@ -8,101 +14,191 @@ export default function Blog() {
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const [active, setActive] = useState('All')
+    const containerRef = useRef(null);
 
     useEffect(() => {
-        getAllPosts()
-            .then(setPosts)
-            .finally(() => setLoading(false))
+        const fetchPosts = async () => {
+            try {
+                const data = await getAllPosts();
+                setPosts(data || []);
+            } catch (err) {
+                console.error("Error in component fetch:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPosts();
     }, [])
 
     const filtered = active === 'All'
         ? posts
         : posts.filter(p =>
-            p.tags.some(t => t.name.toLowerCase() === active.toLowerCase())
+            p.tags?.some(t => t.name.toLowerCase() === active.toLowerCase())
         )
 
+    useGSAP(() => {
+        if (!loading) {
+            // Refresh ScrollTrigger to ensure correct positions
+            ScrollTrigger.refresh();
+
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            });
+
+            tl.from(".blog-header-animate", {
+                y: 30,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power3.out"
+            })
+                .from(".category-nav-animate", {
+                    y: 20,
+                    opacity: 0,
+                    stagger: 0.1,
+                    duration: 0.6,
+                    ease: "power3.out"
+                }, "-=0.4");
+
+            if (filtered.length > 0) {
+                gsap.from(".blog-post-card", {
+                    y: 40,
+                    opacity: 0,
+                    stagger: 0.1,
+                    duration: 0.8,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: ".posts-grid",
+                        start: "top 85%"
+                    }
+                });
+            }
+        }
+    }, [loading, filtered.length, active]);
+
     if (loading) return (
-        <div className="flex justify-center items-center min-h-screen">
-            <div className="text-gray-400 text-lg">Loading posts...</div>
+        <div className="flex justify-center items-center min-h-[70vh]">
+            <div className="flex flex-col items-center gap-6">
+                <div className="relative w-24 h-24">
+                    <div className="absolute inset-0 border-4 border-primary-500/20 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-t-primary-500 rounded-full animate-spin"></div>
+                    <div className="text-slate-400 font-display text-xl animate-pulse mt-32 tracking-widest font-bold uppercase">Synthesizing...</div>
+                </div>
+            </div>
         </div>
     )
 
     return (
-        <section className="max-w-6xl mx-auto px-6 py-20">
+        <div ref={containerRef} className="blog-section relative py-12 px-4 sm:px-8 lg:px-12 min-h-screen">
+            <div className="max-w-7xl mx-auto relative z-10">
+                {/* Header */}
+                <div className="blog-header text-center mb-16 space-y-4">
+                    <div className="blog-header-animate inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-slate-100 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/5 text-primary-500 dark:text-primary-400 text-[10px] font-black uppercase tracking-[0.4em] shadow-xl">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
+                        Publications
+                    </div>
+                    <h1 className="blog-header-animate text-5xl md:text-7xl lg:text-8xl font-black font-display text-slate-900 dark:text-white leading-[0.9] tracking-tighter">
+                        The <span className="bg-gradient-to-br from-primary-400 via-purple-500 to-primary-600 bg-clip-text text-transparent">Digital</span><br />
+                        <span className="italic font-light">Archive.</span>
+                    </h1>
+                    <p className="blog-header-animate text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-lg md:text-xl font-medium leading-relaxed">
+                        Regular explorations in software engineering, development, productivity, and life's curiosities.
+                    </p>
+                </div>
 
-            {/* Header */}
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold mb-3">My Blog</h1>
-                <p className="text-gray-400">Thoughts on development, life & faith</p>
-            </div>
-
-            {/* Category Tabs */}
-            <div className="flex gap-3 justify-center flex-wrap mb-12">
-                {CATEGORIES.map(cat => (
-                    <button
-                        key={cat}
-                        onClick={() => setActive(cat)}
-                        className={`px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200
-              ${active === cat
-                                ? 'bg-purple-600 text-white border-purple-600'
-                                : 'border-gray-600 text-gray-400 hover:border-purple-500 hover:text-purple-400'
-                            }`}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
-            {/* Posts Grid */}
-            {filtered.length === 0 ? (
-                <p className="text-center text-gray-500">No posts in this category yet.</p>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filtered.map(post => (
-                        <Link
-                            to={`/blog/${post.slug}`}
-                            key={post.slug}
-                            className="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700 hover:border-purple-500 hover:-translate-y-1 transition-all duration-300 flex flex-col"
-                        >
-                            {post.coverImage && (
-                                <img
-                                    src={post.coverImage.url}
-                                    alt={post.title}
-                                    className="w-full h-48 object-cover"
-                                />
-                            )}
-                            <div className="p-5 flex flex-col gap-3 flex-1">
-                                {/* Tags */}
-                                <div className="flex gap-2 flex-wrap">
-                                    {post.tags.map(tag => (
-                                        <span
-                                            key={tag.name}
-                                            className="text-xs px-3 py-1 bg-purple-900/40 text-purple-400 rounded-full"
-                                        >
-                                            {tag.name}
-                                        </span>
-                                    ))}
-                                </div>
-                                {/* Title */}
-                                <h3 className="text-white font-semibold text-lg leading-snug">
-                                    {post.title}
-                                </h3>
-                                {/* Excerpt */}
-                                <p className="text-gray-400 text-sm flex-1 line-clamp-3">
-                                    {post.brief}
-                                </p>
-                                {/* Meta */}
-                                <div className="flex justify-between text-xs text-gray-500 mt-auto pt-2 border-t border-gray-700">
-                                    <span>{new Date(post.publishedAt).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'short', day: 'numeric'
-                                    })}</span>
-                                    <span>{post.readTimeInMinutes} min read</span>
-                                </div>
-                            </div>
-                        </Link>
+                {/* Category Navigation */}
+                <div className="category-nav flex gap-3 sm:gap-4 justify-center flex-wrap mb-16 px-4">
+                    {CATEGORIES.map(cat => (
+                        <div key={cat} className="category-nav-animate">
+                            <Magnetic strength={0.2}>
+                                <button
+                                    onClick={() => setActive(cat)}
+                                    className={`group relative px-6 sm:px-10 py-3.5 rounded-2xl sm:rounded-3xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 border overflow-hidden
+                    ${active === cat
+                                            ? 'bg-slate-900 text-white border-primary-500/50 shadow-xl'
+                                            : 'bg-white/50 dark:bg-slate-900/40 backdrop-blur-md border-slate-200 dark:border-white/5 text-slate-600 hover:text-white'
+                                        }`}
+                                >
+                                    <span className="relative z-10">{cat}</span>
+                                    {active !== cat && (
+                                        <div className="absolute inset-0 bg-primary-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                                    )}
+                                </button>
+                            </Magnetic>
+                        </div>
                     ))}
                 </div>
-            )}
-        </section>
+
+                {/* Posts Grid */}
+                {filtered.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 bg-slate-900/5 backdrop-blur-3xl rounded-xl border border-dashed border-slate-200 dark:border-white/10">
+                        <span className="material-icons-outlined text-xl text-slate-400 mb-2">inventory_2</span>
+                        <p className="text-slate-500 text-xs font-medium tracking-tight">The archive is empty.</p>
+                        <button
+                            onClick={() => setActive('All')}
+                            className="mt-2 text-primary-500 text-[10px] font-bold hover:underline"
+                        >
+                            View all
+                        </button>
+                    </div>
+                ) : (
+                    <div className="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xxl:grid-cols-5 gap-4">
+                        {filtered.map(post => (
+                            <Link
+                                to={`/blog/${post.slug}`}
+                                key={post.slug}
+                                className="blog-post-card group relative flex flex-col h-[320px] bg-white dark:bg-[#020617] rounded-[1.5rem] overflow-hidden border border-slate-200 dark:border-white/5 hover:border-primary-500/30 transition-all duration-500 shadow-sm hover:shadow-2xl dark:shadow-lg"
+                            >
+                                {/* Subtle Glow Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-primary-500/0 via-purple-500/0 to-primary-500/0 group-hover:from-primary-500/5 group-hover:via-purple-500/5 group-hover:to-primary-500/5 transition-all duration-700" />
+
+                                <div className="relative h-32 overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-[#020617] z-10" />
+                                    {post.coverImage ? (
+                                        <img src={post.coverImage.url} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700 dark:opacity-80 dark:group-hover:opacity-100" />
+                                    ) : (
+                                        <div className="w-full h-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+                                            <span className="material-icons-outlined text-slate-400 dark:text-slate-700 text-3xl">auto_awesome</span>
+                                        </div>
+                                    )}
+                                    <div className="absolute top-3 left-3 z-20 px-2.5 py-1 bg-white/90 dark:bg-black/60 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-lg text-[8px] font-black text-slate-900 dark:text-white uppercase tracking-widest shadow-sm">
+                                        {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                    </div>
+                                </div>
+
+                                <div className="relative p-5 pt-0 flex flex-col flex-1 z-20">
+                                    <div className="flex gap-2.5 flex-wrap mb-3">
+                                        {post.tags?.slice(0, 2).map(tag => (
+                                            <span key={tag.name} className="text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-primary-500 transition-colors">
+                                                #{tag.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display leading-tight tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-300 transition-all line-clamp-2">
+                                        {post.title}
+                                    </h3>
+                                    <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed line-clamp-2 font-medium group-hover:opacity-100 transition-opacity mb-4">
+                                        {post.brief}
+                                    </p>
+                                    <div className="mt-auto flex items-center justify-between">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="material-icons-outlined text-[10px] text-primary-500">schedule</span>
+                                            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{post.readTimeInMinutes}m read</span>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-center justify-center group-hover:bg-primary-600 group-hover:border-primary-500 transition-all duration-300">
+                                            <span className="material-icons-outlined text-slate-600 dark:text-white text-[12px] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform font-bold">north_east</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
     )
 }
+
