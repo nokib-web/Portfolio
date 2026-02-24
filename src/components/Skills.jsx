@@ -2,13 +2,14 @@ import React, { useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FaReact, FaHtml5, FaCss3Alt, FaJs, FaPython, FaGitAlt, FaDocker, FaAws, FaFigma } from 'react-icons/fa';
-import { SiNextdotjs, SiTailwindcss, SiTypescript, SiNodedotjs, SiExpress, SiMongodb, SiPostgresql } from 'react-icons/si';
+import { FaReact } from 'react-icons/fa';
+import { skills } from '../data/portfolioData';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Skills = () => {
     const containerRef = useRef(null);
+    const totalSkillsCount = skills.reduce((acc, cat) => acc + cat.items.length, 0);
 
     useGSAP(() => {
         const cards = gsap.utils.toArray('.bento-card');
@@ -42,8 +43,11 @@ const Skills = () => {
     }, { scope: containerRef });
 
     const SkillChip = ({ icon, name, level, color }) => (
-        <div className="group relative flex items-center gap-3 p-3 bg-white/5 dark:bg-white/[0.03] border border-slate-200/50 dark:border-white/[0.08] rounded-2xl hover:bg-white/10 dark:hover:bg-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.15] transition-all duration-300 cursor-default">
-            <div className={`text-xl transition-all duration-500 text-slate-500 group-hover:scale-110 drop-shadow-sm ${color || 'group-hover:text-primary-500'}`}>
+        <div
+            className="group relative flex items-center gap-3 p-3 bg-white/5 dark:bg-white/[0.03] border border-slate-200/50 dark:border-white/[0.08] rounded-2xl hover:bg-white/10 dark:hover:bg-white/[0.06] hover:border-slate-300 dark:hover:border-white/[0.15] transition-all duration-300 cursor-default"
+            style={{ '--hover-color': color }}
+        >
+            <div className="text-xl transition-all duration-500 text-slate-500 group-hover:scale-110 drop-shadow-sm group-hover:text-[var(--hover-color)]">
                 {icon}
             </div>
             <div className="flex flex-col">
@@ -92,14 +96,15 @@ const Skills = () => {
                             </p>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <SkillChip icon={<FaReact />} name="React" level="Hooks/Context" color="group-hover:text-[#61DAFB]" />
-                                <SkillChip icon={<SiNextdotjs />} name="Next.js" level="SSR/ISR" color="group-hover:text-white" />
-                                <SkillChip icon={<SiTypescript />} name="TypeScript" level="Strict Mode" color="group-hover:text-[#3178C6]" />
-                                <SkillChip icon={<SiTailwindcss />} name="Tailwind" level="JIT/Tokens" color="group-hover:text-[#38BDF8]" />
-                                <SkillChip icon={<FaJs />} name="JS (ES6+)" level="Async/Event" color="group-hover:text-[#F7DF1E]" />
-                                <SkillChip icon={<FaHtml5 />} name="HTML5" level="Semantic" color="group-hover:text-[#E34F26]" />
-                                <SkillChip icon={<FaCss3Alt />} name="CSS3" level="Grid/Flex" color="group-hover:text-[#1572B6]" />
-                                <SkillChip icon={<FaFigma />} name="Figma" level="Auto Design" color="group-hover:text-[#F24E1E]" />
+                                {skills[0].items.map((skill, idx) => (
+                                    <SkillChip
+                                        key={idx}
+                                        icon={skill.icon}
+                                        name={skill.name}
+                                        level={skill.level}
+                                        color={skill.color}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -110,15 +115,20 @@ const Skills = () => {
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0 bg-[radial-gradient(600px_circle_at_var(--mouse-x)_var(--mouse-y),rgba(139,92,246,0.06),transparent_40%)]" />
                         <CardLabel text="System Architecture" />
                         <h4 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Scalable Backend</h4>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 leading-relaxed">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-4 leading-relaxed">
                             Building reliable REST/GraphQL services with robust schemas.
                         </p>
 
                         <div className="flex flex-col gap-3">
-                            <SkillChip icon={<SiNodedotjs />} name="Node.js" level="Runtime Opt." color="group-hover:text-[#339933]" />
-                            <SkillChip icon={<SiMongodb />} name="MongoDB" level="Aggregation" color="group-hover:text-[#47A248]" />
-                            <SkillChip icon={<SiPostgresql />} name="Postgres" level="SQL/Prisma" color="group-hover:text-[#4169E1]" />
-                            <SkillChip icon={<FaPython />} name="Python" level="Scripting" color="group-hover:text-[#3776AB]" />
+                            {skills[1].items.map((skill, idx) => (
+                                <SkillChip
+                                    key={idx}
+                                    icon={skill.icon}
+                                    name={skill.name}
+                                    level={skill.level}
+                                    color={skill.color}
+                                />
+                            ))}
                         </div>
                     </div>
 
@@ -134,11 +144,17 @@ const Skills = () => {
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1">
-                            <SkillChip icon={<FaGitAlt />} name="Git" level="Workflows" color="group-hover:text-[#F05032]" />
-                            <SkillChip icon={<FaDocker />} name="Docker" level="Containers" color="group-hover:text-[#2496ED]" />
-                            <SkillChip icon={<FaAws />} name="Cloud Services" level="S3/EC2" color="group-hover:text-[#FF9900]" />
+                            {skills[2].items.slice(0, 3).map((skill, idx) => (
+                                <SkillChip
+                                    key={idx}
+                                    icon={skill.icon}
+                                    name={skill.name}
+                                    level={skill.level}
+                                    color={`group-hover:text-[${skill.color}]`}
+                                />
+                            ))}
                             <div className="p-4 rounded-2xl bg-primary-600 flex flex-col justify-center items-center text-white shadow-xl shadow-primary-500/20">
-                                <span className="text-2xl font-bold font-display leading-tight">12+</span>
+                                <span className="text-2xl font-bold font-display leading-tight">{totalSkillsCount}+</span>
                                 <span className="text-[8px] font-black uppercase tracking-widest opacity-80">Tools Mastered</span>
                             </div>
                         </div>

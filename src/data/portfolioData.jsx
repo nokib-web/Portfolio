@@ -177,33 +177,49 @@ export const skills = [
     {
         category: "Frontend",
         items: [
-            { name: "React", icon: <FaReact /> },
-            { name: "Next.js", icon: <SiNextdotjs /> },
-            { name: "Tailwind CSS", icon: <SiTailwindcss /> },
-            { name: "TypeScript", icon: <SiTypescript /> },
-            { name: "HTML5", icon: <FaHtml5 /> },
-            { name: "CSS3", icon: <FaCss3Alt /> },
-            { name: "JavaScript", icon: <FaJs /> },
+            { name: "React", icon: <FaReact />, level: "Hooks/Context", color: "#61DAFB" },
+            { name: "Next.js", icon: <SiNextdotjs />, level: "SSR/ISR", color: "white" },
+            { name: "TypeScript", icon: <SiTypescript />, level: "Strict Mode", color: "#3178C6" },
+            { name: "Tailwind CSS", icon: <SiTailwindcss />, level: "JIT/Tokens", color: "#38BDF8" },
+            { name: "JavaScript", icon: <FaJs />, level: "Async/Event", color: "#F7DF1E" },
+            { name: "HTML5", icon: <FaHtml5 />, level: "Semantic", color: "#E34F26" },
+            { name: "CSS3", icon: <FaCss3Alt />, level: "Grid/Flex", color: "#1572B6" },
+            { name: "Figma", icon: <FaFigma />, level: "Auto Design", color: "#F24E1E" },
         ]
     },
     {
         category: "Backend",
         items: [
-            { name: "Node.js", icon: <SiNodedotjs /> },
-            { name: "Express", icon: <SiExpress /> },
-            { name: "MongoDB", icon: <SiMongodb /> },
-            { name: "PostgreSQL", icon: <SiPostgresql /> },
-            { name: "Python", icon: <FaPython /> },
+            { name: "Node.js", icon: <SiNodedotjs />, level: "Runtime Opt.", color: "#339933" },
+            { name: "Express", icon: <SiExpress />, level: "API Arch.", color: "#000000" },
+            { name: "MongoDB", icon: <SiMongodb />, level: "Aggregation", color: "#47A248" },
+            { name: "PostgreSQL", icon: <SiPostgresql />, level: "SQL/Prisma", color: "#4169E1" },
+            { name: "Python", icon: <FaPython />, level: "Scripting", color: "#3776AB" },
         ]
     },
     {
         category: "Tools & DevOps",
         items: [
-            { name: "Git", icon: <FaGitAlt /> },
-            { name: "Docker", icon: <FaDocker /> },
-            { name: "AWS", icon: <FaAws /> },
-            { name: "VS Code", icon: null },
-            { name: "Figma", icon: <FaFigma /> },
+            { name: "Git", icon: <FaGitAlt />, level: "Workflows", color: "#F05032" },
+            { name: "Docker", icon: <FaDocker />, level: "Containers", color: "#2496ED" },
+            { name: "AWS", icon: <FaAws />, level: "S3/EC2", color: "#FF9900" },
+            { name: "VS Code", icon: null, level: "Efficiency", color: "#007ACC" },
+            { name: "Figma", icon: <FaFigma />, level: "Prototyping", color: "#F24E1E" },
         ]
+    }
+];
+
+export const problemSolvingLinks = [
+    {
+        platform: "LeetCode",
+        username: "nokib",
+        url: "https://leetcode.com/u/nokib_dev",
+        color: "#FFA116"
+    },
+    {
+        platform: "CodeChef",
+        username: "nokib_chef",
+        url: "https://www.codechef.com/users/nokib_dev",
+        color: "#5B4638"
     }
 ];

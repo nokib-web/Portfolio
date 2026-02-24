@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
 import { FaReact, FaGithub, FaNodeJs } from 'react-icons/fa';
-import { SiMongodb, SiTailwindcss, SiNextdotjs } from 'react-icons/si';
+import { SiMongodb, SiTailwindcss, SiNextdotjs, SiLeetcode, SiCodechef } from 'react-icons/si';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Magnetic from './Common/Magnetic';
+import { problemSolvingLinks } from '../data/portfolioData';
 
 const Hero = () => {
     const containerRef = useRef(null);
@@ -124,6 +125,31 @@ const Hero = () => {
                                     View Projects
                                 </a>
                             </Magnetic>
+                        </div>
+                    </div>
+
+                    {/* Problem Solving Links */}
+                    <div className="mt-12 flex items-center justify-center gap-6 hero-btn-container">
+                        <span className="text-sm font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest">Problem Solving:</span>
+                        <div className="flex items-center gap-4">
+                            {problemSolvingLinks.map((link) => (
+                                <Magnetic key={link.platform}>
+                                    <a
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-3 rounded-full bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-white transition-all duration-300 group relative overflow-hidden flex items-center justify-center"
+                                        aria-label={link.platform}
+                                        style={{ '--hover-color': link.color }}
+                                    >
+                                        <div className="absolute inset-0 bg-slate-900 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: link.color }} />
+                                        <span className="relative z-10 text-xl font-bold">
+                                            {link.platform === 'LeetCode' && <SiLeetcode />}
+                                            {link.platform === 'CodeChef' && <SiCodechef />}
+                                        </span>
+                                    </a>
+                                </Magnetic>
+                            ))}
                         </div>
                     </div>
                 </div>

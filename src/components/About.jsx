@@ -110,10 +110,10 @@ const About = () => {
                         </p>
 
                         <p>
-                            I work extensively with React, Next.js, Node.js, MongoDB, modern JavaScript,
-                            and the surrounding ecosystem. I love exploring emerging technologies, patterns,
-                            and tools that push the boundaries of what’s possible on the web.
-                            Learning isn’t a phase for me — it’s part of who I am.
+                            Beyond building applications, I’m an avid problem-solver. I regularly challenge myself
+                            with algorithmic puzzles on platforms like <span className="text-primary-600 dark:text-primary-400 font-semibold">LeetCode</span> and <span className="text-primary-600 dark:text-primary-400 font-semibold">CodeChef</span>,
+                            which helps me keep my logic sharp and my code optimized. Dealing with complex
+                            data structures and algorithms is not just a skill — it's a passion.
                         </p>
                     </div>
                 </div>
