@@ -79,19 +79,32 @@ const Header = ({ activeSection }) => {
             }
         });
 
-        // Search Sections (including "Stats" which is section #stats)
+        // Search Sections
         const sections = ['Home', 'About', 'Experience', 'Education', 'Projects', 'Skills', 'Contact', 'Stats', 'Blog'];
         sections.forEach(section => {
             if (section.toLowerCase().includes(query)) {
-                // Skills is #skills (plural), others are singular usually or logic handled by section ID
-                // In Layout.jsx/Home.jsx: ids are: hero, about, skills, experience, projects, education, contact, stats
                 let link = `#${section.toLowerCase()}`;
                 if (section === 'Home') link = '#hero';
                 if (section === 'Skills') link = '#skills';
                 if (section === 'Projects') link = '#projects';
                 if (section === 'Blog') link = '/blog';
 
-                results.push({ type: 'Section', title: section, link: link, icon: 'article' });
+                results.push({ type: 'Section', title: `Go to ${section}`, link: link, icon: 'article' });
+            }
+        });
+
+        // Pro Commands (The "Command Palette" vibe)
+        const commands = [
+            { title: 'Toggle Dark Mode', icon: 'dark_mode', action: 'theme' },
+            { title: 'Download Resume', icon: 'download', action: 'resume', link: 'https://drive.google.com/uc?export=download&id=1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY' },
+            { title: 'Contact / Email Me', icon: 'mail', link: 'mailto:nokib.web@gmail.com' },
+            { title: 'Go to LinkedIn', icon: 'open_in_new', link: 'https://www.linkedin.com/in/nazmulhasan-nokib/' },
+            { title: 'Go to GitHub', icon: 'code', link: 'https://github.com/nokib-web' }
+        ];
+
+        commands.forEach(cmd => {
+            if (cmd.title.toLowerCase().includes(query)) {
+                results.push({ type: 'Command', ...cmd });
             }
         });
 
@@ -99,7 +112,21 @@ const Header = ({ activeSection }) => {
         setShowResults(true);
     }, [searchQuery]);
 
-    const handleResultClick = () => {
+    const handleResultClick = (result) => {
+        if (result.action === 'theme') {
+            toggleDarkMode();
+            setSearchQuery('');
+            setShowResults(false);
+            return;
+        }
+
+        if (result.link?.startsWith('http') || result.link?.startsWith('mailto')) {
+            window.open(result.link, '_blank');
+            setSearchQuery('');
+            setShowResults(false);
+            return;
+        }
+
         setSearchQuery('');
         setShowResults(false);
     };
@@ -222,8 +249,11 @@ const Header = ({ activeSection }) => {
                                 {searchResults.slice(0, 6).map((result, index) => (
                                     <a
                                         key={index}
-                                        href={result.link}
-                                        onClick={handleResultClick}
+                                        href={result.type === 'Command' ? '#' : result.link}
+                                        onClick={(e) => {
+                                            if (result.type === 'Command') e.preventDefault();
+                                            handleResultClick(result);
+                                        }}
                                         className="flex items-center space-x-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                                     >
                                         <span className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400">

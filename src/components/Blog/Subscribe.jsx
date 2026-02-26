@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import emailjs from '@emailjs/browser'
+import confetti from 'canvas-confetti'
 
 /**
  * Subscribe component — collects reader email and sends a notification
@@ -38,6 +39,28 @@ export default function Subscribe() {
                 },
                 EMAILJS_PUBLIC_KEY
             )
+
+            // Trigger Confetti!
+            const count = 200;
+            const defaults = {
+                origin: { y: 0.7 },
+                zIndex: 9999
+            };
+
+            function fire(particleRatio, opts) {
+                confetti({
+                    ...defaults,
+                    ...opts,
+                    particleCount: Math.floor(count * particleRatio)
+                });
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+
             setStatus('success')
             setEmail('')
         } catch (err) {
@@ -48,7 +71,7 @@ export default function Subscribe() {
     }
 
     return (
-        <section className="relative mt-24 rounded-[2.5rem] overflow-hidden border border-slate-200 dark:border-white/5">
+        <section className="relative mt-24 rounded-[2.5rem] overflow-hidden">
             {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 via-purple-600/5 to-transparent dark:from-primary-500/10 dark:via-purple-500/5" />
             <div className="absolute inset-0 backdrop-blur-3xl bg-white/60 dark:bg-slate-900/60" />

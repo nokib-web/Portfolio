@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Magnetic from '../Common/Magnetic'
+import BlogSidebar from './BlogSidebar'
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,6 +16,7 @@ const allPosts = getAllPosts()
 export default function Blog() {
     const [active, setActive] = useState('All')
     const [searchQuery, setSearchQuery] = useState('')
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const containerRef = useRef(null);
 
     const filtered = allPosts.filter(p => {
@@ -70,8 +72,9 @@ export default function Blog() {
     }, [filtered.length, active]);
 
     return (
-        <div ref={containerRef} className="blog-section relative py-12 px-4 sm:px-8 lg:px-12 min-h-screen">
-            <div className="max-w-7xl mx-auto relative z-10">
+        <div ref={containerRef} className="blog-section relative py-12 transition-all duration-300 min-h-screen">
+            <BlogSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            <div className={`max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 transition-all duration-500 relative z-10 ${isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]'}`}>
                 {/* Header */}
                 <div className="blog-header text-center mb-16 space-y-4">
                     <div className="blog-header-animate inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-slate-100 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/5 text-primary-500 dark:text-primary-400 text-[10px] font-black uppercase tracking-[0.4em] shadow-xl">
@@ -152,7 +155,14 @@ export default function Blog() {
                             <Link
                                 to={`/blog/${post.slug}`}
                                 key={post.slug}
-                                className="blog-post-card group relative flex flex-col h-[320px] bg-white dark:bg-[#020617] rounded-[1.5rem] overflow-hidden border border-slate-200 dark:border-white/5 hover:border-primary-500/30 transition-all duration-500 shadow-sm hover:shadow-2xl dark:shadow-lg"
+                                onMouseMove={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    const x = e.clientX - rect.left;
+                                    const y = e.clientY - rect.top;
+                                    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
+                                    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
+                                }}
+                                className="blog-post-card spotlight-card group relative flex flex-col h-[320px] bg-white dark:bg-[#020617] rounded-[1.5rem] overflow-hidden border border-slate-200 dark:border-white/5 hover:border-primary-500/30 transition-all duration-500 shadow-sm hover:shadow-2xl dark:shadow-lg"
                             >
                                 {/* Subtle Glow Overlay */}
                                 <div className="absolute inset-0 bg-gradient-to-tr from-primary-500/0 via-purple-500/0 to-primary-500/0 group-hover:from-primary-500/5 group-hover:via-purple-500/5 group-hover:to-primary-500/5 transition-all duration-700" />

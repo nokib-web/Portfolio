@@ -8,6 +8,7 @@ import CustomCursor from './Common/CustomCursor';
 const Layout = ({ children }) => {
     const [activeSection, setActiveSection] = useState('hero');
     const location = useLocation();
+    const isBlogPage = location.pathname.startsWith('/blog');
 
     // Handle scroll to hash on route change/initial load
     useEffect(() => {
@@ -23,8 +24,7 @@ const Layout = ({ children }) => {
             return () => clearTimeout(timer);
         } else if (location.pathname === '/') {
             // If on home with no hash, scroll to top
-            const container = document.getElementById('scroll-container');
-            if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }, [location.pathname, location.hash]);
 
@@ -56,9 +56,9 @@ const Layout = ({ children }) => {
             <MeshGradient />
             <Header activeSection={activeSection} />
             <div className="flex-1 w-full relative z-10 pt-16">
-                <div className="max-w-7xl mx-auto flex">
-                    <Sidebar activeSection={activeSection} />
-                    <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-8 lg:p-12 scroll-smooth" id="scroll-container">
+                <div className={`${isBlogPage ? 'w-full' : 'max-w-7xl mx-auto px-4 md:px-8 lg:px-12'} flex`}>
+                    {!isBlogPage && <Sidebar activeSection={activeSection} />}
+                    <main className="flex-1 min-w-0">
                         {children}
                     </main>
                 </div>

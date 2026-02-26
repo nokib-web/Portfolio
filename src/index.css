@@ -11,6 +11,15 @@ html {
   scroll-behavior: smooth;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   @apply bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200;
@@ -362,4 +371,31 @@ h6 {
   text-align: center;
   padding: 100px 0;
   color: #888;
+}
+
+/* Blog Card Spotlight Effect */
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  z-index: 30;
+  background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
+      rgba(99, 102, 241, 0.08),
+      transparent 40%);
+}
+
+.dark .spotlight-card::before {
+  background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
+      rgba(99, 102, 241, 0.12),
+      transparent 40%);
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
 }

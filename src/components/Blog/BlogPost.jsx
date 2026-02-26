@@ -3,6 +3,47 @@ import { useParams, Link } from 'react-router-dom'
 import { getPostMeta, getPostComponent } from '../../lib/posts'
 import Magnetic from '../Common/Magnetic'
 import Subscribe from './Subscribe'
+import BlogSidebar from './BlogSidebar'
+
+/* ── Table of Contents ────────────────────────────────────────── */
+function TOC({ headings, activeId }) {
+    if (!headings || headings.length === 0) return null;
+
+    return (
+        <nav className="sticky top-32 max-h-[calc(100vh-160px)] overflow-y-auto hidden lg:block w-72 shrink-0 pl-10 scrollbar-hide">
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-6 flex items-center gap-2">
+                <span className="w-4 h-px bg-slate-300 dark:bg-slate-700"></span>
+                In this post
+            </p>
+            <ul className="space-y-4">
+                {headings.map((h, i) => (
+                    <li
+                        key={i}
+                        style={{ paddingLeft: `${(h.level - 2) * 1}rem` }}
+                        className="transition-all duration-300"
+                    >
+                        <a
+                            href={`#${h.id}`}
+                            className={`block text-[11px] font-bold leading-relaxed transition-all duration-300 hover:text-primary-500 hover:translate-x-1 relative ${activeId === h.id
+                                ? 'text-primary-600 dark:text-primary-400 translate-x-1'
+                                : 'text-slate-500 dark:text-slate-400'
+                                }`}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById(h.id)?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                        >
+                            {activeId === h.id && (
+                                <span className="absolute -left-[41px] top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)] animate-pulse"></span>
+                            )}
+                            {h.text}
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+    );
+}
 
 /* ── Share helpers ──────────────────────────────────────────────────── */
 function ShareButtons({ title, url }) {
@@ -66,27 +107,101 @@ function ShareButtons({ title, url }) {
     )
 }
 
+/* ── Progress Circle ────────────────────────────────────────── */
+function ProgressCircle({ progress }) {
+    const radius = 24;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (progress / 100) * circumference;
+
+    return (
+        <div className="relative w-14 h-14 flex items-center justify-center">
+            <svg className="w-14 h-14 -rotate-90">
+                <circle
+                    cx="28"
+                    cy="28"
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-slate-100 dark:text-white/5"
+                />
+                <circle
+                    cx="28"
+                    cy="28"
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    strokeLinecap="round"
+                    className="text-primary-500 transition-all duration-150"
+                />
+            </svg>
+            <span className="absolute text-[10px] font-black text-slate-900 dark:text-white">
+                {Math.round(progress)}%
+            </span>
+        </div>
+    );
+}
+
+
+
 /* ── Main BlogPost component ────────────────────────────────────────── */
 export default function BlogPost() {
     const { slug } = useParams()
     const [Content, setContent] = useState(null)
     const [loading, setLoading] = useState(true)
     const [readProgress, setReadProgress] = useState(0)
+    const [headings, setHeadings] = useState([])
+    const [activeId, setActiveId] = useState('')
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
     const post = getPostMeta(slug)
     const postUrl = typeof window !== 'undefined' ? window.location.href : ''
 
-    /* Read progress bar */
+    /* Read progress bar & Heading Tracker */
     useEffect(() => {
         const onScroll = () => {
             const el = document.documentElement
-            const scrolled = el.scrollTop
-            const total = el.scrollHeight - el.clientHeight
+            const scrolled = window.scrollY
+            const total = el.scrollHeight - window.innerHeight
             setReadProgress(total > 0 ? (scrolled / total) * 100 : 0)
+
+            // Update active heading
+            const hElements = Array.from(document.querySelectorAll('.article-body h2, .article-body h3'))
+            for (const h of hElements.reverse()) {
+                if (h.offsetTop - 150 <= scrolled) {
+                    setActiveId(h.id)
+                    break
+                }
+            }
         }
         window.addEventListener('scroll', onScroll, { passive: true })
+        // Initial call
+        onScroll()
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
+
+    /* Generate Headings */
+    useEffect(() => {
+        if (!loading && Content) {
+            // Wait for content to sync to DOM
+            setTimeout(() => {
+                const hElements = Array.from(document.querySelectorAll('.article-body h2, .article-body h3'))
+                const items = hElements.map(h => {
+                    const id = h.textContent.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')
+                    h.id = id // Inject ID for linking
+                    return {
+                        id,
+                        text: h.textContent,
+                        level: parseInt(h.tagName[1])
+                    }
+                })
+                setHeadings(items)
+            }, 100)
+        }
+    }, [loading, Content])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -132,110 +247,134 @@ export default function BlogPost() {
                 style={{ width: `${readProgress}%` }}
             />
 
-            {/* ── Back Navigation ── */}
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-0">
-                <Magnetic strength={0.2}>
-                    <Link
-                        to="/blog"
-                        className="inline-flex items-center gap-2 group text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all font-bold uppercase tracking-[0.2em] text-[10px]"
-                    >
-                        <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform">west</span>
-                        All Posts
-                    </Link>
-                </Magnetic>
+            {/* Sidebar Component */}
+            <BlogSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+
+            <div
+                className={`max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 transition-all duration-500 ${isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]'
+                    }`}
+            >
+                <div className="flex flex-col lg:flex-row gap-0 lg:gap-16 relative">
+
+                    {/* ── Left Content Column ── */}
+                    <article className="flex-1 max-w-4xl pt-10 pb-20">
+                        {/* Back Link */}
+                        <div className="mb-10">
+                            <Magnetic strength={0.2}>
+                                <Link
+                                    to="/blog"
+                                    className="inline-flex items-center gap-2 group text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all font-bold uppercase tracking-[0.2em] text-[10px]"
+                                >
+                                    <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform">west</span>
+                                    All Posts
+                                </Link>
+                            </Magnetic>
+                        </div>
+
+                        {/* Tags */}
+                        <div className="flex gap-2.5 flex-wrap mb-6">
+                            {post.tags?.map(tag => (
+                                <span key={tag} className="px-3.5 py-1 bg-primary-500/10 border border-primary-500/20 rounded-full text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+
+                        {/* Title */}
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 dark:text-white leading-[1] tracking-tighter font-display mb-6">
+                            {post.title}
+                        </h1>
+
+                        {/* Description */}
+                        <p className="text-slate-500 dark:text-slate-400 text-lg md:text-xl leading-relaxed mb-8 font-medium border-l-4 border-primary-500/40 pl-6">
+                            {post.description}
+                        </p>
+
+                        {/* Meta Row */}
+                        <div className="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-100 dark:border-white/5">
+                            <div className="flex items-center gap-5 text-slate-500 dark:text-slate-500 text-[11px] font-bold uppercase tracking-[0.15em]">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="material-icons-outlined text-xs text-primary-500">calendar_today</span>
+                                    {formattedDate}
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="material-icons-outlined text-xs text-primary-500">schedule</span>
+                                    {post.readTime} min read
+                                </div>
+                            </div>
+                            <ShareButtons title={post.title} url={postUrl} />
+                        </div>
+
+                        {/* Cover Image */}
+                        {post.coverImage && (
+                            <div className="my-10 rounded-[3rem] overflow-hidden border border-slate-100 dark:border-white/5 shadow-2xl bg-slate-50 dark:bg-slate-900/50 aspect-video">
+                                <img
+                                    src={post.coverImage}
+                                    alt={post.title}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
+                                        e.target.parentElement.innerHTML = '<span class="material-icons-outlined text-6xl text-slate-300">image_not_supported</span>';
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {/* Article Content */}
+                        <div className={`article-body mt-10 ${post.tags?.some(t => t.toLowerCase() === 'bangla') ? 'bn-content' : ''}`}>
+                            <Content />
+                        </div>
+
+                        {/* Bottom Share Row */}
+                        <div className="mt-16 pt-8 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="text-center sm:text-left">
+                                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-1">Written by</p>
+                                <p className="text-sm font-bold text-slate-900 dark:text-white">Nazmul Hasan Nokib</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Share this post</span>
+                                <ShareButtons title={post.title} url={postUrl} />
+                            </div>
+                        </div>
+
+                        {/* Subscribe Section */}
+                        <Subscribe />
+
+                        {/* Back to Blog */}
+                        <div className="mt-12 text-center lg:text-left">
+                            <Magnetic strength={0.2}>
+                                <Link
+                                    to="/blog"
+                                    className="inline-flex items-center gap-2 group px-8 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black text-slate-700 dark:text-white uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white hover:border-primary-500 transition-all font-display"
+                                >
+                                    <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform font-bold">west</span>
+                                    All Publications
+                                </Link>
+                            </Magnetic>
+                        </div>
+                    </article>
+
+                    {/* ── Right Sidebar (TOC) ── */}
+                    <div className="hidden xl:block w-72 shrink-0">
+                        <TOC headings={headings} activeId={activeId} />
+                    </div>
+
+                </div>
             </div>
 
-            <article className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-
-                {/* ── Tags ── */}
-                <div className="flex gap-2.5 flex-wrap mb-6">
-                    {post.tags?.map(tag => (
-                        <span key={tag} className="px-3.5 py-1 bg-primary-500/10 border border-primary-500/20 rounded-full text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">
-                            {tag}
-                        </span>
-                    ))}
+            {/* ── Floating Controls ── */}
+            <div className="fixed bottom-12 right-12 z-50 flex flex-col gap-4">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border border-slate-200 dark:border-white/10 rounded-full shadow-2xl p-1 shrink-0 overflow-hidden">
+                    <ProgressCircle progress={readProgress} />
                 </div>
+            </div>
 
-                {/* ── Title ── */}
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-[1.15] tracking-tighter font-display mb-6">
-                    {post.title}
-                </h1>
-
-                {/* ── Description / Lead ── */}
-                <p className="text-slate-500 dark:text-slate-400 text-lg leading-relaxed mb-8 font-medium border-l-2 border-primary-500/40 pl-4">
-                    {post.description}
-                </p>
-
-                {/* ── Meta Row ── */}
-                <div className="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-100 dark:border-white/5">
-                    <div className="flex items-center gap-5 text-slate-500 dark:text-slate-500 text-[11px] font-bold uppercase tracking-[0.15em]">
-                        <div className="flex items-center gap-1.5">
-                            <span className="material-icons-outlined text-xs text-primary-500">calendar_today</span>
-                            {formattedDate}
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <span className="material-icons-outlined text-xs text-primary-500">schedule</span>
-                            {post.readTime} min read
-                        </div>
-                    </div>
-                    <ShareButtons title={post.title} url={postUrl} />
-                </div>
-
-                {/* ── Cover Image ── */}
-                {post.coverImage && (
-                    <div className="my-10 rounded-3xl overflow-hidden border border-slate-100 dark:border-white/5 shadow-2xl bg-slate-50 dark:bg-slate-900/50 aspect-video">
-                        <img
-                            src={post.coverImage}
-                            alt={post.title}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                                e.target.style.display = 'none';
-                                e.target.parentElement.classList.add('flex', 'items-center', 'justify-center');
-                                e.target.parentElement.innerHTML = '<span class="material-icons-outlined text-6xl text-slate-300">image_not_supported</span>';
-                            }}
-                        />
-                    </div>
-                )}
-
-                {/* ── Article Content ── */}
-                <div className={`article-body mt-10 ${post.tags?.some(t => t.toLowerCase() === 'bangla') ? 'bn-content' : ''}`}>
-                    <Content />
-                </div>
-
-                {/* ── Bottom Share Row ── */}
-                <div className="mt-16 pt-8 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="text-center sm:text-left">
-                        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-1">Written by</p>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">Nazmul Hasan Nokib</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Share this post</span>
-                        <ShareButtons title={post.title} url={postUrl} />
-                    </div>
-                </div>
-
-                {/* ── Subscribe Section ── */}
-                <Subscribe />
-
-                {/* ── Back to Blog ── */}
-                <div className="mt-12 text-center">
-                    <Magnetic strength={0.2}>
-                        <Link
-                            to="/blog"
-                            className="inline-flex items-center gap-2 group px-8 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black text-slate-700 dark:text-white uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white hover:border-primary-500 transition-all"
-                        >
-                            <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform">west</span>
-                            All Publications
-                        </Link>
-                    </Magnetic>
-                </div>
-            </article>
-
-            {/* ── Floating Back Button (2xl+) ── */}
-            <div className="fixed bottom-12 left-12 z-50 hidden 2xl:block">
+            {/* Floating Back Button (Mobile only or as extra) */}
+            <div className="fixed bottom-6 left-6 z-50 lg:hidden">
                 <Magnetic strength={0.2}>
-                    <Link to="/blog" className="w-14 h-14 bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center text-slate-900 dark:text-white shadow-xl hover:bg-primary-600 hover:border-primary-500 hover:text-white transition-all group">
-                        <span className="material-icons-outlined group-hover:-translate-x-1 transition-transform text-lg">west</span>
+                    <Link to="/blog" className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95">
+                        <span className="material-icons-outlined">west</span>
                     </Link>
                 </Magnetic>
             </div>
