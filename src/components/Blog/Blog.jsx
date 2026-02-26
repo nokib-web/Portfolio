@@ -14,13 +14,15 @@ const allPosts = getAllPosts()
 
 export default function Blog() {
     const [active, setActive] = useState('All')
+    const [searchQuery, setSearchQuery] = useState('')
     const containerRef = useRef(null);
 
-    const filtered = active === 'All'
-        ? allPosts
-        : allPosts.filter(p =>
-            p.tags?.some(t => t.toLowerCase() === active.toLowerCase())
-        )
+    const filtered = allPosts.filter(p => {
+        const matchesCategory = active === 'All' || p.tags?.some(t => t.toLowerCase() === active.toLowerCase());
+        const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.description.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     useGSAP(() => {
         ScrollTrigger.refresh();
@@ -85,27 +87,51 @@ export default function Blog() {
                     </p>
                 </div>
 
-                {/* Category Navigation */}
-                <div className="category-nav flex gap-3 sm:gap-4 justify-center flex-wrap mb-16 px-4">
-                    {CATEGORIES.map(cat => (
-                        <div key={cat} className="category-nav-animate">
-                            <Magnetic strength={0.2}>
-                                <button
-                                    onClick={() => setActive(cat)}
-                                    className={`group relative px-6 sm:px-10 py-3.5 rounded-2xl sm:rounded-3xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 border overflow-hidden
-                    ${active === cat
-                                            ? 'bg-slate-900 text-white border-primary-500/50 shadow-xl'
-                                            : 'bg-white/50 dark:bg-slate-900/40 backdrop-blur-md border-slate-200 dark:border-white/5 text-slate-600 hover:text-white'
-                                        }`}
-                                >
-                                    <span className="relative z-10">{cat}</span>
-                                    {active !== cat && (
-                                        <div className="absolute inset-0 bg-primary-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                                    )}
-                                </button>
-                            </Magnetic>
+                {/* Search and Category Navigation */}
+                <div className="flex flex-col items-center gap-8 mb-16">
+                    {/* Search Bar */}
+                    <div className="w-full max-w-md relative group px-4">
+                        <div className="absolute inset-y-0 left-7 flex items-center pointer-events-none">
+                            <span className="material-icons-outlined text-slate-400 group-focus-within:text-primary-500 transition-colors">search</span>
                         </div>
-                    ))}
+                        <input
+                            type="text"
+                            placeholder="Search by title or description..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl py-4 pl-14 pr-6 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm group-hover:shadow-md"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute inset-y-0 right-7 flex items-center text-slate-400 hover:text-primary-500 transition-colors"
+                            >
+                                <span className="material-icons-outlined text-sm font-bold">close</span>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="category-nav flex gap-3 sm:gap-4 justify-center flex-wrap px-4">
+                        {CATEGORIES.map(cat => (
+                            <div key={cat} className="category-nav-animate">
+                                <Magnetic strength={0.2}>
+                                    <button
+                                        onClick={() => setActive(cat)}
+                                        className={`group relative px-6 sm:px-10 py-3.5 rounded-2xl sm:rounded-3xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 border overflow-hidden
+                        ${active === cat
+                                                ? 'bg-slate-900 text-white border-primary-500/50 shadow-xl'
+                                                : 'bg-white/50 dark:bg-slate-900/40 backdrop-blur-md border-slate-200 dark:border-white/5 text-slate-600 hover:text-white'
+                                            }`}
+                                    >
+                                        <span className="relative z-10">{cat}</span>
+                                        {active !== cat && (
+                                            <div className="absolute inset-0 bg-primary-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                                        )}
+                                    </button>
+                                </Magnetic>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Posts Grid */}

@@ -4,6 +4,7 @@ import { FaGithub } from "react-icons/fa";
 import { motion } from 'framer-motion';
 import MobileMenu from './MobileMenu';
 import { projects, skills } from '../data/portfolioData';
+import { posts } from '../lib/posts';
 
 const Header = ({ activeSection }) => {
     const location = useLocation();
@@ -63,8 +64,24 @@ const Header = ({ activeSection }) => {
             });
         });
 
+        // Search Blog Posts
+        posts.forEach(post => {
+            if (
+                post.title.toLowerCase().includes(query) ||
+                post.tags?.some(tag => tag.toLowerCase().includes(query))
+            ) {
+                results.push({
+                    type: 'Blog',
+                    title: post.title,
+                    link: `/blog/${post.slug}`,
+                    icon: 'description'
+                });
+            }
+        });
+
         // Search Sections (including "Stats" which is section #stats)
-        ['Home', 'About', 'Experience', 'Education', 'Projects', 'Skills', 'Contact', 'Stats', 'Blog'].forEach(section => {
+        const sections = ['Home', 'About', 'Experience', 'Education', 'Projects', 'Skills', 'Contact', 'Stats', 'Blog'];
+        sections.forEach(section => {
             if (section.toLowerCase().includes(query)) {
                 // Skills is #skills (plural), others are singular usually or logic handled by section ID
                 // In Layout.jsx/Home.jsx: ids are: hero, about, skills, experience, projects, education, contact, stats
