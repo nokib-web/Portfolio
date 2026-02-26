@@ -6,6 +6,7 @@ import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Magnetic from '../Common/Magnetic'
 import BlogSidebar from './BlogSidebar'
+import Pagination from '../Common/Pagination'
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,6 +18,8 @@ export default function Blog() {
     const [active, setActive] = useState('All')
     const [searchQuery, setSearchQuery] = useState('')
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const postsPerPage = 12
     const containerRef = useRef(null);
 
     const filtered = allPosts.filter(p => {
@@ -25,6 +28,23 @@ export default function Blog() {
             p.description.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
+
+    const totalPages = Math.ceil(filtered.length / postsPerPage);
+    const paginatedPosts = filtered.slice(
+        (currentPage - 1) * postsPerPage,
+        currentPage * postsPerPage
+    );
+
+    // Reset to page 1 when filter changes
+    const handleCategoryChange = (cat) => {
+        setActive(cat);
+        setCurrentPage(1);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1);
+    };
 
     useGSAP(() => {
         ScrollTrigger.refresh();
@@ -76,7 +96,7 @@ export default function Blog() {
             <BlogSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
             <div className={`max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 transition-all duration-500 relative z-10 ${isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]'}`}>
                 {/* Header */}
-                <div className="blog-header text-center mb-16 space-y-4">
+                <div className="blog-header text-center mb-10 space-y-4">
                     <div className="blog-header-animate inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-slate-100 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/5 text-primary-500 dark:text-primary-400 text-[10px] font-black uppercase tracking-[0.4em] shadow-xl">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
                         Publications
@@ -101,7 +121,7 @@ export default function Blog() {
                             type="text"
                             placeholder="Search by title or description..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={handleSearchChange}
                             className="w-full bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl py-4 pl-14 pr-6 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm group-hover:shadow-md"
                         />
                         {searchQuery && (
@@ -119,7 +139,7 @@ export default function Blog() {
                             <div key={cat} className="category-nav-animate">
                                 <Magnetic strength={0.2}>
                                     <button
-                                        onClick={() => setActive(cat)}
+                                        onClick={() => handleCategoryChange(cat)}
                                         className={`group relative px-6 sm:px-10 py-3.5 rounded-2xl sm:rounded-3xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 border overflow-hidden
                         ${active === cat
                                                 ? 'bg-slate-900 text-white border-primary-500/50 shadow-xl'
@@ -151,7 +171,7 @@ export default function Blog() {
                     </div>
                 ) : (
                     <div className="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {filtered.map(post => (
+                        {paginatedPosts.map(post => (
                             <Link
                                 to={`/blog/${post.slug}`}
                                 key={post.slug}
@@ -209,6 +229,15 @@ export default function Blog() {
                         ))}
                     </div>
                 )}
+
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(page) => {
+                        setCurrentPage(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                />
             </div>
         </div>
     )

@@ -257,9 +257,9 @@ export default function BlogPost() {
                 <div className="flex flex-col lg:flex-row gap-0 lg:gap-16 relative">
 
                     {/* ── Left Content Column ── */}
-                    <article className="flex-1 max-w-4xl pt-10 pb-20">
+                    <article className="flex-1 max-w-4xl pt-8 pb-12">
                         {/* Back Link */}
-                        <div className="mb-10">
+                        <div className="mb-6">
                             <Magnetic strength={0.2}>
                                 <Link
                                     to="/blog"
@@ -307,7 +307,7 @@ export default function BlogPost() {
 
                         {/* Cover Image */}
                         {post.coverImage && (
-                            <div className="my-10 rounded-[3rem] overflow-hidden border border-slate-100 dark:border-white/5 shadow-2xl bg-slate-50 dark:bg-slate-900/50 aspect-video">
+                            <div className="my-6 rounded-[3rem] overflow-hidden border border-slate-100 dark:border-white/5 shadow-2xl bg-slate-50 dark:bg-slate-900/50 aspect-video">
                                 <img
                                     src={post.coverImage}
                                     alt={post.title}
@@ -322,12 +322,12 @@ export default function BlogPost() {
                         )}
 
                         {/* Article Content */}
-                        <div className={`article-body mt-10 ${post.tags?.some(t => t.toLowerCase() === 'bangla') ? 'bn-content' : ''}`}>
+                        <div className={`article-body mt-6 ${post.tags?.some(t => t.toLowerCase() === 'bangla') ? 'bn-content' : ''}`}>
                             <Content />
                         </div>
 
                         {/* Bottom Share Row */}
-                        <div className="mt-16 pt-8 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="mt-10 pt-6 border-t border-slate-100 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div className="text-center sm:text-left">
                                 <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-1">Written by</p>
                                 <p className="text-sm font-bold text-slate-900 dark:text-white">Nazmul Hasan Nokib</p>

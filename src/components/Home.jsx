@@ -11,7 +11,7 @@ import Footer from './Footer';
 
 const Home = () => {
     return (
-        <div className="flex flex-col space-y-20 md:space-y-32">
+        <div className="w-full mx-auto px-4 md:px-8 lg:px-12 flex flex-col space-y-12 md:space-y-20">
             <section id="hero" className="scroll-mt-20">
                 <Hero />
             </section>

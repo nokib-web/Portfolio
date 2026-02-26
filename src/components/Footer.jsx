@@ -6,7 +6,7 @@ import { problemSolvingLinks } from '../data/portfolioData';
 const Footer = () => {
     return (
         <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-6 mt-auto">
-            <div className="container mx-auto px-6 flex flex-col md:flex-row-reverse items-center justify-between gap-4">
+            <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 flex flex-col md:flex-row-reverse items-center justify-between gap-4">
 
                 {/* Text */}
 

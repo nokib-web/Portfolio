@@ -9,7 +9,7 @@ const statsData = [
     { label: "Years Experience", value: 1 },
     { label: "Projects Completed", value: 20 },
     { label: "Open Source Contribs", value: 10 },
-    { label: "Commits this Year", value: 540 },
+    { label: "Commits this Year", value: 560 },
 ];
 
 const Stats = () => {
@@ -58,8 +58,8 @@ const Stats = () => {
     }, { scope: containerRef });
 
     return (
-        <div ref={containerRef} className="max-w-4xl mx-auto py-12 px-4">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Stats</h2>
+        <div ref={containerRef} className="w-full py-8 px-4">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Stats</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {statsData.map((stat, index) => (
                     <div key={index} className="stat-card bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">

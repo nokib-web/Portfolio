@@ -84,12 +84,12 @@ const Hero = () => {
                 </div>
             </div>
 
-            <div className="container mx-auto px-6 relative z-10 text-center" ref={contentRef}>
+            <div className="relative z-10 text-center" ref={contentRef}>
                 <div>
                     <div className="hero-badge inline-block px-4 py-1.5 mb-6 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 text-sm font-medium border border-primary-100 dark:border-primary-800 shadow-sm backdrop-blur-sm">
                         ✨ Full-Stack Developer
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-bold font-display text-slate-900 dark:text-white mb-6 tracking-tight">
+                    <h1 className="text-5xl md:text-7xl font-bold font-display text-slate-900 dark:text-white mb-4 tracking-tight">
                         Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-700 dark:from-primary-400 dark:to-primary-600 relative">
                             Nokib
                             <svg className="absolute w-full h-3 -bottom-1 left-0 text-primary-500 opacity-30" viewBox="0 0 100 10" preserveAspectRatio="none">
@@ -101,10 +101,10 @@ const Hero = () => {
                             Building digital experiences.
                         </span>
                     </h1>
-                    <p className="mt-8 text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto font-body">
+                    <p className="mt-6 text-lg md:text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto font-body">
                         I enjoy crafting responsive web solutions using modern technologies like <span className="text-slate-900 dark:text-slate-200 font-semibold">Next.js</span>, <span className="text-slate-900 dark:text-slate-200 font-semibold">React</span>, and <span className="text-slate-900 dark:text-slate-200 font-semibold">Node.js</span>.
                     </p>
-                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
                         <div className="hero-btn-container w-full sm:w-auto">
                             <Magnetic>
                                 <a
@@ -129,7 +129,7 @@ const Hero = () => {
                     </div>
 
                     {/* Problem Solving Links */}
-                    <div className="mt-12 flex items-center justify-center gap-6 hero-btn-container">
+                    <div className="mt-8 flex items-center justify-center gap-6 hero-btn-container">
                         <span className="text-sm font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest">Problem Solving:</span>
                         <div className="flex items-center gap-4">
                             {problemSolvingLinks.map((link) => (

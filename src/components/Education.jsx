@@ -2,8 +2,8 @@ import React from 'react';
 
 const Education = () => {
     return (
-        <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Education</h2>
+        <div className="w-full">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Education</h2>
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Bachelor of Business Administration(BBA Honors)</h3>
                 <p className="text-primary font-medium mt-1"></p>

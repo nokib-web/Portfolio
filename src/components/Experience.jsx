@@ -26,8 +26,8 @@ const Experience = () => {
     ];
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Experience</h2>
+        <div className="w-full">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Experience</h2>
             <div className="space-y-8 border-l-2 border-gray-200 dark:border-gray-700 ml-3 pl-8 relative">
                 {experiences.map((exp, index) => (
                     <div key={index} className="relative">

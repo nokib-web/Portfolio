@@ -179,7 +179,7 @@ const Header = ({ activeSection }) => {
 
     return (
         <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-white/70 dark:bg-slate-900/70 backdrop-blur-glass border-b border-slate-200/50 dark:border-slate-800/50 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-slate-900/60">
-            <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+            <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 h-16 flex items-center justify-between">
                 {/* Logo & Nav */}
                 <div className="flex items-center space-x-8">
                     <Link to="/">
@@ -235,7 +235,7 @@ const Header = ({ activeSection }) => {
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onFocus={() => setShowResults(true)}
                             onBlur={() => setTimeout(() => setShowResults(false), 200)}
-                            className="bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary-500 rounded-full py-2 pl-4 pr-12 text-sm focus:ring-2 focus:ring-primary-500/20 focus:outline-none w-48 transition-all group-hover:bg-white dark:group-hover:bg-slate-800"
+                            className="bg-slate-100 dark:bg-slate-800/50 border border-transparent focus:border-primary-500 rounded-full py-2 pl-4 pr-12 text-sm focus:ring-2 focus:ring-primary-500/20 focus:outline-none w-32 md:w-48 transition-all group-hover:bg-white dark:group-hover:bg-slate-800"
                             placeholder="Search..."
                             type="text"
                         />

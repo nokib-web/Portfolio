@@ -67,9 +67,9 @@ const About = () => {
     }, { scope: containerRef });
 
     return (
-        <div ref={containerRef} className="max-w-4xl mx-auto">
+        <div ref={containerRef} className="w-full">
 
-            <div className="about-header flex items-center gap-3 mb-8">
+            <div className="about-header flex items-center gap-3 mb-6">
                 <span className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
                     <span className="material-icons-outlined">person</span>
                 </span>
@@ -119,9 +119,8 @@ const About = () => {
                 </div>
             </div>
 
-            {/* Personal Interests */}
-            <div className="mt-20">
-                <h3 className="text-2xl font-bold font-display text-slate-900 dark:text-white mb-8">Personal Interests</h3>
+            <div className="mt-12">
+                <h3 className="text-2xl font-bold font-display text-slate-900 dark:text-white mb-6">Personal Interests</h3>
 
                 <div className="interests-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 

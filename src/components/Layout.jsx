@@ -7,6 +7,7 @@ import CustomCursor from './Common/CustomCursor';
 
 const Layout = ({ children }) => {
     const [activeSection, setActiveSection] = useState('hero');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
     const isBlogPage = location.pathname.startsWith('/blog');
 
@@ -56,9 +57,9 @@ const Layout = ({ children }) => {
             <MeshGradient />
             <Header activeSection={activeSection} />
             <div className="flex-1 w-full relative z-10 pt-16">
-                <div className={`${isBlogPage ? 'w-full' : 'max-w-7xl mx-auto px-4 md:px-8 lg:px-12'} flex`}>
-                    {!isBlogPage && <Sidebar activeSection={activeSection} />}
-                    <main className="flex-1 min-w-0">
+                <div className={`${isBlogPage ? 'w-full' : 'max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 transition-all duration-500 ' + (!isBlogPage && isSidebarOpen ? 'lg:pl-[18rem]' : !isBlogPage ? 'lg:pl-[7rem]' : '')} flex`}>
+                    {!isBlogPage && <Sidebar activeSection={activeSection} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />}
+                    <main className="flex-1 min-w-0 transition-all duration-500">
                         {children}
                     </main>
                 </div>

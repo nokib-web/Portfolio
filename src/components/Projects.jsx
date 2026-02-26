@@ -3,13 +3,22 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ProjectModal from './ProjectModal';
+import Pagination from './Common/Pagination';
 import { projects } from '../data/portfolioData';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Projects = () => {
     const [selectedProject, setSelectedProject] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const projectsPerPage = 8;
     const containerRef = useRef(null);
+
+    const totalPages = Math.ceil(projects.length / projectsPerPage);
+    const paginatedProjects = projects.slice(
+        (currentPage - 1) * projectsPerPage,
+        currentPage * projectsPerPage
+    );
 
     useGSAP(() => {
         const headerTl = gsap.timeline({
@@ -66,18 +75,18 @@ const Projects = () => {
             duration: 0.6
         });
 
-    }, { scope: containerRef });
+    }, { scope: containerRef, dependencies: [currentPage] });
 
     return (
-        <section ref={containerRef} className="relative py-20 md:py-32 overflow-hidden">
+        <section ref={containerRef} className="relative py-12 md:py-20 overflow-hidden">
             {/* Background Elements */}
             <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 via-white to-slate-50/50 dark:from-slate-950/50 dark:via-slate-900 dark:to-slate-950/50 pointer-events-none" />
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative px-4 sm:px-6 lg:px-8">
                 {/* Section Header */}
-                <div className="projects-header mb-16 md:mb-20">
+                <div className="projects-header mb-10 md:mb-12">
                     <div className="flex flex-col items-center text-center space-y-4">
                         {/* Badge */}
                         <div className="badge inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 border border-primary-200/50 dark:border-primary-700/30 shadow-sm">
@@ -105,18 +114,18 @@ const Projects = () => {
                 </div>
 
                 {/* Projects Grid */}
-                <div className="projects-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-                    {projects.map((project, index) => (
+                <div className="projects-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                    {paginatedProjects.map((project, index) => (
                         <article
                             key={index}
                             onClick={() => setSelectedProject(project)}
-                            className="project-card group relative bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 hover:shadow-2xl hover:shadow-primary-500/20 dark:hover:shadow-primary-500/10 transition-all duration-700 cursor-pointer"
+                            className="project-card group relative h-full flex flex-col bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 hover:shadow-2xl hover:shadow-primary-500/20 dark:hover:shadow-primary-500/10 transition-all duration-700 cursor-pointer"
                         >
                             {/* Gradient Border Effect */}
                             <div className="absolute inset-0 bg-gradient-to-br from-primary-500/0 via-primary-500/0 to-purple-500/0 group-hover:from-primary-500/10 group-hover:via-purple-500/10 group-hover:to-primary-500/10 transition-all duration-700 rounded-2xl pointer-events-none" />
 
                             {/* Image Container */}
-                            <div className="relative h-44 sm:h-48 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
+                            <div className="relative h-28 sm:h-32 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
                                 {/* Gradient Overlay */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent z-10 group-hover:from-slate-900/60 transition-all duration-700" />
 
@@ -149,14 +158,14 @@ const Projects = () => {
                             </div>
 
                             {/* Content */}
-                            <div className="relative p-4 sm:p-5 lg:p-6 space-y-3 sm:space-y-4">
+                            <div className="relative flex-1 p-3 sm:p-4 space-y-2 sm:space-y-3">
                                 {/* Title */}
                                 <h3 className="text-lg sm:text-xl font-bold font-display text-slate-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-300 line-clamp-1">
                                     {project.title}
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2 min-h-[2.5rem]">
+                                <p className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2 min-h-[2rem]">
                                     {project.description}
                                 </p>
 
@@ -195,8 +204,19 @@ const Projects = () => {
                     ))}
                 </div>
 
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(page) => {
+                        setCurrentPage(page);
+                        // Optional: scroll to grid top
+                        const grid = document.querySelector('.projects-grid');
+                        if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                />
+
                 {/* View All Projects CTA */}
-                <div className="projects-cta mt-16 text-center">
+                <div className="projects-cta mt-12 text-center">
                     <a
                         href="https://github.com/nokib-web"
                         target="_blank"

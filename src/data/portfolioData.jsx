@@ -192,9 +192,14 @@ export const skills = [
         items: [
             { name: "Node.js", icon: <SiNodedotjs />, level: "Runtime Opt.", color: "#339933" },
             { name: "Express", icon: <SiExpress />, level: "API Arch.", color: "#000000" },
+            { name: "Python", icon: <FaPython />, level: "Scripting", color: "#3776AB" },
+        ]
+    },
+    {
+        category: "Database",
+        items: [
             { name: "MongoDB", icon: <SiMongodb />, level: "Aggregation", color: "#47A248" },
             { name: "PostgreSQL", icon: <SiPostgresql />, level: "SQL/Prisma", color: "#4169E1" },
-            { name: "Python", icon: <FaPython />, level: "Scripting", color: "#3776AB" },
         ]
     },
     {

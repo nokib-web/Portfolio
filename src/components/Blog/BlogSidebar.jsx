@@ -15,14 +15,14 @@ const BlogSidebar = ({ isOpen, setIsOpen }) => {
 
     return (
         <aside
-            className={`fixed left-4 top-24 bottom-4 z-40 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-white/80 dark:bg-[#0A0F1E]/80 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl overflow-hidden ${isOpen ? 'w-64' : 'w-20'
+            className={`fixed left-4 top-24 bottom-4 z-40 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-white/80 dark:bg-[#0A0F1E]/80 backdrop-blur-2xl rounded-none shadow-2xl overflow-hidden ${isOpen ? 'w-64' : 'w-20'
                 }`}
         >
             {/* Toggle Button */}
             <div className="flex justify-center p-4">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="p-3 rounded-2xl hover:bg-primary-500/10 dark:hover:bg-primary-500/20 text-slate-400 hover:text-primary-500 transition-all group"
+                    className="p-3 rounded-none hover:bg-primary-500/10 dark:hover:bg-primary-500/20 text-slate-400 hover:text-primary-500 transition-all group"
                 >
                     <span className="material-icons-outlined text-2xl group-hover:rotate-180 transition-transform duration-500">
                         {isOpen ? 'menu_open' : 'menu'}
@@ -36,7 +36,7 @@ const BlogSidebar = ({ isOpen, setIsOpen }) => {
                     <Link
                         key={item.name}
                         to={item.link}
-                        className="group flex items-center h-12 rounded-2xl hover:bg-primary-500 transition-all px-3"
+                        className="group flex items-center h-12 rounded-none hover:bg-primary-500 transition-all px-3"
                     >
                         <span className="material-icons-outlined text-slate-400 group-hover:text-white transition-colors w-10 text-center text-xl">
                             {item.icon}
@@ -51,7 +51,7 @@ const BlogSidebar = ({ isOpen, setIsOpen }) => {
 
             {/* Bottom Decoration */}
             <div className="p-6">
-                <div className={`h-1 w-full rounded-full bg-gradient-to-r from-primary-500 to-purple-500 transition-all duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'}`} />
+                <div className={`h-1 w-full rounded-none bg-gradient-to-r from-primary-500 to-purple-500 transition-all duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'}`} />
             </div>
         </aside>
     );

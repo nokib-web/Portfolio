@@ -1,59 +1,83 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaWhatsapp } from "react-icons/fa";
 import { MdEmail, MdLocationOn } from "react-icons/md";
 import Swal from "sweetalert2";
+import emailjs from '@emailjs/browser';
+
+const EMAILJS_SERVICE_ID = 'service_wiecqoh';
+const EMAILJS_TEMPLATE_ID = 'template_pd5vc1f'; // Assuming same template or general purpose
+const EMAILJS_PUBLIC_KEY = 'GS5FlBE6Yq_LGd1va';
 
 const Contact = () => {
 
 
 
-    const handleSubmit = (e) => {
+    const [status, setStatus] = useState('idle'); // idle | loading
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // get form data
         const form = e.target.closest('form');
         const name = form.name.value;
         const email = form.email.value;
         const message = form.message.value;
 
-        // Basic validation
         if (!name || !email || !message) {
             Swal.fire({
                 icon: "warning",
                 title: "Missing Fields",
-                text: "Please fill out all required fields."
+                text: "Please fill out all required fields.",
+                confirmButtonColor: "#3b82f6"
             });
             return;
         }
 
-        // Construct mailto link
-        const subject = `Portfolio Contact from ${name}`;
-        const body = `Name: ${name}%0D%0AEmail: ${email}%0D%0A%0D%0AMessage:%0D%0A${message}`;
-        const mailtoLink = `mailto:nokibnokib1@gmail.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+        setStatus('loading');
 
-        // Open email client
-        window.location.href = mailtoLink;
+        try {
+            await emailjs.send(
+                EMAILJS_SERVICE_ID,
+                EMAILJS_TEMPLATE_ID,
+                {
+                    from_name: name,
+                    from_email: email,
+                    message: message,
+                    to_name: 'Nokib',
+                    reply_to: email,
+                },
+                EMAILJS_PUBLIC_KEY
+            );
 
-        // Show success message
-        Swal.fire({
-            icon: "success",
-            title: "Opening Email Client...",
-            text: "Please click send in your email app to complete the message.",
-            confirmButtonColor: "#3085d6"
-        });
+            Swal.fire({
+                icon: "success",
+                title: "Message Sent!",
+                text: "Thank you for reaching out. I'll get back to you soon.",
+                confirmButtonColor: "#3b82f6"
+            });
 
-        form.reset();
+            form.reset();
+        } catch (error) {
+            console.error('EmailJS Error:', error);
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong. Please try again later.",
+                confirmButtonColor: "#3b82f6"
+            });
+        } finally {
+            setStatus('idle');
+        }
     };
 
     return (
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
-                className="mb-12"
+                className="mb-8"
             >
                 <div className="flex items-center gap-3 mb-4">
                     <span className="p-2 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
@@ -110,7 +134,7 @@ const Contact = () => {
                     </div>
                 </div>
 
-                <form className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-8 rounded-2xl shadow-sm space-y-6">
+                <form className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 p-5 sm:p-8 rounded-2xl shadow-sm space-y-4 sm:space-y-6">
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name</label>
                         <input type="text" id="name" className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary-500 focus:ring-primary-500 transition-all p-3" placeholder="Your Name" />
@@ -128,9 +152,17 @@ const Contact = () => {
                         whileHover={{ scale: 1.02 }}
                         type="submit"
                         onClick={handleSubmit}
-                        className="w-full bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-all font-semibold shadow-lg shadow-primary-600/20"
+                        disabled={status === 'loading'}
+                        className="w-full bg-primary-600 text-white py-3 px-6 rounded-xl hover:bg-primary-700 transition-all font-semibold shadow-lg shadow-primary-600/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Send Message
+                        {status === 'loading' ? (
+                            <>
+                                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Sending...
+                            </>
+                        ) : (
+                            'Send Message'
+                        )}
                     </motion.button>
                 </form>
             </div>
