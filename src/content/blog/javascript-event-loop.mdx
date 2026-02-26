@@ -1,0 +1,157 @@
+---
+title: "The JavaScript Event Loop Demystified"
+date: "2026-02-15"
+description: "Visualising how the call stack, microtask queue, and macrotask queue interact — and why it matters for writing performant async code."
+tags: ["Development", "JavaScript"]
+readTime: 8
+coverImage: https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=2070
+---
+
+## JavaScript is Single-Threaded. So How Does Async Work?
+
+JavaScript has exactly **one call stack**. It can only do one thing at a time. Yet we write code that fetches data, sets timers, and handles user events — all without freezing the UI.
+
+The secret is the **event loop**, and understanding it will change how you read and write JavaScript forever.
+
+---
+
+## The Call Stack
+
+The call stack is a LIFO (last in, first out) data structure. When you call a function, it's pushed onto the stack. When it returns, it's popped off.
+
+```js
+function greet(name) {
+  console.log(`Hello, ${name}`)
+}
+
+function main() {
+  greet('Nokib')
+}
+
+main()
+// Stack: main → greet → console.log → ... → empty
+```
+
+Synchronous code is straightforward: functions get pushed and popped in order.
+
+---
+
+## Web APIs — Offloading Async Work
+
+Browsers (and Node.js) provide **Web APIs** that run outside the call stack: `setTimeout`, `fetch`, DOM events, etc.
+
+When you call `setTimeout(fn, 1000)`, JavaScript hands the timer off to the browser's timer API and immediately continues. After 1000ms, the browser puts the callback into a queue.
+
+```js
+console.log('start')
+
+setTimeout(() => {
+  console.log('timeout')
+}, 0)
+
+console.log('end')
+
+// Output:
+// start
+// end
+// timeout   ← even with 0ms delay!
+```
+
+Even `setTimeout(..., 0)` runs after the current call stack clears.
+
+---
+
+## The Two Queues
+
+There are actually **two queues**, not one:
+
+### Macrotask Queue (Task Queue)
+Holds callbacks from: `setTimeout`, `setInterval`, `setImmediate`, I/O callbacks, UI rendering events.
+
+### Microtask Queue
+Holds callbacks from: `Promise.then()`, `queueMicrotask()`, `MutationObserver`.
+
+> **Critical rule:** After each macrotask, the event loop drains the **entire** microtask queue before picking up the next macrotask.
+
+---
+
+## The Event Loop Algorithm
+
+```
+while (true) {
+  1. Execute the current macrotask (call stack)
+  2. Drain ALL microtasks (Promise callbacks, etc.)
+  3. Render if needed (browser only)
+  4. Pick next macrotask from queue — repeat
+}
+```
+
+Let's trace through a real example:
+
+```js
+console.log('1: start')
+
+setTimeout(() => console.log('4: timeout'), 0)
+
+Promise.resolve()
+  .then(() => console.log('3: microtask 1'))
+  .then(() => console.log('3b: microtask 2'))
+
+console.log('2: end')
+
+// Output:
+// 1: start
+// 2: end
+// 3: microtask 1
+// 3b: microtask 2
+// 4: timeout
+```
+
+The promise callbacks run **before** the setTimeout, even though the timeout was registered first — because microtasks flush before the next macrotask.
+
+---
+
+## Why This Matters in Practice
+
+### Never Block the Call Stack
+
+Long synchronous operations (heavy loops, huge JSON parsing) block everything — including user events and rendering.
+
+```js
+// BAD — blocks UI for seconds
+const result = hugeArray.reduce((acc, item) => {
+  /* expensive computation */
+}, [])
+```
+
+For heavy work, use **Web Workers** or break the work into chunks with `setTimeout(..., 0)`.
+
+### Async/Await is Just Promise Sugar
+
+```js
+async function fetchUser(id) {
+  const res = await fetch(`/api/users/${id}`)  // microtask suspension point
+  const data = await res.json()                 // another microtask
+  return data
+}
+```
+
+Each `await` suspends the async function and resumes it in the microtask queue when the promise resolves. The call stack is free in the meantime.
+
+---
+
+## Mental Model Summary
+
+| Concept | Role |
+|---|---|
+| **Call Stack** | Executes synchronous code, one frame at a time |
+| **Web APIs** | Handle async operations outside JavaScript |
+| **Macrotask Queue** | `setTimeout`, `setInterval`, events |
+| **Microtask Queue** | Promise callbacks — drained completely after every task |
+| **Event Loop** | Orchestrates the cycle: task → microtasks → render → repeat |
+
+---
+
+## Wrapping Up
+
+The event loop is the heartbeat of JavaScript. Once you internalize that microtasks flush before the next macrotask, and that a blocked call stack freezes everything, a whole class of async bugs suddenly becomes obvious — and avoidable.

@@ -1,0 +1,148 @@
+---
+title: "CSS That Doesn't Haunt You at 2AM"
+date: "2026-02-18"
+description: "Practical CSS architecture patterns — BEM, CSS custom properties, and component scoping — that prevent the cascade from becoming a war zone."
+tags: ["Development"]
+readTime: 6
+coverImage: https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?auto=format&fit=crop&q=80&w=2070
+---
+
+## Why CSS Gets Messy
+
+CSS starts clean. Then a deadline hits and you add `!important`. Then another deadline, and suddenly you're nesting selectors five levels deep and your `z-index` is 9999.
+
+This isn't a CSS problem — it's an *architecture* problem. CSS without a system degrades linearly with the size of your team and codebase.
+
+---
+
+## Rule 1: Use Custom Properties for Everything Variable
+
+CSS custom properties (variables) aren't just for colours. They're your design token layer.
+
+```css
+:root {
+  /* Colours */
+  --color-primary: #6366f1;
+  --color-text: #1e293b;
+  --color-surface: #ffffff;
+
+  /* Spacing */
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 2rem;
+
+  /* Typography */
+  --font-body: 'Inter', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+  --text-base: 1rem;
+  --line-height-body: 1.65;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+```
+
+When you need to update your primary colour, you change it in one place. When dark mode kicks in, you override just the relevant variables:
+
+```css
+.dark {
+  --color-text: #f1f5f9;
+  --color-surface: #0f172a;
+}
+```
+
+---
+
+## Rule 2: Never Nest More Than 2 Levels
+
+Every level of nesting increases specificity and makes overriding harder.
+
+```css
+/* ❌ BAD — nightmare specificity */
+.card .card-body .card-title a:hover { }
+
+/* ✅ GOOD — flat and composable */
+.card-title-link:hover { }
+```
+
+With BEM (Block-Element-Modifier), you get structured naming without deep nesting:
+
+```css
+/* Block */
+.card { }
+
+/* Element */
+.card__title { }
+.card__body { }
+
+/* Modifier */
+.card--featured { }
+.card__title--large { }
+```
+
+---
+
+## Rule 3: Scope Component Styles
+
+In React (or any component-based architecture), scope styles to their component. CSS Modules, Tailwind, or a strict naming convention all work — consistency matters more than which you pick.
+
+With CSS Modules:
+
+```css
+/* Card.module.css */
+.root { border-radius: 1rem; padding: 1.5rem; }
+.title { font-weight: 800; font-size: 1.25rem; }
+```
+
+```jsx
+import styles from './Card.module.css'
+<div className={styles.root}>
+  <h2 className={styles.title}>...</h2>
+</div>
+```
+
+Zero risk of styles leaking.
+
+---
+
+## Rule 4: Own Your Z-Index Scale
+
+Arbitrary z-indexes (`9999`, `99999`) are a sign of a z-index war. Define a scale:
+
+```css
+:root {
+  --z-base:    0;
+  --z-raised:  10;
+  --z-dropdown: 100;
+  --z-overlay: 200;
+  --z-modal:   300;
+  --z-toast:   400;
+  --z-header:  500;
+}
+```
+
+Now `z-index: var(--z-modal)` communicates intent, and you'll never fight a ghost `z-index` again.
+
+---
+
+## Rule 5: Utility Classes for One-Offs, Component Classes for Patterns
+
+Utility classes (Tailwind or custom) are excellent for spacing nudges and one-time overrides. But when a pattern repeats across 5 components, extract it into a semantic class.
+
+```css
+/* Repeated pattern → extract it */
+.section-header {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+```
+
+---
+
+## Wrapping Up
+
+Good CSS architecture is mostly about *preventing decisions* — giving yourself and your team guardrails so the cascade stays predictable as the codebase grows.
+
+The properties, naming conventions, and scoping strategies above don't add complexity. They remove it — one global variable or well-named class at a time.

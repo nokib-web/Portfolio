@@ -1,0 +1,100 @@
+---
+title: "Git Branching Strategies That Actually Work"
+date: "2026-02-22"
+description: "A practical walkthrough of trunk-based development, Gitflow, and feature flags — and how to choose the right strategy for your team size."
+tags: ["Development"]
+readTime: 7
+coverImage: https://images.unsplash.com/photo-1556075798-4825dfaaf498?auto=format&fit=crop&q=80&w=2076
+---
+
+## Branching Is a Team Sport
+
+Every git repository has branches, but not every team has a *strategy*. Without one, you end up with feature branches that live for months, merge conflicts that eat half a sprint, and a main branch that nobody trusts to be deployable.
+
+Let's fix that.
+
+---
+
+## Strategy 1: Trunk-Based Development
+
+Everyone commits to `main` (the trunk) at least once a day. Feature flags hide unfinished work from users.
+
+```bash
+# No long-lived branches. Just trunk.
+git checkout main
+git pull
+# ... make small changes ...
+git commit -m "feat: add user avatar upload (behind flag)"
+git push
+```
+
+**Best for:** Small teams, high-deployment-frequency products, teams with strong CI.
+
+**The pain point:** You need feature flags and a solid CI pipeline. Without them, half-baked code ships to production.
+
+---
+
+## Strategy 2: Gitflow
+
+Gitflow formalises a set of permanent branches: `main`, `develop`, `feature/*`, `release/*`, `hotfix/*`.
+
+```
+main       ←── hotfix/fix-login-crash
+ ↑              ↑
+release/1.2 ── develop ←── feature/user-profiles
+                          └── feature/dark-mode
+```
+
+**The flow:**
+1. Branch from `develop` for new features
+2. Merge feature → `develop` when done
+3. Cut `release/x.y` from `develop` for QA
+4. Merge release → `main` and `develop`
+5. Hotfix branches come from `main` and merge back to both
+
+**Best for:** Teams with scheduled release cycles (mobile apps, desktop software, SaaS with separate staging).
+
+**The pain point:** It's complex. Feature branches can live weeks and create enormous merge nightmares.
+
+---
+
+## Strategy 3: GitHub Flow (The Middle Ground)
+
+One step up from trunk, one step down from Gitflow. Great for most web teams.
+
+```
+main ← PR ← feature/my-feature
+           (branch lives max 2-3 days)
+```
+
+Rules:
+1. `main` is always deployable
+2. Create descriptive branches for work
+3. Open a PR early (draft PR = work in progress)
+4. Get review, then merge to `main`
+5. Deploy immediately after merge
+
+**Best for:** Teams deploying continuously, open source projects.
+
+---
+
+## Choosing Your Strategy
+
+| Situation | Recommended Strategy |
+|---|---|
+| Solo / 2-person team | Trunk or GitHub Flow |
+| Web startup, frequent releases | GitHub Flow |
+| Mobile app, versioned releases | Gitflow |
+| Microservices, multiple services | Trunk with feature flags |
+| Open source project | GitHub Flow |
+
+---
+
+## Universal Rules (Regardless of Strategy)
+
+1. **Keep branches short-lived.** Anything over 3 days is a risk.
+2. **Commit small.** Small commits are easier to review and easier to revert.
+3. **Never commit directly to main** without a review (except solo projects).
+4. **Write descriptive PR titles.** `fix bug` is useless. `fix: user logout clears stale JWT cookie` is gold.
+
+The best branching strategy is the simplest one your team will actually follow consistently.

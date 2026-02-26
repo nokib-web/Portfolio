@@ -1,140 +1,102 @@
-Nokib – Personal Portfolio Website
+# Nazmul Hasan Nokib – Personal Portfolio
 
-A modern, responsive, and animated personal portfolio built using Next.js, React, Tailwind CSS, and Framer Motion.
-This website showcases my skills, projects, experience, and professional background as a Full-Stack Developer (Fresher).
+A premium, highly-animated personal portfolio and blog built with **React**, **Vite**, **GSAP**, and **MDX**. 
+This project features a fully internal blog system, integrated email subscriptions, and state-of-the-art animations.
 
-🌐 Live Website
+---
 
-Portfolio URL:
-https://your-portfolio-link.vercel.app
+## 🚀 Tech Stack
 
-(Replace with your deployed link)
+- **Core:** React 19 + Vite
+- **Styling:** Tailwind CSS (Custom Design System)
+- **Animations:** GSAP (ScrollTrigger, useGSAP) + Framer Motion
+- **Blog Content:** MDX (with Frontmatter support)
+- **Routing:** React Router Dom
+- **Communication:** EmailJS (Subscribe system), SweetAlert2
+- **Icons:** Material Icons & React Icons
 
-📌 Overview
+---
 
-This portfolio was designed to reflect my personality, coding style, and technical abilities.
-It highlights what I do, the technologies I work with, the projects I have built, and how to contact me directly.
+## ✍️ Internal Blog Workflow (MDX)
 
-The goal of this project is to create a clean, fast, professional, and easy-to-navigate personal brand website.
+I have migrated the blog from Hashnode to a fully internal MDX-based system for maximum performance and SEO.
 
-✨ Features
-Modern UI/UX
+### How to add a new post:
 
-Clean and minimal interface
+1.  **Create MDX file:** Add a new `.mdx` file in `src/content/blog/`.
+    - Use the following frontmatter structure:
+      ```md
+      ---
+      title: "Your Post Title"
+      date: "2026-02-26"
+      description: "A short snippet for the blog card."
+      tags: ["Development", "React"]
+      readTime: 5
+      coverImage: null
+      ---
+      ```
+2.  **Register the post:** Open `src/lib/posts.js` and add your post metadata to the `posts` array.
+    - Ensure the `slug` matches your filename exactly.
+3.  **Content:** Write your post using standard Markdown or embed React components directly in the MDX.
 
-Smooth animations with Framer Motion
+### Features:
+- **Bangla Support:** Native support for Bengali typography with custom line-heights and spacing.
+- **Reading Progress:** Real-time progress bar at the top of the post.
+- **Social Share:** Integrated sharing for X (Twitter), LinkedIn, and direct link copying.
+- **Premium Prose:** Custom `article-body` styling for optimal readability.
 
-Beautiful typography and spacing
+---
 
-Fully Responsive
+## 📧 Subscription System (EmailJS)
 
-Optimized for desktop, tablet, and mobile
+The portfolio includes a "Stay in the loop" subscription form at the bottom of every blog post.
 
-Adaptive layouts with Tailwind CSS
+### Setup:
+1.  Sign up at [EmailJS](https://emailjs.com/).
+2.  Create an Email Service and an Email Template.
+3.  In your template, use `{{subscriber_email}}` to capture the reader's input.
+4.  Update your credentials in `src/components/Blog/Subscribe.jsx`:
+    ```js
+    const EMAILJS_SERVICE_ID = 'your_service_id';
+    const EMAILJS_TEMPLATE_ID = 'your_template_id';
+    const EMAILJS_PUBLIC_KEY = 'your_public_key';
+    ```
 
-Dark Mode
+---
 
-System preference detection
+## 📂 Project Structure
 
-Manual toggle support
+```text
+src/
+├── api/             # API services
+├── components/      # UI Components (GSAP/Framer)
+│   ├── Blog/        # Blog-specific components
+│   └── Common/      # Reusable helpers (Magnetic, etc.)
+├── content/
+│   └── blog/        # MDX Blog Posts (.mdx)
+├── data/            # Static site data (Projects, Skills)
+├── lib/             # Utility logic & Post Registry
+├── App.jsx          # Routing & Layout
+└── index.css        # Design System & article-body styles
+```
 
-Interactive Contact Options
+---
 
-Clickable email
+## ⚙️ Installation
 
-WhatsApp direct message
+1.  **Clone:** `git clone https://github.com/nokib-web/Portfolio.git`
+2.  **Install:** `npm install`
+3.  **Dev:** `npm run dev`
+4.  **Build:** `npm run build`
 
-Google Maps location open
+---
 
-Professional Sections
+## 📞 Contact
 
-Hero section with Resume (View/Download)
+- **Email:** [nokibnokib1@gmail.com](mailto:nokibnokib1@gmail.com)
+- **WhatsApp:** [+8801910229119](https://wa.me/8801910229119)
+- **LinkedIn:** [Nazmul Hasan Nokib](https://linkedin.com/in/nokib-web)
 
-Skills & Technologies
+---
 
-Experience (Programming Hero MERN Training)
-
-Featured Projects
-
-Personal interests
-
-Contact section
-
-🛠 Tech Stack
-Category	Technologies
-Framework	Next.js
-Library	React
-Styling	Tailwind CSS
-Animations	Framer Motion
-Icons	Material Icons, React Icons
-Deployment	Vercel
-📂 Folder Structure
-/
-├── app/ or pages/
-│   ├── layout.jsx
-│   └── page.jsx
-├── components/
-│   ├── Header.jsx
-│   ├── Hero.jsx
-│   ├── Skills.jsx
-│   ├── Experience.jsx
-│   ├── Projects.jsx
-│   └── Footer.jsx
-├── public/
-│   ├── resume.pdf
-│   └── images/
-└── README.md
-
-⚙️ Installation & Setup
-1. Clone the repository
-git clone https://github.com/yourusername/portfolio.git
-cd portfolio
-
-2. Install dependencies
-npm install
-
-3. Start development server
-npm run dev
-
-4. Build for production
-npm run build
-
-5. Deploy
-
-Deploy easily on Vercel:
-
-https://vercel.com
-
-🧑‍💻 About Me
-
-I am a dedicated Full-Stack Developer focusing on building scalable, user-friendly, and high-performance web applications.
-I work primarily with:
-
-Next.js
-
-React
-
-Tailwind CSS
-
-Node.js
-
-Express
-
-MongoDB
-
-I completed 6 months of MERN Stack training at Programming Hero, where I gained hands-on experience building real-world projects.
-
-📞 Contact Me
-
-Email:
-nokibnokib1@gmail.com
-
-WhatsApp:
-+8801910229119
-
-Location:
-Dhaka, Bangladesh
-
-📜 License
-
-This project is open-source and can be used or modified for personal use.
+📜 **License:** MIT. Feel free to use this for your own portfolio!

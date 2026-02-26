@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Outlined');
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -141,100 +143,219 @@ h6 {
   margin-top: 10px;
 }
 
-/* Premium Prose System for Blog Content */
-.premium-prose {
-  @apply text-slate-600 dark:text-slate-400;
-  font-size: 1.125rem;
-  line-height: 1.65;
-  font-weight: 500;
+/* ══════════════════════════════════════════════════════════════
+   Article Body — reading-friendly prose for blog posts
+   Works for both English and Bangla (Bengali) content.
+   ══════════════════════════════════════════════════════════════ */
+.article-body {
+  @apply text-slate-700 dark:text-slate-300;
+  font-size: 1.1rem;
+  line-height: 1.85;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-.premium-prose h1,
-.premium-prose h2,
-.premium-prose h3,
-.premium-prose h4 {
-  @apply text-slate-900 dark:text-slate-50;
+/* Bangla text naturally needs a bit more line-height and different font */
+.article-body:lang(bn),
+.article-body [lang="bn"],
+.article-body.bn-content {
+  font-family: 'Hind Siliguri', 'Inter', sans-serif;
+  line-height: 2.1;
+  font-size: 1.2rem;
+  letter-spacing: 0;
+}
+
+.article-body.bn-content h1,
+.article-body.bn-content h2,
+.article-body.bn-content h3,
+.article-body.bn-content h4 {
+  font-family: 'Hind Siliguri', 'Outfit', sans-serif;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+/* Headings */
+.article-body h1,
+.article-body h2,
+.article-body h3,
+.article-body h4 {
+  @apply text-slate-900 dark:text-white;
   font-family: 'Outfit', sans-serif;
   font-weight: 900;
-  letter-spacing: -0.04em;
-  margin-top: 2.25rem;
-  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-top: 2.75rem;
+  margin-bottom: 0.9rem;
 }
 
-.premium-prose h2 {
-  font-size: 2.25rem;
-  @apply border-b border-slate-200 dark:border-white/5;
-  padding-bottom: 0.75rem;
-}
-
-.premium-prose h3 {
+.article-body h2 {
   font-size: 1.75rem;
+  @apply border-b border-slate-100 dark:border-white/5;
+  padding-bottom: 0.6rem;
 }
 
-.premium-prose p {
-  margin-bottom: 1.25rem;
+.article-body h3 {
+  font-size: 1.35rem;
 }
 
-.premium-prose strong {
+.article-body h4 {
+  font-size: 1.1rem;
+  @apply text-primary-700 dark:text-primary-400;
+}
+
+/* Paragraphs */
+.article-body p {
+  margin-bottom: 1.4rem;
+}
+
+/* Bold / strong */
+.article-body strong {
   @apply text-slate-900 dark:text-white;
   font-weight: 800;
 }
 
-.premium-prose a {
-  color: #a78bfa;
-  /* primary-400 */
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  font-weight: 700;
-  transition: color 0.3s;
+/* Links */
+.article-body a {
+  @apply text-primary-600 dark:text-primary-400;
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  transition: color 0.2s, text-decoration-color 0.2s;
 }
 
-.premium-prose a:hover {
-  color: #8b5cf6;
+.article-body a:hover {
+  @apply text-primary-700 dark:text-primary-300;
 }
 
-.premium-prose blockquote {
-  border-left: 4px solid #8b5cf6;
-  @apply bg-primary-500/5 text-slate-700 dark:text-slate-300;
-  padding: 1.5rem 2rem;
-  font-style: italic;
-  font-size: 1.25rem;
-  border-radius: 0 1.5rem 1.5rem 0;
-  margin: 3rem 0;
-}
-
-.premium-prose code {
-  @apply bg-slate-100 dark:bg-white/5 text-primary-600 dark:text-primary-200;
-  padding: 0.2rem 0.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.9em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-.premium-prose pre {
-  @apply bg-slate-900 dark:bg-slate-950;
-  padding: 2rem;
-  border-radius: 1.5rem;
-  overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+/* Horizontal rule */
+.article-body hr {
+  @apply border-slate-200 dark:border-white/5;
   margin: 2.5rem 0;
 }
 
-.premium-prose img {
-  border-radius: 2rem;
-  margin: 3.5rem 0;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* Blockquote */
+.article-body blockquote {
+  @apply border-l-[3px] border-primary-500 bg-primary-500/5 dark:bg-primary-500/10 text-slate-700 dark:text-slate-300;
+  padding: 1.1rem 1.5rem;
+  font-style: italic;
+  font-size: 1.05rem;
+  border-radius: 0 1rem 1rem 0;
+  margin: 2rem 0;
 }
 
-.premium-prose ul,
-.premium-prose ol {
-  margin-bottom: 2rem;
+.article-body blockquote>* {
+  margin: 0;
+}
+
+/* Inline code */
+.article-body code {
+  @apply bg-slate-100 dark:bg-white/10 text-primary-700 dark:text-primary-300;
+  padding: 0.18rem 0.45rem;
+  border-radius: 0.4rem;
+  font-size: 0.875em;
+  font-family: ui-monospace, 'Fira Code', Menlo, Monaco, Consolas, monospace;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Code blocks */
+.article-body pre {
+  @apply bg-[#0d1117] dark:bg-[#090e17] border border-white/5;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1.25rem;
+  overflow-x: auto;
+  margin: 2rem 0;
+  font-size: 0.88rem;
+  line-height: 1.7;
+}
+
+.article-body pre code {
+  @apply bg-transparent text-slate-200 dark:text-slate-200;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 400;
+}
+
+/* Tables */
+.article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.9rem;
+  @apply border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden;
+}
+
+.article-body thead {
+  @apply bg-slate-50 dark:bg-white/5;
+}
+
+.article-body th {
+  @apply text-slate-900 dark:text-white;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.article-body td {
+  @apply border-t border-slate-100 dark:border-white/5 text-slate-700 dark:text-slate-300;
+  padding: 0.75rem 1rem;
+}
+
+.article-body tr:hover td {
+  @apply bg-slate-50/50 dark:bg-white/5;
+}
+
+/* Lists */
+.article-body ul,
+.article-body ol {
   padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-.premium-prose li {
-  margin-bottom: 0.75rem;
+.article-body li {
+  margin-bottom: 0.6rem;
+  padding-left: 0.25rem;
+}
+
+.article-body ul li {
+  list-style-type: disc;
+}
+
+.article-body ol li {
+  list-style-type: decimal;
+}
+
+.article-body li::marker {
+  @apply text-primary-500;
+  font-weight: 700;
+}
+
+/* Images */
+.article-body img {
+  border-radius: 1.25rem;
+  margin: 2.5rem 0;
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+  @apply border border-slate-100 dark:border-white/5;
+  max-width: 100%;
+}
+
+/* Keyboard */
+.article-body kbd {
+  @apply bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-white/20;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.35rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8em;
+  border-bottom-width: 2px;
+}
+
+/* Legacy class — kept for backwards compat */
+.premium-prose {
+  @apply article-body;
 }
 
 .loading {

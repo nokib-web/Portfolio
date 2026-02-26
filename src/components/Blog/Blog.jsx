@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { getAllPosts } from '../../api/hashnode'
+import { getAllPosts } from '../../lib/posts'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -10,86 +10,62 @@ gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORIES = ['All', 'Development', 'Dailylife', 'Religion']
 
+const allPosts = getAllPosts()
+
 export default function Blog() {
-    const [posts, setPosts] = useState([])
-    const [loading, setLoading] = useState(true)
     const [active, setActive] = useState('All')
     const containerRef = useRef(null);
 
-    useEffect(() => {
-        const fetchPosts = async () => {
-            try {
-                const data = await getAllPosts();
-                setPosts(data || []);
-            } catch (err) {
-                console.error("Error in component fetch:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPosts();
-    }, [])
-
     const filtered = active === 'All'
-        ? posts
-        : posts.filter(p =>
-            p.tags?.some(t => t.name.toLowerCase() === active.toLowerCase())
+        ? allPosts
+        : allPosts.filter(p =>
+            p.tags?.some(t => t.toLowerCase() === active.toLowerCase())
         )
 
     useGSAP(() => {
-        if (!loading) {
-            // Refresh ScrollTrigger to ensure correct positions
-            ScrollTrigger.refresh();
+        ScrollTrigger.refresh();
 
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none none"
-                }
-            });
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top 80%",
+                toggleActions: "play none none none"
+            }
+        });
 
-            tl.from(".blog-header-animate", {
-                y: 30,
+        tl.from(".blog-header-animate", {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out"
+        })
+            .from(".category-nav-animate", {
+                y: 20,
                 opacity: 0,
-                duration: 0.8,
+                stagger: 0.1,
+                duration: 0.6,
                 ease: "power3.out"
-            })
-                .from(".category-nav-animate", {
-                    y: 20,
-                    opacity: 0,
-                    stagger: 0.1,
-                    duration: 0.6,
-                    ease: "power3.out"
-                }, "-=0.4");
+            }, "-=0.4");
 
-            if (filtered.length > 0) {
-                gsap.from(".blog-post-card", {
-                    y: 40,
-                    opacity: 0,
+        if (filtered.length > 0) {
+            gsap.fromTo(".blog-post-card",
+                { y: 40, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
                     stagger: 0.1,
                     duration: 0.8,
                     ease: "power3.out",
                     scrollTrigger: {
                         trigger: ".posts-grid",
-                        start: "top 85%"
-                    }
-                });
-            }
+                        start: "top 85%",
+                        once: true
+                    },
+                    delay: 0.1
+                }
+            );
         }
-    }, [loading, filtered.length, active]);
-
-    if (loading) return (
-        <div className="flex justify-center items-center min-h-[70vh]">
-            <div className="flex flex-col items-center gap-6">
-                <div className="relative w-24 h-24">
-                    <div className="absolute inset-0 border-4 border-primary-500/20 rounded-full"></div>
-                    <div className="absolute inset-0 border-4 border-t-primary-500 rounded-full animate-spin"></div>
-                    <div className="text-slate-400 font-display text-xl animate-pulse mt-32 tracking-widest font-bold uppercase">Synthesizing...</div>
-                </div>
-            </div>
-        </div>
-    )
+    }, [filtered.length, active]);
 
     return (
         <div ref={containerRef} className="blog-section relative py-12 px-4 sm:px-8 lg:px-12 min-h-screen">
@@ -145,7 +121,7 @@ export default function Blog() {
                         </button>
                     </div>
                 ) : (
-                    <div className="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xxl:grid-cols-5 gap-4">
+                    <div className="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {filtered.map(post => (
                             <Link
                                 to={`/blog/${post.slug}`}
@@ -158,22 +134,22 @@ export default function Blog() {
                                 <div className="relative h-32 overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white dark:to-[#020617] z-10" />
                                     {post.coverImage ? (
-                                        <img src={post.coverImage.url} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700 dark:opacity-80 dark:group-hover:opacity-100" />
+                                        <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-all duration-700 dark:opacity-80 dark:group-hover:opacity-100" />
                                     ) : (
-                                        <div className="w-full h-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
-                                            <span className="material-icons-outlined text-slate-400 dark:text-slate-700 text-3xl">auto_awesome</span>
+                                        <div className="w-full h-full bg-gradient-to-br from-primary-500/10 via-purple-500/10 to-slate-100 dark:from-primary-900/30 dark:via-purple-900/20 dark:to-slate-900 flex items-center justify-center">
+                                            <span className="material-icons-outlined text-primary-400 dark:text-primary-700 text-4xl">auto_awesome</span>
                                         </div>
                                     )}
                                     <div className="absolute top-3 left-3 z-20 px-2.5 py-1 bg-white/90 dark:bg-black/60 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-lg text-[8px] font-black text-slate-900 dark:text-white uppercase tracking-widest shadow-sm">
-                                        {new Date(post.publishedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                        {new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                     </div>
                                 </div>
 
                                 <div className="relative p-5 pt-0 flex flex-col flex-1 z-20">
                                     <div className="flex gap-2.5 flex-wrap mb-3">
                                         {post.tags?.slice(0, 2).map(tag => (
-                                            <span key={tag.name} className="text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-primary-500 transition-colors">
-                                                #{tag.name}
+                                            <span key={tag} className="text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-primary-500 transition-colors">
+                                                #{tag}
                                             </span>
                                         ))}
                                     </div>
@@ -181,12 +157,12 @@ export default function Blog() {
                                         {post.title}
                                     </h3>
                                     <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed line-clamp-2 font-medium group-hover:opacity-100 transition-opacity mb-4">
-                                        {post.brief}
+                                        {post.description}
                                     </p>
                                     <div className="mt-auto flex items-center justify-between">
                                         <div className="flex items-center gap-1.5">
                                             <span className="material-icons-outlined text-[10px] text-primary-500">schedule</span>
-                                            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{post.readTimeInMinutes}m read</span>
+                                            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{post.readTime}m read</span>
                                         </div>
                                         <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-center justify-center group-hover:bg-primary-600 group-hover:border-primary-500 transition-all duration-300">
                                             <span className="material-icons-outlined text-slate-600 dark:text-white text-[12px] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform font-bold">north_east</span>
@@ -201,4 +177,3 @@ export default function Blog() {
         </div>
     )
 }
-

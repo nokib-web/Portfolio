@@ -1,0 +1,108 @@
+---
+title: "My Daily Developer Workflow"
+date: "2026-02-10"
+description: "The tools, habits, and rituals that keep me productive as a full-stack developer — from terminal shortcuts to focus techniques."
+tags: ["Dailylife"]
+readTime: 4
+coverImage: https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=2072
+---
+
+## Start With Intention, Not a Browser Tab
+
+The worst way to start a dev day is opening a browser and letting inertia decide what you work on. I start every morning with a **two-minute planning ritual**:
+
+1. What is the one thing I need to ship today?
+2. What is the biggest blocker to that?
+3. What is the first concrete step?
+
+Write it down. Seriously — even in a text file. Externalising the goal frees mental RAM.
+
+---
+
+## My Terminal Setup
+
+I spend most of my day in the terminal, so it's worth investing in.
+
+**Shell:** Windows PowerShell with Oh My Posh for a clean prompt that shows git branch and status at a glance.
+
+**Key aliases I use daily:**
+
+```bash
+# Open current project in VS Code
+alias c.='code .'
+
+# Git shortcuts
+alias gs='git status'
+alias ga='git add .'
+alias gc='git commit -m'
+alias gp='git push'
+alias gl='git log --oneline --graph --decorate -20'
+
+# Quick dev server
+alias dev='npm run dev'
+```
+
+Muscle memory for these shortcuts probably saves me 20+ minutes a day.
+
+---
+
+## VS Code Configuration
+
+**Extensions I can't work without:**
+
+- **ESLint + Prettier** — auto-format on save, no arguments with teammates about style
+- **GitLens** — inline blame, heatmaps, commit history without leaving the editor
+- **Tailwind CSS IntelliSense** — autocomplete + hover previews for Tailwind classes
+- **Error Lens** — shows lint errors inline, no more hovering over red squiggles
+
+**Settings worth stealing:**
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+  "terminal.integrated.defaultProfile.windows": "PowerShell"
+}
+```
+
+---
+
+## The Pomodoro Technique (Sort Of)
+
+I don't follow it rigidly, but the core idea — **work in focused sprints, then rest** — genuinely works.
+
+My version: 50 minutes focused, 10 minutes off. During the 50 minutes:
+
+- Phone is face down
+- Notifications are off (`Do Not Disturb` mode)
+- Only the task at hand — no "quick" code reviews or Slack replies
+
+The 10-minute break is real rest: walk, water, nothing screens.
+
+---
+
+## Code Review as a Learning Tool
+
+I treat every code review — giving and receiving — as a learning session. When I review someone's PR I ask myself: *is there a pattern here I haven't seen before?* When I receive feedback, I don't just apply the fix — I understand *why*.
+
+Over months, this compounds dramatically.
+
+---
+
+## End-of-Day Wind Down
+
+Before closing my laptop I take 5 minutes to:
+
+1. **Commit everything** — even work-in-progress, on a WIP branch
+2. **Write one note** about where I stopped and what comes next (a comment in code or in a notes file)
+3. **Close all tabs** — tomorrow-me shouldn't inherit today-me's tab debt
+
+That note is the single most valuable 2 minutes in my day. It cuts the "where was I?" startup cost from 15 minutes to zero.
+
+---
+
+## Wrapping Up
+
+Productivity is less about tools and more about **eliminating friction** — the friction of context-switching, of forgetting where you were, of wasted keystrokes. Find the friction in your workflow and chip away at it, one alias at a time.

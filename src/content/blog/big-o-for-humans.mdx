@@ -1,0 +1,152 @@
+---
+title: "Algorithms Aren't Scary: Big O for Humans"
+date: "2026-02-05"
+description: "A no-nonsense explanation of time complexity with real code examples — written for developers who hated math class but love shipping fast software."
+tags: ["Development"]
+readTime: 9
+coverImage: https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=2070
+---
+
+## Why Bother With Big O?
+
+You could write code that works perfectly on your laptop and melts your users' servers in production. Big O is simply the language we use to describe *how badly* performance degrades as data grows.
+
+It's not about being a computer science purist. It's about writing code that doesn't surprise you.
+
+---
+
+## The Key Insight
+
+Big O measures **how many operations your code does relative to its input size**.
+
+- Input doubles → operations double → **O(n)** (linear)
+- Input doubles → operations quadruple → **O(n²)** (quadratic)
+- Input doubles → operations stay the same → **O(1)** (constant)
+
+---
+
+## O(1) — Constant Time
+
+No matter how big the input, you do the same amount of work.
+
+```js
+// Accessing an array by index — always O(1)
+function getFirst(arr) {
+  return arr[0]
+}
+
+// Accessing an object key — always O(1)
+function getUserName(userMap, id) {
+  return userMap[id]?.name
+}
+```
+
+**Bottom line:** O(1) is the best you can get. Hash maps, arrays by index.
+
+---
+
+## O(n) — Linear Time
+
+One pass through the data. If the array doubles, work doubles.
+
+```js
+// Find an element — one loop, one pass
+function findUser(users, targetId) {
+  for (const user of users) {
+    if (user.id === targetId) return user
+  }
+  return null
+}
+
+// Sum all elements — O(n)
+const total = prices.reduce((sum, p) => sum + p, 0)
+```
+
+**Bottom line:** Totally fine for most things. A single loop over your data is O(n).
+
+---
+
+## O(n²) — Quadratic Time
+
+Nested loops. Every element compared with every other element.
+
+```js
+// ❌ Bubble sort — O(n²)
+function bubbleSort(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = 0; j < arr.length - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]
+      }
+    }
+  }
+  return arr
+}
+```
+
+With 1,000 elements: ~1,000,000 operations. With 10,000: ~100,000,000. This is where apps go from fast to frozen.
+
+**Bottom line:** Avoid nested loops over the same array. Usually solvable with a hash map.
+
+---
+
+## O(log n) — Logarithmic Time
+
+Every step cuts the problem in half. Binary search is the classic example.
+
+```js
+// Binary search over a SORTED array — O(log n)
+function binarySearch(arr, target) {
+  let left = 0, right = arr.length - 1
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2)
+    if (arr[mid] === target) return mid
+    if (arr[mid] < target) left = mid + 1
+    else right = mid - 1
+  }
+  return -1
+}
+```
+
+With 1,000,000 sorted elements, binary search needs at most ~20 comparisons. O(log n) is nearly as good as O(1) in practice.
+
+---
+
+## The Practical Cheat Sheet
+
+| Complexity | Common Example | 1,000 items | 1,000,000 items |
+|---|---|---|---|
+| O(1) | Hash map lookup | 1 op | 1 op |
+| O(log n) | Binary search | ~10 ops | ~20 ops |
+| O(n) | Single loop | 1,000 ops | 1M ops |
+| O(n log n) | Merge sort | ~10K ops | ~20M ops |
+| O(n²) | Nested loops | 1M ops | 1 trillion ops 💀 |
+
+---
+
+## The Common Fix: Use a Set or Map
+
+The most frequent O(n²) → O(n) upgrade is replacing a nested lookup with a hash structure:
+
+```js
+// ❌ O(n²) — for every user, search the whole blocklist
+function filterBlocked(users, blocklist) {
+  return users.filter(user =>
+    blocklist.some(b => b.id === user.id)  // inner loop!
+  )
+}
+
+// ✅ O(n) — build a Set first, then look up instantly
+function filterBlocked(users, blocklist) {
+  const blockSet = new Set(blocklist.map(b => b.id))  // O(n)
+  return users.filter(user => !blockSet.has(user.id)) // O(1) per lookup
+}
+```
+
+---
+
+## Wrapping Up
+
+You don't need to memorise every complexity class. You need to develop an instinct for the danger zones: nested loops over large data, and linear scans where you could use a hash lookup.
+
+The next time you write a loop inside a loop, pause and ask: *could this be a Set?* That question alone will prevent most real-world performance problems.
