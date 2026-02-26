@@ -1,0 +1,35 @@
+---
+title: "Basic Node.js and Express.js"
+date: "2026-02-26"
+description: "Building your first backend: Middleware, Routing, and the Event Driven architecture of Node.js."
+tags: ["Development", "JavaScript"]
+readTime: 14
+coverImage: https://images.unsplash.com/photo-1566837945700-30232252a1c0?auto=format&fit=crop&q=80&w=2070
+---
+
+## JavaScript Everywhere
+
+Node.js allows us to use JavaScript on the server, while Express.js provides a minimalist web framework to handle routes and requests.
+
+### 1. The CommonJS vs ESM modules
+Node.js historically used `require`, but now fully supports `import/export`.
+
+### 2. Creating a Server
+```javascript
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => {
+  res.send('API is running!');
+});
+
+app.listen(5000, () => console.log('Server started on port 5000'));
+```
+
+### 3. Middleware
+Middleware functions have access to the request and response objects. They are the backbone of any Express application.
+
+---
+
+## Backend Mastery
+With Node and Express, you can build everything from REST APIs to Real-time WebSockets.

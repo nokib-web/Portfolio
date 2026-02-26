@@ -1,0 +1,44 @@
+---
+title: "Basic JavaScript"
+date: "2026-02-26"
+description: "Mastering the fundamentals: Variables, Data Types, Functions, and the Scope Chain. The essential foundation for Every Web Developer."
+tags: ["Development", "JavaScript"]
+readTime: 10
+coverImage: https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?auto=format&fit=crop&q=80&w=2070
+---
+
+## The Foundation of the Modern Web
+
+JavaScript is the engine that powers the interactive web. Whether you're building a simple landing page or a complex SaaS application, understanding the core concepts of JS is non-negotiable.
+
+### 1. Variables and Scoping
+In modern JS, we use `let` and `const`. 
+- `const` is for values that won't be reassigned.
+- `let` is for values that will change.
+
+```javascript
+const project = "Portfolio";
+let status = "Building";
+
+// Scope check
+if (true) {
+  let inner = "I'm hidden";
+  console.log(project); // Works
+}
+// console.log(inner); // Error: inner is not defined
+```
+
+### 2. Data Types
+Understanding the difference between primitives (String, Number, Boolean, null, undefined, Symbol) and Objects (Arrays, Objects, Functions) is critical for managing state in apps.
+
+### 3. Arrow Functions vs Regular Functions
+Arrow functions provide a cleaner syntax and, crucially, do not have their own `this` context.
+
+```javascript
+const greet = (name) => `Hello, ${name}!`;
+```
+
+---
+
+## Conclusion
+Master the basics first, and the frameworks will feel like second nature.

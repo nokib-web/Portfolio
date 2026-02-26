@@ -1,0 +1,35 @@
+---
+title: "Basic NestJS"
+date: "2026-02-26"
+description: "Enterprise-grade Node.js architecture. Using TypeScript and Decorators to build structured, scalable backends."
+tags: ["Development", "JavaScript"]
+readTime: 14
+coverImage: https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=2070
+---
+
+## Scaling Node.js to the Moon
+
+NestJS is a framework for building efficient, reliable and scalable server-side applications. It's heavily inspired by Angular's architecture.
+
+### 1. Modules, Controllers, Services
+Nest enforces a modular structure. 
+- **Controllers** handle incoming requests.
+- **Services** contain the business logic.
+- **Modules** organize the code.
+
+### 2. Decorators
+Nest makes heavy use of TypeScript decorators to define metadata.
+```typescript
+@Controller('users')
+export class UsersController {
+  @Get()
+  findAll(): string {
+    return 'Returns all users';
+  }
+}
+```
+
+---
+
+## Enterprise Ready
+If you're building a large-scale API, NestJS provides the structure you need to succeed.
