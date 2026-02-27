@@ -21,6 +21,12 @@ const Layout = ({ children }) => {
                 if (element) {
                     element.scrollIntoView({ behavior: 'smooth' });
                 }
+                // Refresh GSAP ScrollTrigger after a bit more time for the scroll to complete/layout to settle
+                setTimeout(() => {
+                    import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+                        ScrollTrigger.refresh();
+                    });
+                }, 1000);
             }, 100);
             return () => clearTimeout(timer);
         } else if (location.pathname === '/') {
@@ -48,7 +54,20 @@ const Layout = ({ children }) => {
             if (el) observer.observe(el);
         });
 
-        return () => observer.disconnect();
+        // Global GSAP Refresh on mount and window load
+        const handleLoad = () => {
+            import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+                ScrollTrigger.refresh();
+            });
+        };
+        window.addEventListener('load', handleLoad);
+        const timer = setTimeout(handleLoad, 1500);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('load', handleLoad);
+            clearTimeout(timer);
+        };
     }, [children]);
 
     return (

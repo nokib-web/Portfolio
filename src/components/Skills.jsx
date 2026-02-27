@@ -13,35 +13,53 @@ const Skills = () => {
         const sections = gsap.utils.toArray('.skill-category-section');
 
         sections.forEach((section) => {
-            gsap.from(section.querySelectorAll('.skill-card'), {
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
-                },
-                opacity: 0,
-                y: 20,
-                stagger: 0.05,
-                duration: 0.5,
-                ease: "power2.out"
-            });
+            gsap.fromTo(section.querySelectorAll('.skill-card'),
+                { opacity: 0, y: 30 },
+                {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 85%",
+                        toggleActions: "play none none none"
+                    },
+                    opacity: 1,
+                    y: 0,
+                    stagger: 0.05,
+                    duration: 0.6,
+                    ease: "power3.out",
+                    overwrite: "auto"
+                }
+            );
 
-            gsap.from(section.querySelector('.category-header'), {
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top 90%",
-                },
-                opacity: 0,
-                x: -20,
-                duration: 0.6,
-                ease: "power2.out"
-            });
+            gsap.fromTo(section.querySelector('.category-header'),
+                { opacity: 0, x: -20 },
+                {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 90%",
+                    },
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.6,
+                    ease: "power2.out",
+                    overwrite: "auto"
+                }
+            );
         });
+
+        // Initial refresh to ensure triggers are correct
+        ScrollTrigger.refresh();
+
+        // Extra refresh after a short delay for late-loading content/layout shifts
+        const timeout = setTimeout(() => {
+            ScrollTrigger.refresh();
+        }, 1000);
+
+        return () => clearTimeout(timeout);
     }, { scope: containerRef });
 
     const SkillCard = ({ item }) => (
         <div
-            className="skill-card group relative flex items-center gap-4 p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl hover:border-primary-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary-500/10 cursor-default overflow-hidden"
+            className="skill-card group relative flex items-center gap-4 p-4 bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-2xl hover:border-primary-500/30 transition-[border-color,box-shadow,background-color,transform] duration-500 hover:shadow-2xl hover:shadow-primary-500/10 cursor-default overflow-hidden"
             style={{ '--skill-color': item.color }}
         >
             {/* Background Glow */}
@@ -72,7 +90,7 @@ const Skills = () => {
     );
 
     return (
-        <section ref={containerRef} id="skills" className="relative py-16 md:py-20 overflow-hidden">
+        <section ref={containerRef} className="relative py-16 md:py-20 overflow-hidden">
             {/* Background Decorations */}
             <div className="absolute top-0 right-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-primary-500/5 rounded-full blur-[80px] md:blur-[120px] -mr-32 md:-mr-64 -mt-32 pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-purple-500/5 rounded-full blur-[80px] md:blur-[120px] -ml-32 md:-ml-64 -mb-32 pointer-events-none" />
