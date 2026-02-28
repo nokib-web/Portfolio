@@ -10,7 +10,7 @@ function TOC({ headings, activeId }) {
     if (!headings || headings.length === 0) return null;
 
     return (
-        <nav className="max-h-[calc(100vh-160px)] overflow-y-auto hidden lg:block w-52 shrink-0 pl-1 scrollbar-hide">
+        <nav className=" fixed top-24 max-h-[calc(100vh-160px)] overflow-y-auto hidden lg:block w-52 shrink-0 pl-4 scrollbar-hide">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-6 flex items-center gap-2">
                 <span className="w-4 h-px bg-slate-300 dark:bg-slate-700"></span>
                 In this post
