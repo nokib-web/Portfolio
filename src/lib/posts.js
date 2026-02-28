@@ -157,6 +157,15 @@ export const posts = [
         readTime: 10,
         coverImage: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=2070',
     },
+    {
+        slug: 'lailatun-nisfi-min-shaban',
+        title: "লাইলাতুন নিসফি মিন শা'বান (শবে বরাত) - ক্ষমা ও তওবার রাত",
+        date: '2026-02-28',
+        description: 'শবে বরাতের ফযীলত এবং এই মহিমান্বিত রাতে আল্লাহর ক্ষমা লাভের উপায় নিয়ে একটি সংক্ষিপ্ত আলোচনা।',
+        tags: ['Religion', 'Bangla', 'Islam'],
+        readTime: 3,
+        coverImage: 'https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?auto=format&fit=crop&q=80&w=2070',
+    },
 ]
 
 /**

@@ -10,7 +10,7 @@ function TOC({ headings, activeId }) {
     if (!headings || headings.length === 0) return null;
 
     return (
-        <nav className="sticky top-32 max-h-[calc(100vh-160px)] overflow-y-auto hidden lg:block w-72 shrink-0 pl-10 scrollbar-hide">
+        <nav className="sticky top-32 max-h-[calc(100vh-160px)] overflow-y-auto hidden lg:block w-60 shrink-0 pl-2 border-2 scrollbar-hide">
             <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 mb-6 flex items-center gap-2">
                 <span className="w-4 h-px bg-slate-300 dark:bg-slate-700"></span>
                 In this post
@@ -254,10 +254,10 @@ export default function BlogPost() {
                 className={`max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 transition-all duration-500 ${isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]'
                     }`}
             >
-                <div className="flex flex-col lg:flex-row gap-0 lg:gap-16 relative">
+                <div className="flex flex-col lg:flex-row lg:justify-center gap-0 lg:gap-2 relative">
 
                     {/* ── Left Content Column ── */}
-                    <article className="flex-1 max-w-4xl pt-8 pb-12">
+                    <article className="max-w-4xl pt-8 pb-12">
                         {/* Back Link */}
                         <div className="mb-6">
                             <Magnetic strength={0.2}>
@@ -356,7 +356,7 @@ export default function BlogPost() {
                     </article>
 
                     {/* ── Right Sidebar (TOC) ── */}
-                    <div className="hidden xl:block w-72 shrink-0">
+                    <div className="hidden xl:block w-60 shrink-0 self-start sticky top-32">
                         <TOC headings={headings} activeId={activeId} />
                     </div>
 

@@ -11,10 +11,14 @@ coverImage: https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?auto=fo
 
 JavaScript is the engine that powers the interactive web. Whether you're building a simple landing page or a complex SaaS application, understanding the core concepts of JS is non-negotiable.
 
+---
+
 ### 1. Variables and Scoping
-In modern JS, we use `let` and `const`. 
+
+In modern JS, we use `let` and `const`.
 - `const` is for values that won't be reassigned.
 - `let` is for values that will change.
+- `var` is legacy — avoid it in modern code.
 
 ```javascript
 const project = "Portfolio";
@@ -28,17 +32,570 @@ if (true) {
 // console.log(inner); // Error: inner is not defined
 ```
 
+#### Why avoid `var`?
+
+`var` is function-scoped, not block-scoped. It leaks out of `if` blocks and `for` loops, which leads to subtle bugs.
+
+```javascript
+if (true) {
+  var leaked = "I escape the block!";
+  let contained = "I stay inside";
+}
+
+console.log(leaked);     // "I escape the block!" — var ignores block scope
+// console.log(contained); // ReferenceError — let respects block scope
+```
+
+#### Scoping Levels
+
+JavaScript has three levels of scope:
+
+```javascript
+const appName = "MyApp"; // Global scope
+
+function initialize() {
+  const version = "1.0.0"; // Function scope
+
+  if (true) {
+    let buildId = "abc-123"; // Block scope
+    console.log(appName);    // ✅ Global accessible everywhere
+    console.log(version);    // ✅ Function scope accessible inside
+    console.log(buildId);    // ✅ Block scope accessible inside block
+  }
+  // console.log(buildId);   // ❌ ReferenceError — out of block
+}
+```
+
+---
+
 ### 2. Data Types
-Understanding the difference between primitives (String, Number, Boolean, null, undefined, Symbol) and Objects (Arrays, Objects, Functions) is critical for managing state in apps.
+
+Understanding the difference between **primitives** (String, Number, Boolean, null, undefined, Symbol) and **Objects** (Arrays, Objects, Functions) is critical for managing state in apps.
+
+#### Primitives
+
+Primitives are immutable and stored by value. Assigning one to a new variable creates a copy.
+
+**String**
+
+```javascript
+const name = 'Alice';
+const greeting = "Hello, world!";
+const message = `Welcome, ${name}! Today is ${new Date().toDateString()}.`;
+
+// Useful string methods:
+name.toUpperCase();          // "ALICE"
+"  hello  ".trim();          // "hello"
+"hello world".split(" ");    // ["hello", "world"]
+"hello".includes("ell");     // true
+"hello".replace("l", "r");   // "herlo"
+```
+
+**Number**
+
+```javascript
+const age = 30;
+const price = 9.99;
+const result = 0 / 0; // NaN
+
+console.log(isNaN(result));  // true
+console.log(typeof NaN);     // "number" — surprising but true!
+
+// Math methods:
+Math.round(4.7);   // 5
+Math.floor(4.9);   // 4
+Math.ceil(4.1);    // 5
+Math.abs(-10);     // 10
+Math.max(1, 5, 3); // 5
+```
+
+**Boolean**
+
+```javascript
+const isLoggedIn = true;
+const hasPermission = false;
+
+console.log(5 > 3);   // true
+console.log(5 === 3); // false
+
+// Falsy values in JS (evaluate to false in conditions):
+// false, 0, "", null, undefined, NaN
+```
+
+**null vs undefined**
+
+```javascript
+let user;                   // undefined — declared, not assigned
+let selectedItem = null;    // null — intentionally empty
+
+console.log(typeof undefined); // "undefined"
+console.log(typeof null);      // "object" — a famous JS quirk!
+```
+
+**Symbol**
+
+```javascript
+const id1 = Symbol("id");
+const id2 = Symbol("id");
+console.log(id1 === id2); // false — every Symbol is unique
+```
+
+#### Reference Types (Objects)
+
+Objects are stored by reference. Two variables can point to the same object in memory.
+
+**Objects**
+
+```javascript
+const person = {
+  name: "Alice",
+  age: 30,
+  address: { city: "Dhaka", country: "BD" }, // nested object
+};
+
+// Accessing properties:
+console.log(person.name);           // "Alice" — dot notation
+console.log(person["age"]);         // 30 — bracket notation
+console.log(person.address.city);   // "Dhaka" — nested access
+
+// Destructuring (ES6):
+const { name, age } = person;
+console.log(name, age); // "Alice" 30
+
+// Spread operator — clone + override:
+const updated = { ...person, age: 31 };
+```
+
+**Arrays**
+
+```javascript
+const fruits = ["apple", "banana", "cherry"];
+
+// Mutation methods:
+fruits.push("date");       // Add to end
+fruits.pop();              // Remove from end
+fruits.unshift("avocado"); // Add to start
+fruits.shift();            // Remove from start
+
+// Transforming arrays (return NEW arrays):
+const upper = fruits.map(f => f.toUpperCase());
+const long  = fruits.filter(f => f.length > 5);
+const found = fruits.find(f => f === "banana");
+const total = [1, 2, 3, 4].reduce((acc, n) => acc + n, 0); // 10
+const flat  = [[1, 2], [3, 4]].flat(); // [1, 2, 3, 4]
+```
+
+---
 
 ### 3. Arrow Functions vs Regular Functions
+
 Arrow functions provide a cleaner syntax and, crucially, do not have their own `this` context.
 
 ```javascript
 const greet = (name) => `Hello, ${name}!`;
 ```
 
+#### All Function Forms
+
+```javascript
+// Function Declaration — hoisted, can be called before definition:
+function add(a, b) {
+  return a + b;
+}
+
+// Function Expression — not hoisted:
+const multiply = function(a, b) {
+  return a * b;
+};
+
+// Arrow Function — concise, no own "this":
+const divide = (a, b) => a / b;
+
+// Multi-line arrow function:
+const divide = (a, b) => {
+  if (b === 0) return "Cannot divide by zero";
+  return a / b;
+};
+```
+
+#### Default Parameters
+
+```javascript
+function createUser(name, role = "viewer", active = true) {
+  return { name, role, active };
+}
+
+createUser("Alice");          // { name: "Alice", role: "viewer", active: true }
+createUser("Bob", "admin");   // { name: "Bob", role: "admin", active: true }
+```
+
+#### Rest Parameters & Spread
+
+```javascript
+// Rest: collect remaining args into an array
+function sum(...numbers) {
+  return numbers.reduce((total, n) => total + n, 0);
+}
+sum(1, 2, 3, 4, 5); // 15
+
+// Spread: expand array into individual args
+const nums = [1, 2, 3];
+Math.max(...nums); // 3
+```
+
+#### Higher-Order Functions
+
+Functions that accept other functions as arguments or return functions.
+
+```javascript
+// Functions as arguments:
+const numbers = [1, 2, 3, 4, 5];
+const doubled = numbers.map(n => n * 2);          // [2, 4, 6, 8, 10]
+const evens   = numbers.filter(n => n % 2 === 0); // [2, 4]
+
+// Returning functions (closures):
+function makeMultiplier(factor) {
+  return (number) => number * factor; // closes over "factor"
+}
+const triple = makeMultiplier(3);
+triple(5); // 15
+```
+
+---
+
+### 4. Control Flow
+
+#### if / else if / else
+
+```javascript
+const score = 75;
+
+if (score >= 90) {
+  console.log("A");
+} else if (score >= 80) {
+  console.log("B");
+} else if (score >= 70) {
+  console.log("C");
+} else {
+  console.log("Below C");
+}
+```
+
+#### Ternary Operator
+
+A compact one-liner for simple if/else:
+
+```javascript
+const age = 20;
+const access = age >= 18 ? "Allowed" : "Denied";
+console.log(access); // "Allowed"
+```
+
+#### switch Statement
+
+Best for checking one variable against multiple exact values:
+
+```javascript
+const day = "Monday";
+
+switch (day) {
+  case "Saturday":
+  case "Sunday":
+    console.log("Weekend!"); break;
+  case "Monday":
+    console.log("Start of week"); break;
+  default:
+    console.log("Midweek");
+}
+```
+
+#### Loops
+
+```javascript
+// for loop — classic, index-based:
+for (let i = 0; i < 5; i++) {
+  console.log(i); // 0, 1, 2, 3, 4
+}
+
+// for...of — iterate over values (arrays, strings):
+const colors = ["red", "green", "blue"];
+for (const color of colors) {
+  console.log(color);
+}
+
+// for...in — iterate over keys (objects):
+const obj = { a: 1, b: 2 };
+for (const key in obj) {
+  console.log(key, obj[key]); // "a" 1, "b" 2
+}
+
+// while loop:
+let count = 0;
+while (count < 3) {
+  console.log(count++); // 0, 1, 2
+}
+```
+
+---
+
+### 5. Objects, Classes & Prototypes
+
+#### Object Methods & `this`
+
+```javascript
+const counter = {
+  count: 0,
+  increment() {         // Method shorthand (ES6)
+    this.count++;       // "this" refers to the counter object
+  },
+  reset() {
+    this.count = 0;
+  }
+};
+
+counter.increment();
+counter.increment();
+console.log(counter.count); // 2
+```
+
+#### ES6 Classes
+
+Classes are syntactic sugar over JavaScript's prototype-based inheritance.
+
+```javascript
+class Animal {
+  constructor(name, sound) {
+    this.name = name;
+    this.sound = sound;
+  }
+
+  speak() {
+    return `${this.name} says ${this.sound}!`;
+  }
+}
+
+class Dog extends Animal {
+  constructor(name) {
+    super(name, "Woof"); // call parent constructor
+  }
+
+  fetch(item) {
+    return `${this.name} fetches the ${item}!`;
+  }
+}
+
+const rex = new Dog("Rex");
+console.log(rex.speak());        // "Rex says Woof!"
+console.log(rex.fetch("ball"));  // "Rex fetches the ball!"
+```
+
+---
+
+### 6. Asynchronous JavaScript
+
+JavaScript is single-threaded but non-blocking. Async patterns let you perform slow operations without freezing the UI.
+
+#### Callbacks
+
+The original async pattern — a function passed to be executed later:
+
+```javascript
+setTimeout(() => {
+  console.log("Runs after 1 second");
+}, 1000);
+```
+
+#### Promises
+
+A Promise represents a value available in the future — either fulfilled or rejected:
+
+```javascript
+const fetchUser = (id) => new Promise((resolve, reject) => {
+  if (id > 0) {
+    resolve({ id, name: "Alice" });
+  } else {
+    reject(new Error("Invalid ID"));
+  }
+});
+
+fetchUser(1)
+  .then(user => console.log(user.name))  // "Alice"
+  .catch(err => console.error(err.message));
+```
+
+#### async / await (Recommended)
+
+Makes async code read like synchronous code:
+
+```javascript
+async function loadUserData(userId) {
+  try {
+    const response = await fetch(`/api/users/${userId}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    const user = await response.json();
+    console.log("User:", user.name);
+    return user;
+  } catch (error) {
+    console.error("Failed to load user:", error.message);
+  }
+}
+
+loadUserData(42);
+```
+
+#### Promise.all — Parallel Requests
+
+Run multiple async operations simultaneously:
+
+```javascript
+async function loadDashboard() {
+  const [user, posts, notifications] = await Promise.all([
+    fetch("/api/user").then(r => r.json()),
+    fetch("/api/posts").then(r => r.json()),
+    fetch("/api/notifications").then(r => r.json()),
+  ]);
+  return { user, posts, notifications };
+}
+```
+
+---
+
+### 7. Error Handling
+
+```javascript
+function parseJSON(text) {
+  try {
+    const data = JSON.parse(text);
+    return { success: true, data };
+  } catch (error) {
+    console.error("Parse failed:", error.message);
+    return { success: false, data: null };
+  } finally {
+    console.log("Parsing attempt complete"); // always runs
+  }
+}
+
+parseJSON('{"name":"Alice"}'); // success
+parseJSON("not valid json");   // error caught gracefully
+```
+
+#### Custom Errors
+
+```javascript
+class ValidationError extends Error {
+  constructor(field, message) {
+    super(message);
+    this.name = "ValidationError";
+    this.field = field;
+  }
+}
+
+function validateAge(age) {
+  if (typeof age !== "number") throw new ValidationError("age", "Must be a number");
+  if (age < 0 || age > 120)   throw new ValidationError("age", "Must be 0–120");
+  return true;
+}
+```
+
+---
+
+### 8. ES6 Modules
+
+#### Named Exports
+
+```javascript
+// math.js
+export const PI = 3.14159;
+export function add(a, b) { return a + b; }
+export function subtract(a, b) { return a - b; }
+
+// main.js
+import { PI, add, subtract } from "./math.js";
+console.log(PI);         // 3.14159
+console.log(add(2, 3));  // 5
+```
+
+#### Default Export
+
+```javascript
+// logger.js
+export default function log(message) {
+  console.log(`[LOG] ${new Date().toISOString()}: ${message}`);
+}
+
+// main.js — any name works for default imports
+import log from "./logger.js";
+log("Application started");
+```
+
+---
+
+### 9. Essential Modern JS Features
+
+#### Optional Chaining (`?.`)
+
+Safely access deeply nested properties without crashing:
+
+```javascript
+const user = { profile: { address: { city: "Dhaka" } } };
+
+const city    = user?.profile?.address?.city;    // "Dhaka"
+const country = user?.profile?.address?.country; // undefined (no error!)
+const zip     = user?.profile?.contact?.zip;     // undefined (no error!)
+```
+
+#### Nullish Coalescing (`??`)
+
+Return a default only when the left side is `null` or `undefined`:
+
+```javascript
+const settings = { volume: 0, theme: null };
+
+const volume = settings.volume ?? 50;      // 0 — 0 is NOT null/undefined
+const theme  = settings.theme  ?? "light"; // "light"
+const name   = settings.name   ?? "Guest"; // "Guest"
+```
+
+#### Destructuring
+
+```javascript
+// Array destructuring:
+const [first, second, ...rest] = [1, 2, 3, 4, 5];
+console.log(first, second, rest); // 1 2 [3, 4, 5]
+
+// Object destructuring with rename & default:
+const { name: fullName, age = 18, role = "user" } = { name: "Alice", age: 30 };
+console.log(fullName, age, role); // "Alice" 30 "user"
+
+// In function parameters:
+function display({ title, author, year = "Unknown" }) {
+  console.log(`${title} by ${author} (${year})`);
+}
+```
+
+#### Template Literals
+
+```javascript
+const user = { name: "Alice", score: 95 };
+
+// Multi-line strings:
+const html = `
+  <div class="card">
+    <h2>${user.name}</h2>
+    <p>Score: ${user.score}</p>
+  </div>
+`;
+
+// Expressions inside ${}:
+const msg = `Status: ${user.score >= 90 ? "Excellent" : "Good"}`;
+```
+
 ---
 
 ## Conclusion
-Master the basics first, and the frameworks will feel like second nature.
+
+Master the basics first, and the frameworks will feel like second nature. These concepts — variables, types, functions, control flow, objects, async patterns, and modern syntax — appear everywhere in React, Vue, Node.js, and beyond.
