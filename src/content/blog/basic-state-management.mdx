@@ -9,15 +9,351 @@ coverImage: https://images.unsplash.com/photo-1516116216624-53e697fedbea?auto=fo
 
 ## Managing Global State
 
-As apps grow, passing props down 10 levels deep (Prop Drilling) becomes a nightmare. Use these tools to manage state centrally.
+As apps grow, passing props down 10 levels deep (Prop Drilling) becomes a nightmare. Use these tools to manage state centrally. Global state management is one of the most debated topics in React — but the right answer is almost always: use the simplest tool that solves your problem.
+
+---
 
 ### 1. Context API
-React's built-in solution. Best for low-frequency updates like Themes or User Authentication.
+
+React's built-in solution. Best for low-frequency updates like Themes or User Authentication. It requires zero extra dependencies and is the right default before reaching for external libraries.
+
+#### When to use Context
+
+- Theme (dark/light mode)
+- Authenticated user data
+- Language / locale preferences
+- Feature flags
+- Any data that is **read often but updated rarely**
+
+> ⚠️ **Important:** Every component that consumes a context re-renders when the context value changes. For high-frequency updates (mouse position, form state, animations), Context will cause performance problems. Use Zustand or Redux instead.
+
+#### Full Auth Context Example
+
+```jsx
+// context/AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from "react";
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user,    setUser]    = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Restore session on app load:
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) setUser(JSON.parse(stored));
+    setLoading(false);
+  }, []);
+
+  const login = async (email, password) => {
+    const res  = await fetch("/api/auth/login", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+
+    setUser(data.user);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+  };
+
+  const isAdmin = () => user?.role === "admin";
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, isAdmin }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Custom hook — always consume context through a hook, never directly:
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+}
+```
+
+```jsx
+// Usage anywhere in the tree:
+function Navbar() {
+  const { user, logout } = useAuth();
+
+  return (
+    <nav>
+      {user ? (
+        <>
+          <span>Welcome, {user.name}</span>
+          <button onClick={logout}>Logout</button>
+        </>
+      ) : (
+        <Link to="/login">Login</Link>
+      )}
+    </nav>
+  );
+}
+
+// Protected route:
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" replace />;
+}
+```
+
+#### Splitting Contexts to Avoid Unnecessary Re-renders
+
+```jsx
+// ❌ One big context — ALL consumers re-render on any change:
+const AppContext = createContext({ user, theme, cart, notifications });
+
+// ✅ Split by update frequency — consumers only re-render when their slice changes:
+const UserContext    = createContext(null);  // changes on login/logout
+const ThemeContext   = createContext(null);  // changes on toggle
+const CartContext    = createContext(null);  // changes often
+
+function AppProviders({ children }) {
+  return (
+    <UserContext.Provider value={userValue}>
+      <ThemeContext.Provider value={themeValue}>
+        <CartContext.Provider value={cartValue}>
+          {children}
+        </CartContext.Provider>
+      </ThemeContext.Provider>
+    </UserContext.Provider>
+  );
+}
+```
+
+---
 
 ### 2. Redux Toolkit
-The industry standard for large, complex applications. It provides a structured flow (Actions → Reducers → Store).
+
+The industry standard for large, complex applications. It provides a structured flow (Actions → Reducers → Store). Redux Toolkit (RTK) is the modern, official way to write Redux — it eliminates the old boilerplate entirely.
+
+#### Setup
+
+```bash
+npm install @reduxjs/toolkit react-redux
+```
+
+#### The RTK Flow
+
+```
+User interaction
+      ↓
+  dispatch(action)
+      ↓
+   Reducer (pure function, returns new state)
+      ↓
+    Store (single source of truth)
+      ↓
+  Selectors (components read from store)
+      ↓
+  Component re-renders
+```
+
+#### Creating a Slice
+
+```javascript
+// store/slices/cartSlice.js
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
+// Async thunk — handles async logic outside the reducer:
+export const fetchCart = createAsyncThunk("cart/fetchCart", async (userId, { rejectWithValue }) => {
+  try {
+    const res = await fetch(`/api/cart/${userId}`);
+    if (!res.ok) throw new Error("Failed to fetch cart");
+    return await res.json();
+  } catch (err) {
+    return rejectWithValue(err.message);
+  }
+});
+
+const cartSlice = createSlice({
+  name: "cart",
+  initialState: {
+    items:   [],
+    total:   0,
+    loading: false,
+    error:   null,
+  },
+  reducers: {
+    // RTK uses Immer under the hood — you can "mutate" state directly:
+    addItem(state, action) {
+      const existing = state.items.find(i => i.id === action.payload.id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        state.items.push({ ...action.payload, qty: 1 });
+      }
+      state.total += action.payload.price;
+    },
+    removeItem(state, action) {
+      const item = state.items.find(i => i.id === action.payload);
+      if (item) state.total -= item.price * item.qty;
+      state.items = state.items.filter(i => i.id !== action.payload);
+    },
+    updateQty(state, action) {
+      const { id, qty } = action.payload;
+      const item = state.items.find(i => i.id === id);
+      if (item) {
+        state.total += (qty - item.qty) * item.price;
+        item.qty = qty;
+      }
+    },
+    clearCart(state) {
+      state.items = [];
+      state.total = 0;
+    },
+  },
+  // Handle async thunk lifecycle:
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCart.pending,   (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchCart.fulfilled, (state, action) => { state.loading = false; state.items = action.payload.items; state.total = action.payload.total; })
+      .addCase(fetchCart.rejected,  (state, action) => { state.loading = false; state.error = action.payload; });
+  },
+});
+
+export const { addItem, removeItem, updateQty, clearCart } = cartSlice.actions;
+export default cartSlice.reducer;
+```
+
+#### Configuring the Store
+
+```javascript
+// store/index.js
+import { configureStore } from "@reduxjs/toolkit";
+import cartReducer         from "./slices/cartSlice";
+import userReducer         from "./slices/userSlice";
+import uiReducer           from "./slices/uiSlice";
+
+export const store = configureStore({
+  reducer: {
+    cart: cartReducer,
+    user: userReducer,
+    ui:   uiReducer,
+  },
+  // Redux DevTools is enabled automatically in development
+});
+
+// TypeScript-friendly typed hooks:
+export const useAppDispatch = () => useDispatch();
+export const useAppSelector = useSelector;
+```
+
+```jsx
+// main.jsx — wrap the app:
+import { Provider } from "react-redux";
+import { store }    from "./store";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+```
+
+#### Using Redux in Components
+
+```jsx
+import { useSelector, useDispatch } from "react-redux";
+import { addItem, removeItem, clearCart, fetchCart } from "../store/slices/cartSlice";
+
+function CartPage() {
+  const dispatch = useDispatch();
+  const { items, total, loading, error } = useSelector(state => state.cart);
+  const userId = useSelector(state => state.user.id);
+
+  useEffect(() => {
+    dispatch(fetchCart(userId));
+  }, [userId, dispatch]);
+
+  if (loading) return <Spinner />;
+  if (error)   return <ErrorMessage message={error} />;
+
+  return (
+    <div>
+      {items.map(item => (
+        <div key={item.id}>
+          <span>{item.name} × {item.qty}</span>
+          <button onClick={() => dispatch(removeItem(item.id))}>Remove</button>
+        </div>
+      ))}
+      <p>Total: ${total}</p>
+      <button onClick={() => dispatch(clearCart())}>Clear Cart</button>
+    </div>
+  );
+}
+```
+
+#### RTK Query — data fetching built into Redux
+
+```javascript
+// store/api/usersApi.js — no more manual loading/error state:
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+export const usersApi = createApi({
+  reducerPath: "usersApi",
+  baseQuery:   fetchBaseQuery({
+    baseUrl: "/api",
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().user.token;
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      return headers;
+    },
+  }),
+  tagTypes: ["User"],
+  endpoints: (builder) => ({
+    getUsers:    builder.query({ query: (page = 1) => `/users?page=${page}`, providesTags: ["User"] }),
+    getUserById: builder.query({ query: (id) => `/users/${id}`, providesTags: (r, e, id) => [{ type: "User", id }] }),
+    createUser:  builder.mutation({ query: (body) => ({ url: "/users", method: "POST", body }), invalidatesTags: ["User"] }),
+    updateUser:  builder.mutation({ query: ({ id, ...body }) => ({ url: `/users/${id}`, method: "PATCH", body }), invalidatesTags: (r, e, { id }) => [{ type: "User", id }] }),
+    deleteUser:  builder.mutation({ query: (id) => ({ url: `/users/${id}`, method: "DELETE" }), invalidatesTags: ["User"] }),
+  }),
+});
+
+// Auto-generated hooks:
+export const {
+  useGetUsersQuery,
+  useGetUserByIdQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} = usersApi;
+```
+
+```jsx
+// Usage — loading, error, and caching handled automatically:
+function UserList() {
+  const { data: users, isLoading, isError } = useGetUsersQuery(1);
+  const [deleteUser] = useDeleteUserMutation();
+
+  if (isLoading) return <Spinner />;
+  if (isError)   return <p>Failed to load users</p>;
+
+  return users.map(user => (
+    <div key={user.id}>
+      <span>{user.name}</span>
+      <button onClick={() => deleteUser(user.id)}>Delete</button>
+    </div>
+  ));
+}
+```
+
+---
 
 ### 3. Zustand
+
 The rising star. Minimalistic, fast, and does not require complex boilerplate like Redux.
 
 ```javascript
@@ -27,9 +363,271 @@ const useStore = create((set) => ({
 }))
 ```
 
+#### Setup
+
+```bash
+npm install zustand
+```
+
+#### Full Store Example
+
+```javascript
+// store/useCartStore.js
+import { create } from "zustand";
+import { persist, devtools } from "zustand/middleware";
+
+const useCartStore = create(
+  devtools(                              // Redux DevTools support
+    persist(                             // persists to localStorage automatically
+      (set, get) => ({
+        items:  [],
+        total:  0,
+
+        addItem: (product) => set((state) => {
+          const existing = state.items.find(i => i.id === product.id);
+          if (existing) {
+            return {
+              items: state.items.map(i =>
+                i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+              ),
+              total: state.total + product.price,
+            };
+          }
+          return {
+            items: [...state.items, { ...product, qty: 1 }],
+            total: state.total + product.price,
+          };
+        }),
+
+        removeItem: (id) => set((state) => {
+          const item = state.items.find(i => i.id === id);
+          return {
+            items: state.items.filter(i => i.id !== id),
+            total: state.total - (item ? item.price * item.qty : 0),
+          };
+        }),
+
+        updateQty: (id, qty) => set((state) => {
+          const item = state.items.find(i => i.id === id);
+          return {
+            items: state.items.map(i => i.id === id ? { ...i, qty } : i),
+            total: state.total + (item ? (qty - item.qty) * item.price : 0),
+          };
+        }),
+
+        clearCart: () => set({ items: [], total: 0 }),
+
+        // Computed value using get():
+        itemCount: () => get().items.reduce((sum, i) => sum + i.qty, 0),
+      }),
+      { name: "cart-storage" }           // localStorage key
+    )
+  )
+);
+
+export default useCartStore;
+```
+
+#### Using Zustand in Components
+
+```jsx
+import useCartStore from "../store/useCartStore";
+
+function CartIcon() {
+  // Subscribe to ONLY what you need — no unnecessary re-renders:
+  const itemCount = useCartStore(state => state.itemCount());
+  return <span className="badge">{itemCount}</span>;
+}
+
+function CartPage() {
+  const { items, total, removeItem, clearCart } = useCartStore();
+
+  return (
+    <div>
+      {items.map(item => (
+        <div key={item.id}>
+          <span>{item.name} × {item.qty} = ${item.price * item.qty}</span>
+          <button onClick={() => removeItem(item.id)}>Remove</button>
+        </div>
+      ))}
+      <p>Total: ${total.toFixed(2)}</p>
+      <button onClick={clearCart}>Clear</button>
+    </div>
+  );
+}
+
+function ProductCard({ product }) {
+  const addItem = useCartStore(state => state.addItem);   // only subscribes to addItem
+  return (
+    <div>
+      <h3>{product.name}</h3>
+      <button onClick={() => addItem(product)}>Add to Cart</button>
+    </div>
+  );
+}
+```
+
+#### Async Actions in Zustand
+
+```javascript
+// store/useUserStore.js
+import { create } from "zustand";
+
+const useUserStore = create((set) => ({
+  user:    null,
+  loading: false,
+  error:   null,
+
+  login: async (email, password) => {
+    set({ loading: true, error: null });
+    try {
+      const res  = await fetch("/api/auth/login", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      set({ user: data.user, loading: false });
+    } catch (err) {
+      set({ error: err.message, loading: false });
+    }
+  },
+
+  logout: () => set({ user: null, error: null }),
+}));
+
+export default useUserStore;
+```
+
+#### Slices Pattern — organizing large Zustand stores
+
+```javascript
+// store/slices/createSettingsSlice.js
+export const createSettingsSlice = (set) => ({
+  theme:     "light",
+  language:  "en",
+  toggleTheme: () => set(state => ({ theme: state.theme === "light" ? "dark" : "light" })),
+  setLanguage: (lang) => set({ language: lang }),
+});
+
+// store/slices/createNotificationSlice.js
+export const createNotificationSlice = (set) => ({
+  notifications: [],
+  addNotification:    (n)  => set(state => ({ notifications: [...state.notifications, { ...n, id: Date.now() }] })),
+  removeNotification: (id) => set(state => ({ notifications: state.notifications.filter(n => n.id !== id) })),
+  clearNotifications: ()   => set({ notifications: [] }),
+});
+
+// store/useAppStore.js — combine all slices:
+import { create } from "zustand";
+import { createSettingsSlice }    from "./slices/createSettingsSlice";
+import { createNotificationSlice } from "./slices/createNotificationSlice";
+
+const useAppStore = create((set, get) => ({
+  ...createSettingsSlice(set, get),
+  ...createNotificationSlice(set, get),
+}));
+
+export default useAppStore;
+```
+
+---
+
+### 4. TanStack Query — Server State Management
+
+Global state libraries like Redux and Zustand are great for **client state** (UI state, cart, theme). But for **server state** (data that lives on your backend), TanStack Query is the superior choice. It handles caching, background refetching, stale data, and pagination automatically.
+
+```bash
+npm install @tanstack/react-query
+```
+
+```jsx
+// main.jsx:
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime:  5 * 60 * 1000,   // data stays fresh for 5 minutes
+      gcTime:     10 * 60 * 1000,  // garbage collect after 10 minutes
+      retry:      2,               // retry failed requests twice
+      refetchOnWindowFocus: true,  // refresh when user returns to tab
+    },
+  },
+});
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>
+);
+```
+
+```jsx
+// Queries — fetching data:
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+function UserList() {
+  const { data: users, isLoading, isError, error } = useQuery({
+    queryKey:  ["users"],                          // cache key
+    queryFn:   () => fetch("/api/users").then(r => r.json()),
+    staleTime: 60_000,                             // override global default
+  });
+
+  if (isLoading) return <Spinner />;
+  if (isError)   return <p>Error: {error.message}</p>;
+
+  return users.map(u => <UserCard key={u.id} user={u} />);
+}
+
+// Dependent query — fetch posts only after we have a userId:
+function UserPosts({ userId }) {
+  const { data: posts } = useQuery({
+    queryKey: ["posts", userId],
+    queryFn:  () => fetch(`/api/users/${userId}/posts`).then(r => r.json()),
+    enabled:  !!userId,   // don't run until userId is truthy
+  });
+  return posts?.map(p => <PostCard key={p.id} post={p} />);
+}
+
+// Mutations — creating, updating, deleting:
+function CreatePostForm() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (data) => fetch("/api/posts", { method: "POST", body: JSON.stringify(data), headers: { "Content-Type": "application/json" } }).then(r => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] }); // refetch post list
+    },
+    onError: (err) => {
+      console.error("Failed to create post:", err.message);
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    mutation.mutate({ title: e.target.title.value, body: e.target.body.value });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input  name="title" placeholder="Post title" />
+      <button type="submit" disabled={mutation.isPending}>
+        {mutation.isPending ? "Saving..." : "Create Post"}
+      </button>
+    </form>
+  );
+}
+```
+
 ---
 
 ## Which one to choose?
-- Small app? **Context**
-- Medium app? **Zustand**
-- Enterprise? **Redux**
+
+- **Small app?** → **Context** — it's already built into React, zero dependencies, perfect for auth and theme
+- **Medium app?** → **Zustand** — minimal boilerplate, great DevTools, `persist` middleware is magic
+- **Enterprise?** → **Redux Toolkit** — strict unidirectional flow, time-travel debugging, RTK Query for API caching
+- **Server data (API calls)?** → **TanStack Query** — regardless of which UI state tool you choose, use this for anything that comes from a server
+
+The most common production setup today is **Zustand for client state + TanStack Query for server state** — giving you the best of both worlds with minimal overhead.

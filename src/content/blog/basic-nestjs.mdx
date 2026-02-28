@@ -9,16 +9,105 @@ coverImage: https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=forma
 
 ## Scaling Node.js to the Moon
 
-NestJS is a framework for building efficient, reliable and scalable server-side applications. It's heavily inspired by Angular's architecture.
+NestJS is a framework for building efficient, reliable, and scalable server-side applications. It's heavily inspired by Angular's architecture — bringing strong opinions, structure, and TypeScript-first design to the Node.js ecosystem. Under the hood, NestJS uses Express (or optionally Fastify) as its HTTP layer.
+
+---
 
 ### 1. Modules, Controllers, Services
-Nest enforces a modular structure. 
-- **Controllers** handle incoming requests.
-- **Services** contain the business logic.
-- **Modules** organize the code.
+
+Nest enforces a modular structure. Every application has at least one root module, and every feature should live in its own dedicated module.
+
+- **Controllers** handle incoming requests and return responses.
+- **Services** contain the business logic, injected via dependency injection.
+- **Modules** organize and wire everything together.
+
+```typescript
+// app.module.ts — the root module
+import { Module } from '@nestjs/common';
+import { UsersModule } from './users/users.module';
+import { PostsModule } from './posts/posts.module';
+
+@Module({
+  imports: [UsersModule, PostsModule],
+})
+export class AppModule {}
+```
+
+```typescript
+// users/users.module.ts
+import { Module } from '@nestjs/common';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
+
+@Module({
+  controllers: [UsersController],
+  providers:   [UsersService],
+  exports:     [UsersService], // expose to other modules
+})
+export class UsersModule {}
+```
+
+```typescript
+// users/users.service.ts
+import { Injectable, NotFoundException } from '@nestjs/common';
+
+@Injectable()
+export class UsersService {
+  private users = [
+    { id: 1, name: 'Alice', email: 'alice@example.com' },
+    { id: 2, name: 'Bob',   email: 'bob@example.com'   },
+  ];
+
+  findAll() {
+    return this.users;
+  }
+
+  findOne(id: number) {
+    const user = this.users.find(u => u.id === id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
+    return user;
+  }
+
+  create(dto: { name: string; email: string }) {
+    const user = { id: Date.now(), ...dto };
+    this.users.push(user);
+    return user;
+  }
+}
+```
+
+```typescript
+// users/users.controller.ts
+import { Controller, Get, Post, Param, Body, ParseIntPipe } from '@nestjs/common';
+import { UsersService } from './users.service';
+
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findOne(id);
+  }
+
+  @Post()
+  create(@Body() body: { name: string; email: string }) {
+    return this.usersService.create(body);
+  }
+}
+```
+
+---
 
 ### 2. Decorators
-Nest makes heavy use of TypeScript decorators to define metadata.
+
+Nest makes heavy use of TypeScript decorators to define metadata — they replace the manual wiring you'd do in vanilla Express.
+
 ```typescript
 @Controller('users')
 export class UsersController {
@@ -29,7 +118,531 @@ export class UsersController {
 }
 ```
 
+#### Route Decorators
+
+```typescript
+import { Controller, Get, Post, Put, Patch, Delete, Param, Body, Query } from '@nestjs/common';
+
+@Controller('posts')
+export class PostsController {
+  @Get()
+  findAll(@Query('page') page: string, @Query('limit') limit: string) {
+    // GET /posts?page=1&limit=10
+    return { page, limit };
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    // GET /posts/42
+    return { id };
+  }
+
+  @Post()
+  create(@Body() body: CreatePostDto) {
+    // POST /posts
+    return body;
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() body: UpdatePostDto) {
+    // PATCH /posts/42
+    return { id, ...body };
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    // DELETE /posts/42
+    return { deleted: id };
+  }
+}
+```
+
+#### Request Decorators
+
+```typescript
+import { Req, Res, Headers, Ip, HttpCode, Header } from '@nestjs/common';
+import { Request, Response } from 'express';
+
+@Get('info')
+@HttpCode(200)                       // custom status code
+@Header('Cache-Control', 'no-cache') // custom response header
+getInfo(
+  @Req() req: Request,
+  @Headers('authorization') auth: string,
+  @Ip() ip: string,
+) {
+  return { ip, hasAuth: !!auth };
+}
+```
+
+---
+
+### 3. DTOs & Validation
+
+A **DTO (Data Transfer Object)** defines the shape of data coming into your API. Combined with `class-validator`, Nest can automatically validate and reject malformed requests before they reach your service.
+
+```bash
+npm install class-validator class-transformer
+```
+
+```typescript
+// users/dto/create-user.dto.ts
+import { IsString, IsEmail, IsInt, Min, Max, IsOptional, MinLength } from 'class-validator';
+
+export class CreateUserDto {
+  @IsString()
+  @MinLength(2)
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  age: number;
+
+  @IsOptional()
+  @IsString()
+  role?: string;
+}
+```
+
+```typescript
+// Enable global validation in main.ts:
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist:        true,  // strip unknown properties
+    forbidNonWhitelisted: true, // throw error on unknown properties
+    transform:        true,  // auto-transform payloads to DTO instances
+  }));
+
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+```typescript
+// Now the controller uses the DTO — validation is automatic:
+@Post()
+create(@Body() createUserDto: CreateUserDto) {
+  return this.usersService.create(createUserDto);
+}
+// POST /users with { "name": "" } → 400 Bad Request automatically
+```
+
+---
+
+### 4. Dependency Injection
+
+Nest has a powerful built-in IoC (Inversion of Control) container. You declare providers and Nest handles instantiating and injecting them — no manual `new MyService()` needed.
+
+```typescript
+// A service that depends on another service:
+@Injectable()
+export class PostsService {
+  constructor(
+    private readonly usersService: UsersService,  // injected automatically
+    private readonly mailService: MailService,     // injected automatically
+  ) {}
+
+  async createPost(userId: number, content: string) {
+    const user = this.usersService.findOne(userId); // use injected service
+    await this.mailService.notify(user.email, 'New post created');
+    return { userId, content };
+  }
+}
+```
+
+#### Custom Providers
+
+```typescript
+// Provide a custom value, factory, or class alias:
+@Module({
+  providers: [
+    UsersService,
+    {
+      provide:  'CONFIG',
+      useValue: { apiUrl: 'https://api.example.com', timeout: 5000 },
+    },
+    {
+      provide:    'DATABASE',
+      useFactory: async (configService: ConfigService) => {
+        return createConnection(configService.get('DATABASE_URL'));
+      },
+      inject: [ConfigService],
+    },
+  ],
+})
+export class AppModule {}
+
+// Inject a custom token:
+@Injectable()
+export class SomeService {
+  constructor(@Inject('CONFIG') private config: { apiUrl: string }) {}
+}
+```
+
+---
+
+### 5. Middleware, Guards, Interceptors & Pipes
+
+Nest has a clean **request lifecycle** — every request passes through a series of layers in order:
+
+```
+Middleware → Guards → Interceptors (pre) → Pipes → Controller → Interceptors (post) → Exception Filters
+```
+
+#### Middleware
+
+Runs before guards. Similar to Express middleware — good for logging, CORS, body parsing.
+
+```typescript
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+
+@Injectable()
+export class LoggerMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+  }
+}
+
+// Apply in a module:
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
+```
+
+#### Guards
+
+Guards decide whether a request should proceed — perfect for authentication and authorization.
+
+```typescript
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+
+@Injectable()
+export class AuthGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    const token   = request.headers['authorization'];
+    return !!token; // simplified — in real life, verify JWT here
+  }
+}
+
+// Apply to a specific route:
+@Get('profile')
+@UseGuards(AuthGuard)
+getProfile() {
+  return { name: 'Alice' };
+}
+
+// Apply globally in main.ts:
+app.useGlobalGuards(new AuthGuard());
+```
+
+#### Interceptors
+
+Interceptors wrap around route handlers — useful for logging, transforming responses, or caching.
+
+```typescript
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+
+// Wrap every response in a { data, timestamp } envelope:
+@Injectable()
+export class TransformInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map(data => ({ data, timestamp: new Date().toISOString() }))
+    );
+  }
+}
+
+// Log execution time:
+@Injectable()
+export class LoggingInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const start = Date.now();
+    return next.handle().pipe(
+      tap(() => console.log(`Execution time: ${Date.now() - start}ms`))
+    );
+  }
+}
+```
+
+#### Pipes
+
+Pipes transform or validate data before it reaches the controller handler.
+
+```typescript
+// Built-in pipes — use directly:
+@Get(':id')
+findOne(@Param('id', ParseIntPipe) id: number) {
+  // id is guaranteed to be a number — returns 400 if not parseable
+  return this.usersService.findOne(id);
+}
+
+// Custom pipe:
+@Injectable()
+export class TrimPipe implements PipeTransform {
+  transform(value: any) {
+    if (typeof value === 'string') return value.trim();
+    if (typeof value === 'object') {
+      Object.keys(value).forEach(k => {
+        if (typeof value[k] === 'string') value[k] = value[k].trim();
+      });
+    }
+    return value;
+  }
+}
+```
+
+---
+
+### 6. Exception Filters
+
+Nest has a built-in global exception layer. You can throw built-in HTTP exceptions anywhere and Nest catches them automatically.
+
+```typescript
+import {
+  NotFoundException, BadRequestException, UnauthorizedException,
+  ForbiddenException, ConflictException, InternalServerErrorException
+} from '@nestjs/common';
+
+@Injectable()
+export class UsersService {
+  findOne(id: number) {
+    const user = this.users.find(u => u.id === id);
+    if (!user) throw new NotFoundException(`User #${id} not found`);
+    return user;
+  }
+
+  create(dto: CreateUserDto) {
+    const exists = this.users.find(u => u.email === dto.email);
+    if (exists) throw new ConflictException('Email already in use');
+    // ...
+  }
+}
+```
+
+#### Custom Exception Filter
+
+```typescript
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
+import { Request, Response } from 'express';
+
+@Catch(HttpException)
+export class HttpExceptionFilter implements ExceptionFilter {
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx    = host.switchToHttp();
+    const res    = ctx.getResponse<Response>();
+    const req    = ctx.getRequest<Request>();
+    const status = exception.getStatus();
+
+    res.status(status).json({
+      statusCode: status,
+      timestamp:  new Date().toISOString(),
+      path:       req.url,
+      message:    exception.message,
+    });
+  }
+}
+
+// Apply globally:
+app.useGlobalFilters(new HttpExceptionFilter());
+```
+
+---
+
+### 7. Database Integration with TypeORM
+
+NestJS integrates seamlessly with TypeORM for SQL databases (PostgreSQL, MySQL, SQLite).
+
+```bash
+npm install @nestjs/typeorm typeorm pg
+```
+
+```typescript
+// app.module.ts
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+@Module({
+  imports: [
+    TypeOrmModule.forRoot({
+      type:        'postgres',
+      host:        'localhost',
+      port:        5432,
+      username:    'postgres',
+      password:    'password',
+      database:    'myapp',
+      entities:    [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true, // auto-migrate in dev — NEVER in production
+    }),
+    UsersModule,
+  ],
+})
+export class AppModule {}
+```
+
+```typescript
+// users/user.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column({ unique: true })
+  email: string;
+
+  @Column({ default: 'user' })
+  role: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+}
+```
+
+```typescript
+// users/users.module.ts — register entity:
+@Module({
+  imports:     [TypeOrmModule.forFeature([User])],
+  controllers: [UsersController],
+  providers:   [UsersService],
+})
+export class UsersModule {}
+
+// users/users.service.ts — use the repository:
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepo: Repository<User>,
+  ) {}
+
+  findAll() {
+    return this.usersRepo.find();
+  }
+
+  findOne(id: number) {
+    return this.usersRepo.findOneBy({ id });
+  }
+
+  create(dto: CreateUserDto) {
+    const user = this.usersRepo.create(dto);
+    return this.usersRepo.save(user);
+  }
+
+  async remove(id: number) {
+    const user = await this.findOne(id);
+    return this.usersRepo.remove(user);
+  }
+}
+```
+
+---
+
+### 8. Configuration & Environment Variables
+
+```bash
+npm install @nestjs/config
+```
+
+```typescript
+// app.module.ts
+import { ConfigModule } from '@nestjs/config';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal:   true,       // no need to import in every module
+      envFilePath: '.env',
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+```typescript
+// .env
+DATABASE_URL=postgresql://user:password@localhost:5432/myapp
+JWT_SECRET=supersecretkey
+PORT=3000
+```
+
+```typescript
+// Inject and use anywhere:
+@Injectable()
+export class AuthService {
+  constructor(private readonly configService: ConfigService) {}
+
+  getJwtSecret() {
+    return this.configService.get<string>('JWT_SECRET');
+  }
+
+  getDatabaseUrl() {
+    return this.configService.getOrThrow('DATABASE_URL'); // throws if missing
+  }
+}
+```
+
+---
+
+### 9. Authentication with JWT
+
+```bash
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt
+```
+
+```typescript
+// auth/auth.service.ts
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async signIn(email: string, password: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    return { access_token: await this.jwtService.signAsync(payload) };
+  }
+}
+```
+
+```typescript
+// auth/jwt.guard.ts
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {}
+
+// Protect a route:
+@Get('profile')
+@UseGuards(JwtAuthGuard)
+getProfile(@Request() req) {
+  return req.user; // populated by Passport after JWT verification
+}
+```
+
 ---
 
 ## Enterprise Ready
-If you're building a large-scale API, NestJS provides the structure you need to succeed.
+
+If you're building a large-scale API, NestJS provides the structure you need to succeed. Its modular architecture enforces clean separation of concerns, its dependency injection system makes testing trivial, and its deep TypeScript integration catches bugs at compile time before they ever hit production. From small microservices to monolithic backends serving millions of requests — NestJS scales with you.

@@ -4,26 +4,528 @@ date: "2026-02-26"
 description: "NoSQL for beginners: Collections, Documents, and flexible Schema design for agile development."
 tags: ["Development", "JavaScript"]
 readTime: 11
-coverImage: https://images.unsplash.com/photo-1558494949-ef010cbdcc48?auto=format&fit=crop&q=80&w=2070
+coverImage: https://i.ibb.co.com/0pfSnrg8/Mongodb.png
 ---
 
 ## The Modern Database for Modern Apps
 
-MongoDB is a document-oriented database. Instead of rows and columns, it stores data in JSON-like BSON documents.
+MongoDB is a document-oriented NoSQL database. Instead of rows and columns, it stores data in JSON-like BSON (Binary JSON) documents grouped into **collections**. It is designed for flexibility, scalability, and speed — making it one of the most popular databases for modern web applications.
+
+---
 
 ### 1. Flexible Schema
-Unlike SQL, you don't need to define a strict schema upfront. This makes MongoDB perfect for rapidly evolving projects.
+
+Unlike SQL, you don't need to define a strict schema upfront. Each document in a collection can have a different structure, making MongoDB perfect for rapidly evolving projects.
+
+```javascript
+// SQL would require every row to match the same columns.
+// MongoDB lets documents in the same collection look different:
+
+{ name: "Alice", age: 30, email: "alice@example.com" }
+{ name: "Bob", phone: "017XXXXXXXX", preferences: { theme: "dark" } }
+{ name: "Charlie", age: 25, address: { city: "Dhaka", zip: "1200" } }
+```
+
+This flexibility means you can iterate fast without running migration scripts every time your data shape changes.
+
+#### Core Concepts
+
+- **Database** — a container for collections (like a SQL database)
+- **Collection** — a group of documents (like a SQL table)
+- **Document** — a single record in BSON format (like a SQL row)
+- **Field** — a key-value pair inside a document (like a SQL column)
+
+```javascript
+// A single MongoDB document:
+{
+  _id: ObjectId("64b1f2c3e4b0a1d2e3f4a5b6"), // auto-generated unique ID
+  title: "Learn MongoDB",
+  author: "Alice",
+  tags: ["database", "nosql", "backend"],
+  published: true,
+  createdAt: new Date()
+}
+```
+
+---
 
 ### 2. CRUD Operations
-- **Create:** `db.collection.insertOne()`
-- **Read:** `db.collection.find()`
-- **Update:** `db.collection.updateOne()`
-- **Delete:** `db.collection.deleteOne()`
 
-### 3. Mongoose ODM
-Working with MongoDB in Node.js is usually done via Mongoose, providing schema validation and easy modelling.
+CRUD stands for **Create, Read, Update, Delete** — the four fundamental operations for any database.
+
+#### Create
+
+```javascript
+// Insert a single document:
+db.users.insertOne({
+  name: "Alice",
+  email: "alice@example.com",
+  age: 30,
+  createdAt: new Date()
+});
+
+// Insert multiple documents at once:
+db.users.insertMany([
+  { name: "Bob",     email: "bob@example.com",     age: 25 },
+  { name: "Charlie", email: "charlie@example.com", age: 35 },
+  { name: "Diana",   email: "diana@example.com",   age: 28 },
+]);
+```
+
+#### Read
+
+```javascript
+// Find all documents in a collection:
+db.users.find();
+
+// Find with a filter:
+db.users.find({ age: 30 });
+
+// Find one document:
+db.users.findOne({ email: "alice@example.com" });
+
+// Comparison operators:
+db.users.find({ age: { $gt: 25 } });          // age > 25
+db.users.find({ age: { $gte: 25, $lte: 35 } }); // 25 <= age <= 35
+db.users.find({ name: { $in: ["Alice", "Bob"] } }); // name is Alice or Bob
+
+// Logical operators:
+db.users.find({ $and: [{ age: { $gt: 20 } }, { published: true }] });
+db.users.find({ $or:  [{ age: { $lt: 25 } }, { age: { $gt: 35 } }] });
+
+// Projection — only return specific fields (1 = include, 0 = exclude):
+db.users.find({ age: { $gt: 25 } }, { name: 1, email: 1, _id: 0 });
+
+// Sort, limit, and skip:
+db.users.find().sort({ age: -1 }).limit(10).skip(20); // page 3 of 10
+```
+
+#### Update
+
+```javascript
+// Update a single matching document:
+db.users.updateOne(
+  { email: "alice@example.com" },          // filter
+  { $set: { age: 31, updatedAt: new Date() } } // update
+);
+
+// Update all matching documents:
+db.users.updateMany(
+  { age: { $lt: 18 } },
+  { $set: { role: "minor" } }
+);
+
+// Common update operators:
+db.users.updateOne({ name: "Alice" }, {
+  $set:    { status: "active" },     // set a field value
+  $unset:  { tempToken: "" },        // remove a field
+  $inc:    { loginCount: 1 },        // increment a number
+  $push:   { tags: "verified" },     // add item to array
+  $pull:   { tags: "unverified" },   // remove item from array
+});
+
+// Upsert — insert if document doesn't exist:
+db.users.updateOne(
+  { email: "new@example.com" },
+  { $set: { name: "New User", createdAt: new Date() } },
+  { upsert: true }
+);
+```
+
+#### Delete
+
+```javascript
+// Delete a single document:
+db.users.deleteOne({ email: "alice@example.com" });
+
+// Delete all matching documents:
+db.users.deleteMany({ active: false });
+
+// Delete all documents in a collection (use with caution!):
+db.users.deleteMany({});
+```
+
+---
+
+### 3. Querying — Going Deeper
+
+#### Querying Nested Documents
+
+```javascript
+// Documents with a nested address field:
+// { name: "Alice", address: { city: "Dhaka", zip: "1200" } }
+
+// Use dot notation to query nested fields:
+db.users.find({ "address.city": "Dhaka" });
+db.users.find({ "address.zip": { $exists: true } });
+```
+
+#### Querying Arrays
+
+```javascript
+// Find documents where tags array contains "mongodb":
+db.posts.find({ tags: "mongodb" });
+
+// Find where tags contains ALL of these values:
+db.posts.find({ tags: { $all: ["mongodb", "backend"] } });
+
+// Find where tags array has exactly 3 elements:
+db.posts.find({ tags: { $size: 3 } });
+
+// $elemMatch — match array element against multiple conditions:
+db.orders.find({
+  items: { $elemMatch: { product: "Phone", qty: { $gte: 2 } } }
+});
+```
+
+#### Text Search
+
+```javascript
+// First create a text index:
+db.posts.createIndex({ title: "text", body: "text" });
+
+// Then search:
+db.posts.find({ $text: { $search: "mongodb tutorial" } });
+
+// Sort by relevance score:
+db.posts.find(
+  { $text: { $search: "mongodb" } },
+  { score: { $meta: "textScore" } }
+).sort({ score: { $meta: "textScore" } });
+```
+
+---
+
+### 4. Indexes
+
+Indexes dramatically speed up read operations. Without an index, MongoDB scans every document in a collection (a **collection scan**). With an index, it jumps directly to matching documents.
+
+```javascript
+// Create a single-field index:
+db.users.createIndex({ email: 1 });   // 1 = ascending, -1 = descending
+
+// Create a unique index — enforces no duplicate values:
+db.users.createIndex({ email: 1 }, { unique: true });
+
+// Compound index — index on multiple fields:
+db.posts.createIndex({ author: 1, createdAt: -1 });
+
+// TTL index — automatically delete documents after a time period:
+db.sessions.createIndex({ createdAt: 1 }, { expireAfterSeconds: 3600 }); // 1 hour
+
+// View all indexes on a collection:
+db.users.getIndexes();
+
+// Drop an index:
+db.users.dropIndex({ email: 1 });
+```
+
+> **Rule of thumb:** Index fields you frequently filter, sort, or join on. Too many indexes slow down writes, so only index what you need.
+
+---
+
+### 5. Aggregation Pipeline
+
+The aggregation pipeline lets you process documents through a series of stages — similar to SQL's `GROUP BY`, `JOIN`, `HAVING`, etc.
+
+```javascript
+// Example: Get top 5 authors by total post count, for published posts only
+db.posts.aggregate([
+  // Stage 1 — filter documents:
+  { $match: { published: true } },
+
+  // Stage 2 — group by author and count:
+  { $group: {
+    _id: "$author",
+    totalPosts: { $sum: 1 },
+    avgLikes:   { $avg: "$likes" }
+  }},
+
+  // Stage 3 — sort by totalPosts descending:
+  { $sort: { totalPosts: -1 } },
+
+  // Stage 4 — limit to top 5:
+  { $limit: 5 },
+
+  // Stage 5 — reshape the output:
+  { $project: {
+    author: "$_id",
+    totalPosts: 1,
+    avgLikes: { $round: ["$avgLikes", 1] },
+    _id: 0
+  }}
+]);
+```
+
+#### Common Aggregation Stages
+
+```javascript
+// $lookup — like a SQL LEFT JOIN:
+db.orders.aggregate([
+  { $lookup: {
+    from:         "users",       // collection to join
+    localField:   "userId",      // field in orders
+    foreignField: "_id",         // field in users
+    as:           "userDetails"  // output array field name
+  }}
+]);
+
+// $unwind — flatten an array field into separate documents:
+db.posts.aggregate([
+  { $unwind: "$tags" },
+  { $group: { _id: "$tags", count: { $sum: 1 } } },
+  { $sort: { count: -1 } }
+]);
+
+// $addFields — add computed fields:
+db.orders.aggregate([
+  { $addFields: {
+    totalPrice: { $multiply: ["$price", "$quantity"] }
+  }}
+]);
+```
+
+---
+
+### 6. Mongoose ODM
+
+Working with MongoDB in Node.js is usually done via **Mongoose**, which provides schema validation, type casting, middleware hooks, and easy modelling on top of the native driver.
+
+#### Setup
+
+```bash
+npm install mongoose
+```
+
+```javascript
+const mongoose = require("mongoose");
+
+mongoose.connect("mongodb://localhost:27017/myapp")
+  .then(() => console.log("Connected to MongoDB"))
+  .catch(err => console.error("Connection error:", err));
+```
+
+#### Defining a Schema
+
+```javascript
+const { Schema, model } = require("mongoose");
+
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: [true, "Name is required"],
+    trim: true,
+    minlength: 2,
+    maxlength: 50,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+  },
+  age: {
+    type: Number,
+    min: 0,
+    max: 120,
+  },
+  role: {
+    type: String,
+    enum: ["user", "admin", "moderator"],
+    default: "user",
+  },
+  tags: [String],           // array of strings
+  address: {                // nested object
+    city:    String,
+    country: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const User = model("User", userSchema);
+```
+
+#### CRUD with Mongoose
+
+```javascript
+// CREATE:
+const newUser = new User({ name: "Alice", email: "alice@example.com", age: 30 });
+await newUser.save();
+
+// Shorthand:
+const user = await User.create({ name: "Bob", email: "bob@example.com" });
+
+// READ:
+const all   = await User.find();
+const one   = await User.findById("64b1f2c3e4b0a1d2e3f4a5b6");
+const alice = await User.findOne({ email: "alice@example.com" });
+
+// With chaining:
+const users = await User
+  .find({ age: { $gte: 18 } })
+  .select("name email")       // only return name and email
+  .sort({ name: 1 })          // A → Z
+  .limit(10)
+  .lean();                    // return plain JS object (faster, no Mongoose overhead)
+
+// UPDATE:
+await User.findByIdAndUpdate(id, { $set: { age: 31 } }, { new: true }); // new: true returns updated doc
+
+// DELETE:
+await User.findByIdAndDelete(id);
+await User.deleteMany({ active: false });
+```
+
+#### Schema Methods & Virtuals
+
+```javascript
+// Instance method — available on a document:
+userSchema.methods.getFullName = function () {
+  return `${this.firstName} ${this.lastName}`;
+};
+
+// Static method — available on the Model:
+userSchema.statics.findByEmail = function (email) {
+  return this.findOne({ email });
+};
+
+// Virtual — computed field, not stored in DB:
+userSchema.virtual("initials").get(function () {
+  return this.name.split(" ").map(n => n[0]).join("").toUpperCase();
+});
+
+// Usage:
+const user = await User.findById(id);
+console.log(user.initials); // "AB" for "Alice Brown"
+```
+
+#### Middleware (Hooks)
+
+```javascript
+const bcrypt = require("bcrypt");
+
+// Pre-save hook — runs before saving a document:
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
+  next();
+});
+
+// Post-save hook — runs after saving:
+userSchema.post("save", function (doc) {
+  console.log(`User ${doc.name} was saved.`);
+});
+
+// Pre-find hook — e.g. always exclude inactive users:
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+```
+
+---
+
+### 7. Relationships & Data Modelling
+
+MongoDB supports two approaches to relationships: **embedding** and **referencing**.
+
+#### Embedding (Denormalization)
+
+Store related data inside the same document. Best when data is always read together and doesn't change independently.
+
+```javascript
+// Embedded comments inside a post:
+{
+  _id: ObjectId("..."),
+  title: "My Post",
+  body: "...",
+  comments: [
+    { author: "Alice", text: "Great post!", createdAt: new Date() },
+    { author: "Bob",   text: "Thanks!",     createdAt: new Date() },
+  ]
+}
+```
+
+#### Referencing (Normalization)
+
+Store related data in separate collections and reference by `_id`. Best when data is shared across documents or updated independently.
+
+```javascript
+// Post references a User by ID:
+{
+  _id: ObjectId("..."),
+  title: "My Post",
+  author: ObjectId("64b1f2c3e4b0a1d2e3f4a5b6"), // reference to User
+}
+
+// Populate the reference in Mongoose:
+const post = await Post
+  .findById(postId)
+  .populate("author", "name email"); // replace ObjectId with user's name & email
+```
+
+#### When to Embed vs Reference
+
+| Embed | Reference |
+|-------|-----------|
+| Data is read together | Data is accessed independently |
+| One-to-few relationship | One-to-many or many-to-many |
+| Child data doesn't grow unbounded | Array could grow very large |
+| Example: post + comments | Example: user + orders |
+
+---
+
+### 8. Transactions
+
+MongoDB supports multi-document ACID transactions (version 4.0+). Use them when multiple writes must all succeed or all fail together.
+
+```javascript
+const session = await mongoose.startSession();
+session.startTransaction();
+
+try {
+  await Order.create([{ userId, items, total }], { session });
+
+  await User.findByIdAndUpdate(
+    userId,
+    { $inc: { balance: -total } },
+    { session }
+  );
+
+  await session.commitTransaction();
+  console.log("Order placed successfully");
+} catch (error) {
+  await session.abortTransaction();
+  console.error("Transaction failed, rolled back:", error.message);
+} finally {
+  session.endSession();
+}
+```
+
+---
+
+### 9. Performance Tips
+
+- **Use indexes** on fields you filter or sort frequently — `createIndex()` is your best friend.
+- **Use projections** in `.find()` to only return the fields you need, reducing payload size.
+- **Use `.lean()`** in Mongoose for read-only queries — it skips Mongoose document hydration and is significantly faster.
+- **Avoid unbounded arrays** — embedding arrays that grow forever (e.g. all comments on a viral post) can cause documents to exceed the 16MB BSON limit.
+- **Use aggregation instead of multiple queries** — one aggregation pipeline beats five separate `find()` calls.
+- **Run `.explain("executionStats")`** to see if a query is using an index or doing a slow collection scan.
+
+```javascript
+// Check query execution plan:
+db.users.find({ email: "alice@example.com" }).explain("executionStats");
+// Look for "IXSCAN" (index scan) vs "COLLSCAN" (slow — no index used)
+```
 
 ---
 
 ## Dynamic Data
-MongoDB excels at handling unstructured data at scale.
+
+MongoDB excels at handling unstructured data at scale. Its document model maps naturally to how JavaScript objects look, making it a natural fit for Node.js backends. Whether you're storing user profiles, product catalogs, event logs, or real-time sensor data — MongoDB's flexibility, aggregation power, and horizontal scalability make it one of the most capable databases for modern applications.

@@ -9,20 +9,606 @@ coverImage: https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=forma
 
 ## Faster than your Database
 
-Redis (Remote Dictionary Server) is an open-source, in-memory data structure store. It's used as a database, cache, and message broker.
+Redis (Remote Dictionary Server) is an open-source, in-memory data structure store. It's used as a database, cache, and message broker. Because all data lives in RAM, Redis can serve millions of operations per second with sub-millisecond latency — making it the go-to solution whenever speed is non-negotiable.
+
+---
 
 ### 1. In-Memory Performance
-Because Redis stores data in RAM, read and write operations take less than a millisecond.
+
+Because Redis stores data in RAM, read and write operations take less than a millisecond. A typical PostgreSQL query might take 5–50ms. The same data served from Redis takes 0.1–0.5ms — a 10–100x improvement that users can feel.
+
+#### How Redis Achieves This
+
+- **RAM-first** — no disk I/O on the hot path. Data is read and written directly from memory
+- **Single-threaded core** — no lock contention, no context switching overhead
+- **Efficient data structures** — each data type is highly optimized at the C level
+- **Optional persistence** — RDB snapshots and AOF (Append-Only File) for durability without sacrificing speed
+
+#### Getting Started
+
+```bash
+# Install Redis (Ubuntu):
+sudo apt install redis-server
+
+# Start the server:
+redis-server
+
+# Connect via CLI:
+redis-cli
+
+# Test the connection:
+PING                   # PONG
+
+# Connect to a remote Redis:
+redis-cli -h localhost -p 6379 -a yourpassword
+```
+
+#### Basic Commands
+
+```bash
+# Set and get a key:
+SET name "Nokib"
+GET name               # "Nokib"
+
+# Set with expiry (TTL):
+SET session:abc123 "user-data" EX 3600    # expires in 1 hour
+SET otp:nokib "8821"   PX 300000          # expires in 300,000ms (5 minutes)
+
+# Check TTL:
+TTL  session:abc123    # seconds remaining
+PTTL session:abc123    # milliseconds remaining
+
+# Check if key exists:
+EXISTS name            # 1 (yes) or 0 (no)
+
+# Delete a key:
+DEL name
+
+# Rename a key:
+RENAME old_key new_key
+
+# Find keys matching a pattern (avoid in production on large datasets):
+KEYS user:*            # all keys starting with "user:"
+SCAN 0 MATCH user:* COUNT 100  # safer, non-blocking alternative
+
+# Flush everything (dangerous!):
+FLUSHDB                # clear current database
+FLUSHALL               # clear ALL databases
+```
+
+---
 
 ### 2. Common Use Cases
+
 - **Session Caching:** Storing user logins.
 - **Rate Limiting:** Preventing API abuse.
 - **Leaderboards:** High-speed ranking systems.
 
+#### Session Caching
+
+```javascript
+// Node.js with ioredis:
+const Redis = require("ioredis");
+const redis = new Redis(process.env.REDIS_URL);
+
+// Store a session on login:
+async function createSession(userId, userData) {
+  const sessionId = crypto.randomUUID();
+  const key       = `session:${sessionId}`;
+
+  await redis.setex(key, 60 * 60 * 24 * 7, JSON.stringify(userData)); // 7 days TTL
+
+  return sessionId;
+}
+
+// Retrieve a session on each request:
+async function getSession(sessionId) {
+  const data = await redis.get(`session:${sessionId}`);
+  return data ? JSON.parse(data) : null;
+}
+
+// Refresh TTL on activity (sliding expiry):
+async function refreshSession(sessionId) {
+  await redis.expire(`session:${sessionId}`, 60 * 60 * 24 * 7);
+}
+
+// Destroy session on logout:
+async function destroySession(sessionId) {
+  await redis.del(`session:${sessionId}`);
+}
+```
+
+#### Rate Limiting
+
+```javascript
+// Sliding window rate limiter — 100 requests per 15 minutes per IP:
+async function rateLimiter(req, res, next) {
+  const ip      = req.ip;
+  const key     = `rate:${ip}`;
+  const limit   = 100;
+  const window  = 15 * 60; // 15 minutes in seconds
+
+  const current = await redis.incr(key);
+
+  if (current === 1) {
+    await redis.expire(key, window); // set TTL on first request
+  }
+
+  res.setHeader("X-RateLimit-Limit",     limit);
+  res.setHeader("X-RateLimit-Remaining", Math.max(0, limit - current));
+
+  if (current > limit) {
+    const ttl = await redis.ttl(key);
+    res.setHeader("Retry-After", ttl);
+    return res.status(429).json({ error: "Too many requests. Try again later." });
+  }
+
+  next();
+}
+
+// Stricter limiter for auth routes — 5 attempts per hour:
+async function authRateLimiter(email) {
+  const key     = `auth:${email}`;
+  const attempts = await redis.incr(key);
+
+  if (attempts === 1) await redis.expire(key, 3600); // 1 hour
+
+  if (attempts > 5) {
+    const ttl = await redis.ttl(key);
+    throw new Error(`Too many login attempts. Try again in ${Math.ceil(ttl / 60)} minutes.`);
+  }
+}
+```
+
+#### Leaderboards
+
+```javascript
+// Sorted sets are perfect for real-time leaderboards:
+
+// Add or update a player's score:
+await redis.zadd("leaderboard:global", score, userId);
+
+// Increment score (e.g. user just earned 50 points):
+await redis.zincrby("leaderboard:global", 50, userId);
+
+// Get top 10 players (highest score first):
+const top10 = await redis.zrevrange("leaderboard:global", 0, 9, "WITHSCORES");
+
+// Get a player's rank (0-indexed, lower = better rank):
+const rank = await redis.zrevrank("leaderboard:global", userId); // rank 0 = #1
+
+// Get a player's score:
+const score = await redis.zscore("leaderboard:global", userId);
+
+// Get players ranked 11-20 (pagination):
+const page2 = await redis.zrevrange("leaderboard:global", 10, 19, "WITHSCORES");
+
+// Full leaderboard helper:
+async function getLeaderboard(page = 1, pageSize = 10) {
+  const start = (page - 1) * pageSize;
+  const end   = start + pageSize - 1;
+
+  const raw   = await redis.zrevrange("leaderboard:global", start, end, "WITHSCORES");
+  const results = [];
+
+  for (let i = 0; i < raw.length; i += 2) {
+    results.push({
+      rank:   start + (i / 2) + 1,
+      userId: raw[i],
+      score:  Number(raw[i + 1]),
+    });
+  }
+  return results;
+}
+```
+
+---
+
 ### 3. Data Types
+
 It's not just strings! Redis supports Hashes, Lists, Sets, and Sorted Sets.
+
+#### Strings — the foundation
+
+```bash
+# The most versatile type — stores text, numbers, or binary data:
+SET user:1:name "Nokib"
+SET user:1:age  "25"
+SET page:views  0
+
+# Atomic increment/decrement (no race conditions):
+INCR  page:views      # 1
+INCRBY page:views 10  # 11
+DECR  page:views      # 10
+INCRBYFLOAT price 0.5 # add 0.5 to a float
+
+# Get multiple keys at once:
+MSET  city "Dhaka" country "BD" timezone "UTC+6"
+MGET  city country timezone      # ["Dhaka", "BD", "UTC+6"]
+
+# Set only if key does NOT exist (useful for distributed locks):
+SETNX lock:resource "worker-1"   # 1 if set, 0 if already exists
+SET   lock:resource "worker-1" NX EX 30  # atomic set + expire
+```
+
+#### Hashes — objects and records
+
+```bash
+# Store a user object — no JSON serialization needed:
+HSET user:1 name "Nokib" email "nokib@dev.io" role "admin" age 25
+
+# Get a single field:
+HGET user:1 name           # "Nokib"
+
+# Get all fields and values:
+HGETALL user:1             # ["name","Nokib","email","nokib@dev.io",...]
+
+# Get multiple specific fields:
+HMGET user:1 name email    # ["Nokib", "nokib@dev.io"]
+
+# Update a single field (without touching others):
+HSET user:1 age 26
+
+# Check if a field exists:
+HEXISTS user:1 email       # 1
+
+# Delete a field:
+HDEL user:1 age
+
+# Increment a numeric field:
+HINCRBY user:1 loginCount 1
+
+# Get all keys or all values:
+HKEYS user:1               # ["name", "email", "role", "age"]
+HVALS user:1               # ["Nokib", "nokib@dev.io", "admin", "25"]
+HLEN  user:1               # 4 (number of fields)
+```
+
+```javascript
+// Node.js hash operations:
+await redis.hset("user:1", { name: "Nokib", email: "nokib@dev.io", role: "admin" });
+const user  = await redis.hgetall("user:1");  // { name: 'Nokib', email: '...', role: '...' }
+const name  = await redis.hget("user:1", "name");
+await redis.hincrby("user:1", "loginCount", 1);
+```
+
+#### Lists — queues and stacks
+
+```bash
+# Push items:
+RPUSH tasks "send-email"   "resize-image"  "generate-pdf"  # push to RIGHT (end)
+LPUSH queue "urgent-task"                                   # push to LEFT (front)
+
+# Pop items:
+RPOP tasks     # remove and return from right (stack / LIFO)
+LPOP tasks     # remove and return from left  (queue / FIFO)
+
+# Blocking pop — waits until an item is available (perfect for job queues):
+BLPOP queue 0  # block indefinitely until item arrives
+BLPOP queue 5  # block for up to 5 seconds
+
+# View items without removing:
+LRANGE tasks 0 -1   # all items
+LRANGE tasks 0  2   # first 3 items
+LLEN   tasks        # list length
+
+# Insert at specific position:
+LINSERT tasks BEFORE "resize-image" "validate-input"
+```
+
+```javascript
+// Job queue with Redis Lists:
+// Producer — adds jobs:
+async function enqueueJob(jobType, payload) {
+  const job = JSON.stringify({ id: crypto.randomUUID(), type: jobType, payload, createdAt: new Date() });
+  await redis.rpush("jobs:pending", job);
+}
+
+// Worker — processes jobs:
+async function processJobs() {
+  while (true) {
+    const [, raw] = await redis.blpop("jobs:pending", 0); // wait forever
+    const job = JSON.parse(raw);
+    console.log(`Processing job: ${job.type}`);
+    await handleJob(job);
+  }
+}
+```
+
+#### Sets — unique collections
+
+```bash
+# Add members (duplicates are silently ignored):
+SADD tags:post:1 "javascript" "react" "frontend"
+SADD tags:post:2 "javascript" "nodejs" "backend"
+
+# Check membership:
+SISMEMBER tags:post:1 "react"   # 1 (yes)
+
+# Get all members:
+SMEMBERS tags:post:1            # ["javascript", "react", "frontend"]
+
+# Remove a member:
+SREM tags:post:1 "frontend"
+
+# Count members:
+SCARD tags:post:1               # 2
+
+# Set operations — very powerful:
+SUNION  tags:post:1 tags:post:2  # all unique tags from both posts
+SINTER  tags:post:1 tags:post:2  # tags that appear in BOTH posts
+SDIFF   tags:post:1 tags:post:2  # tags in post:1 but NOT in post:2
+
+# Random member (shuffle/sampling):
+SRANDMEMBER tags:post:1         # random member
+SRANDMEMBER tags:post:1 3       # 3 random members
+SPOP tags:post:1                # random member + remove it
+```
+
+#### Sorted Sets — ranked collections
+
+```bash
+# Add with score — score determines order:
+ZADD scores 98.5 "Alice"
+ZADD scores 87.0 "Bob"
+ZADD scores 92.3 "Charlie"
+
+# Get range by rank (low to high):
+ZRANGE  scores 0 -1 WITHSCORES   # all, ascending
+ZREVRANGE scores 0 2 WITHSCORES  # top 3, descending
+
+# Get range by score:
+ZRANGEBYSCORE scores 85 100      # members with score 85-100
+ZRANGEBYSCORE scores -inf +inf   # all members
+
+# Get rank (0-indexed):
+ZRANK    scores "Alice"          # rank by ascending score
+ZREVRANK scores "Alice"          # rank by descending score (0 = highest)
+
+# Get score:
+ZSCORE scores "Alice"            # 98.5
+
+# Increment score:
+ZINCRBY scores 5 "Bob"           # Bob's new score: 92.0
+
+# Remove a member:
+ZREM scores "Bob"
+
+# Count members in score range:
+ZCOUNT scores 90 100             # members scoring 90-100
+```
+
+---
+
+### 4. Caching Strategies
+
+The most common Redis use case is caching expensive database queries or API calls.
+
+#### Cache-Aside (Lazy Loading)
+
+```javascript
+// The most common pattern — check cache first, fall back to DB:
+async function getUserById(userId) {
+  const cacheKey = `user:${userId}`;
+
+  // 1. Try the cache first:
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    console.log("Cache HIT");
+    return JSON.parse(cached);
+  }
+
+  // 2. Cache miss — fetch from database:
+  console.log("Cache MISS");
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return null;
+
+  // 3. Store in cache for next time (TTL: 5 minutes):
+  await redis.setex(cacheKey, 300, JSON.stringify(user));
+
+  return user;
+}
+
+// Invalidate cache when data changes:
+async function updateUser(userId, data) {
+  const updated = await db.user.update({ where: { id: userId }, data });
+  await redis.del(`user:${userId}`);  // bust the cache
+  return updated;
+}
+```
+
+#### Write-Through Cache
+
+```javascript
+// Write to cache AND database simultaneously:
+async function updateUserProfile(userId, data) {
+  const [dbUser] = await Promise.all([
+    db.user.update({ where: { id: userId }, data }),
+    redis.setex(`user:${userId}`, 300, JSON.stringify({ ...data, id: userId })),
+  ]);
+  return dbUser;
+}
+```
+
+#### Full Route Caching (Express middleware)
+
+```javascript
+function cacheMiddleware(ttl = 60) {
+  return async (req, res, next) => {
+    const key = `cache:${req.originalUrl}`;
+
+    const cached = await redis.get(key);
+    if (cached) {
+      res.setHeader("X-Cache", "HIT");
+      return res.json(JSON.parse(cached));
+    }
+
+    // Intercept the response to cache it:
+    const originalJson = res.json.bind(res);
+    res.json = async (data) => {
+      await redis.setex(key, ttl, JSON.stringify(data));
+      res.setHeader("X-Cache", "MISS");
+      return originalJson(data);
+    };
+
+    next();
+  };
+}
+
+// Apply to specific routes:
+app.get("/api/products", cacheMiddleware(300), getProducts); // cache 5 min
+app.get("/api/config",   cacheMiddleware(3600), getConfig);   // cache 1 hour
+```
+
+---
+
+### 5. Pub/Sub — Real-Time Messaging
+
+Redis Pub/Sub lets processes communicate in real-time without polling.
+
+```javascript
+// Separate publisher and subscriber clients (required by ioredis):
+const publisher  = new Redis(process.env.REDIS_URL);
+const subscriber = new Redis(process.env.REDIS_URL);
+
+// Subscriber — listens for messages:
+await subscriber.subscribe("notifications", "alerts");
+
+subscriber.on("message", (channel, message) => {
+  const data = JSON.parse(message);
+  console.log(`[${channel}] ${data.type}: ${data.content}`);
+
+  if (channel === "notifications") {
+    io.to(data.userId).emit("notification", data); // forward to WebSocket
+  }
+});
+
+// Publisher — sends messages from anywhere in your app:
+async function notifyUser(userId, type, content) {
+  await publisher.publish("notifications", JSON.stringify({
+    userId, type, content, timestamp: new Date().toISOString()
+  }));
+}
+
+// Pattern subscriptions — match multiple channels:
+await subscriber.psubscribe("user:*:events");
+
+subscriber.on("pmessage", (pattern, channel, message) => {
+  // channel might be "user:42:events", "user:99:events", etc.
+  const userId = channel.split(":")[1];
+  console.log(`Event from user ${userId}:`, message);
+});
+```
+
+---
+
+### 6. Distributed Locks
+
+Redis enables distributed locking — preventing multiple servers from executing the same critical section simultaneously.
+
+```javascript
+// Simple distributed lock with SET NX EX:
+async function acquireLock(resource, ttlSeconds = 30) {
+  const lockKey = `lock:${resource}`;
+  const lockId  = crypto.randomUUID(); // unique value to identify THIS lock
+
+  const acquired = await redis.set(lockKey, lockId, "NX", "EX", ttlSeconds);
+  return acquired ? lockId : null;  // null = someone else holds the lock
+}
+
+async function releaseLock(resource, lockId) {
+  const lockKey = `lock:${resource}`;
+  const current = await redis.get(lockKey);
+
+  // Only release if WE own the lock:
+  if (current === lockId) {
+    await redis.del(lockKey);
+    return true;
+  }
+  return false;
+}
+
+// Usage — ensure only one server processes a payment at a time:
+async function processPayment(orderId) {
+  const lockId = await acquireLock(`payment:${orderId}`, 30);
+
+  if (!lockId) {
+    throw new Error("Payment already being processed");
+  }
+
+  try {
+    await chargeCustomer(orderId);
+    await updateOrderStatus(orderId, "paid");
+  } finally {
+    await releaseLock(`payment:${orderId}`, lockId);
+  }
+}
+```
+
+---
+
+### 7. Redis with Node.js (ioredis)
+
+```bash
+npm install ioredis
+```
+
+```javascript
+// lib/redis.js — singleton with reconnection & error handling:
+const Redis = require("ioredis");
+
+const redis = new Redis({
+  host:            process.env.REDIS_HOST     || "localhost",
+  port:            Number(process.env.REDIS_PORT) || 6379,
+  password:        process.env.REDIS_PASSWORD,
+  db:              0,
+  retryStrategy:   (times) => Math.min(times * 50, 2000), // retry with backoff
+  lazyConnect:     true,
+  enableReadyCheck: true,
+  maxRetriesPerRequest: 3,
+});
+
+redis.on("connect",    () => console.log("Redis connected"));
+redis.on("ready",      () => console.log("Redis ready"));
+redis.on("error",  (err) => console.error("Redis error:", err.message));
+redis.on("reconnecting", () => console.log("Redis reconnecting..."));
+
+module.exports = redis;
+```
+
+```javascript
+// Pipelining — batch multiple commands in one round trip:
+const pipeline = redis.pipeline();
+pipeline.set("key1", "val1");
+pipeline.set("key2", "val2");
+pipeline.get("key1");
+pipeline.expire("key1", 300);
+const results = await pipeline.exec();
+// [[null, "OK"], [null, "OK"], [null, "val1"], [null, 1]]
+
+// Transactions (MULTI/EXEC) — all or nothing:
+const tx = redis.multi();
+tx.incr("counter");
+tx.incr("counter");
+tx.get("counter");
+await tx.exec(); // all three run atomically
+
+// Lua scripting — atomic complex operations:
+const script = `
+  local current = redis.call('GET', KEYS[1])
+  if current and tonumber(current) >= tonumber(ARGV[1]) then
+    redis.call('DECRBY', KEYS[1], ARGV[1])
+    return 1
+  end
+  return 0
+`;
+
+const deducted = await redis.eval(script, 1, `credits:${userId}`, 10);
+// Atomically checks and deducts credits — no race condition possible
+```
 
 ---
 
 ## Speed Matters
-Integrating Redis into your stack is the quickest way to improve perceived performance.
+
+Integrating Redis into your stack is the quickest way to improve perceived performance. Whether you're caching hot database rows, throttling API abuse, powering real-time leaderboards, coordinating distributed workers, or broadcasting events between services — Redis gives you the tools to do all of it with sub-millisecond latency and a dead-simple API. Add it once, and you'll wonder how you built without it.

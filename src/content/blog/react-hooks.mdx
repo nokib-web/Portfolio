@@ -35,6 +35,61 @@ function Counter() {
 
 > **Rule:** Never mutate state directly. Always go through the setter.
 
+#### Functional Updates
+
+When new state depends on previous state, always use the functional form of the setter. This avoids stale closure bugs in async contexts.
+
+```jsx
+// ❌ Potentially stale — captures count at time of render:
+setCount(count + 1)
+
+// ✅ Always up to date — receives guaranteed latest value:
+setCount(prev => prev + 1)
+
+// Practical example — multiple increments in one event:
+function handleTripleClick() {
+  setCount(prev => prev + 1)
+  setCount(prev => prev + 1)
+  setCount(prev => prev + 1)
+  // count goes up by 3 ✅ — without functional form it would only go up by 1
+}
+```
+
+#### State with Objects and Arrays
+
+```jsx
+// Objects — always spread to preserve other fields:
+const [user, setUser] = useState({ name: 'Nokib', role: 'Dev', age: 25 })
+
+// ❌ Wrong — wipes out role and age:
+setUser({ name: 'Updated Name' })
+
+// ✅ Correct — only updates name:
+setUser(prev => ({ ...prev, name: 'Updated Name' }))
+
+// Arrays — use non-mutating methods:
+const [items, setItems] = useState(['apple', 'banana'])
+
+const addItem    = (item) => setItems(prev => [...prev, item])
+const removeItem = (i)    => setItems(prev => prev.filter((_, idx) => idx !== i))
+const updateItem = (i, v) => setItems(prev => prev.map((item, idx) => idx === i ? v : item))
+```
+
+#### Lazy Initialization
+
+For expensive initial state, pass a function to `useState` — it runs only once on mount, not on every render.
+
+```jsx
+// ❌ Runs on every render even though it only matters once:
+const [data, setData] = useState(JSON.parse(localStorage.getItem('data')))
+
+// ✅ Runs only on mount:
+const [data, setData] = useState(() => {
+  const stored = localStorage.getItem('data')
+  return stored ? JSON.parse(stored) : { theme: 'light', lang: 'en' }
+})
+```
+
 ---
 
 ## `useEffect` — Side Effects, Declaratively
@@ -65,6 +120,84 @@ function UserProfile({ userId }) {
 
 The **dependency array** is the key. An empty `[]` means "run once on mount". Omitting it means "run after every render" (rarely what you want).
 
+#### All Three Dependency Array Patterns
+
+```jsx
+// 1. No dependency array — runs after EVERY render (use rarely):
+useEffect(() => {
+  document.title = `You have ${notifications} notifications`
+})
+
+// 2. Empty array — runs ONCE on mount, cleanup on unmount:
+useEffect(() => {
+  const handler = () => console.log('window resized')
+  window.addEventListener('resize', handler)
+  return () => window.removeEventListener('resize', handler)
+}, [])
+
+// 3. With dependencies — runs on mount AND whenever a dep changes:
+useEffect(() => {
+  let cancelled = false
+
+  async function load() {
+    const data = await fetchUser(userId)
+    if (!cancelled) setUser(data)
+  }
+
+  load()
+  return () => { cancelled = true }
+}, [userId])
+```
+
+#### Avoiding the Stale Closure Problem
+
+```jsx
+// ❌ Problem — count inside the effect is stale after first render:
+useEffect(() => {
+  const id = setInterval(() => {
+    setCount(count + 1)   // count is always 0 — captured at mount
+  }, 1000)
+  return () => clearInterval(id)
+}, [])
+
+// ✅ Fix 1 — add count to dependency array (but interval restarts on change):
+useEffect(() => {
+  const id = setInterval(() => setCount(count + 1), 1000)
+  return () => clearInterval(id)
+}, [count])
+
+// ✅ Fix 2 — use functional update to avoid needing count as a dep:
+useEffect(() => {
+  const id = setInterval(() => setCount(prev => prev + 1), 1000)
+  return () => clearInterval(id)
+}, [])  // empty deps — no stale closure, no restarts
+```
+
+#### When NOT to use `useEffect`
+
+React's documentation now discourages `useEffect` for several patterns that are better handled differently.
+
+```jsx
+// ❌ Don't use useEffect to derive state from props:
+const [fullName, setFullName] = useState('')
+useEffect(() => {
+  setFullName(`${firstName} ${lastName}`)
+}, [firstName, lastName])
+
+// ✅ Just compute it during render — no effect needed:
+const fullName = `${firstName} ${lastName}`
+
+// ❌ Don't use useEffect to handle user events:
+useEffect(() => {
+  if (submitted) sendForm(data)
+}, [submitted])
+
+// ✅ Handle it directly in the event handler:
+function handleSubmit() {
+  sendForm(data)
+}
+```
+
 ---
 
 ## `useRef` — Escape Hatch for Mutable Values
@@ -91,6 +224,249 @@ function Timer() {
 
 You can also use `useRef` to directly access DOM nodes — like focusing an input on mount.
 
+#### DOM Access
+
+```jsx
+function SearchBar() {
+  const inputRef = useRef(null)
+
+  // Focus on mount:
+  useEffect(() => {
+    inputRef.current.focus()
+  }, [])
+
+  // Focus programmatically (e.g. on modal open):
+  const focusInput = () => inputRef.current.focus()
+
+  return (
+    <div>
+      <input ref={inputRef} type="text" placeholder="Search..." />
+      <button onClick={focusInput}>Focus</button>
+    </div>
+  )
+}
+```
+
+#### Storing Previous Values
+
+```jsx
+// Classic pattern — track what a prop was on the previous render:
+function usePrevious(value) {
+  const ref = useRef(undefined)
+  useEffect(() => { ref.current = value }) // updates AFTER render
+  return ref.current // returns value from BEFORE this render
+}
+
+function PriceDisplay({ price }) {
+  const prevPrice = usePrevious(price)
+  const direction = price > prevPrice ? '↑' : price < prevPrice ? '↓' : '–'
+
+  return <p>{direction} ${price}</p>
+}
+```
+
+#### Ref vs State — Decision Guide
+
+| Need | Use |
+|---|---|
+| Value that triggers re-render when it changes | `useState` |
+| Value that persists but should NOT cause re-render | `useRef` |
+| Access a DOM element | `useRef` |
+| Track previous render value | `useRef` |
+| Interval/timeout ID | `useRef` |
+
+---
+
+## `useReducer` — State Machines for Complex Logic
+
+When a component has multiple related state values or complex update logic, `useReducer` is cleaner than multiple `useState` calls.
+
+```jsx
+import { useReducer } from 'react'
+
+const initialState = { count: 0, step: 1, history: [] }
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        ...state,
+        count:   state.count + state.step,
+        history: [...state.history, state.count + state.step],
+      }
+    case 'DECREMENT':
+      return {
+        ...state,
+        count:   state.count - state.step,
+        history: [...state.history, state.count - state.step],
+      }
+    case 'SET_STEP':
+      return { ...state, step: action.payload }
+    case 'RESET':
+      return initialState
+    default:
+      return state
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  return (
+    <div>
+      <p>Count: {state.count} (step: {state.step})</p>
+      <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
+      <button onClick={() => dispatch({ type: 'DECREMENT' })}>-</button>
+      <input
+        type="number"
+        value={state.step}
+        onChange={e => dispatch({ type: 'SET_STEP', payload: Number(e.target.value) })}
+      />
+      <button onClick={() => dispatch({ type: 'RESET' })}>Reset</button>
+      <p>History: {state.history.join(', ')}</p>
+    </div>
+  )
+}
+```
+
+#### `useReducer` for Async Operations
+
+```jsx
+const initialState = { data: null, loading: false, error: null }
+
+function fetchReducer(state, action) {
+  switch (action.type) {
+    case 'FETCH_START':   return { ...state, loading: true,  error: null }
+    case 'FETCH_SUCCESS': return { data: action.payload, loading: false, error: null }
+    case 'FETCH_ERROR':   return { ...state, loading: false, error: action.payload }
+    default:              return state
+  }
+}
+
+function useAsyncFetch(url) {
+  const [state, dispatch] = useReducer(fetchReducer, initialState)
+
+  useEffect(() => {
+    let cancelled = false
+    dispatch({ type: 'FETCH_START' })
+
+    fetch(url)
+      .then(r => r.json())
+      .then(data  => { if (!cancelled) dispatch({ type: 'FETCH_SUCCESS', payload: data }) })
+      .catch(err  => { if (!cancelled) dispatch({ type: 'FETCH_ERROR',   payload: err.message }) })
+
+    return () => { cancelled = true }
+  }, [url])
+
+  return state
+}
+```
+
+---
+
+## `useMemo` & `useCallback` — Referential Stability
+
+Both hooks memoize values to avoid unnecessary recalculations and re-renders. Use them when you have a measurable performance problem — not by default.
+
+```jsx
+import { useMemo, useCallback, useState, memo } from 'react'
+
+function ProductList({ products, onAddToCart }) {
+  const [search, setSearch] = useState('')
+
+  // useMemo — recomputes only when products or search changes:
+  const filtered = useMemo(() => {
+    console.log('Filtering...')
+    return products
+      .filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) => a.price - b.price)
+  }, [products, search])
+
+  // useCallback — stable function reference so memo'd children don't re-render:
+  const handleAdd = useCallback((productId) => {
+    onAddToCart(productId)
+  }, [onAddToCart])
+
+  return (
+    <>
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..." />
+      {filtered.map(p => (
+        <ProductCard key={p.id} product={p} onAdd={handleAdd} />
+      ))}
+    </>
+  )
+}
+
+// memo — skip re-render if props haven't changed:
+const ProductCard = memo(function ProductCard({ product, onAdd }) {
+  console.log('ProductCard rendered:', product.name)
+  return (
+    <div>
+      <h3>{product.name}</h3>
+      <p>${product.price}</p>
+      <button onClick={() => onAdd(product.id)}>Add</button>
+    </div>
+  )
+})
+```
+
+> **Rule of thumb:** `memo` is only useful when combined with `useCallback`/`useMemo`. Without stable references, `memo` does nothing — the parent re-renders and passes a new function reference every time, breaking the optimization.
+
+---
+
+## `useContext` — Consuming Global State
+
+`useContext` subscribes a component to a context value. It's best paired with a custom hook to encapsulate error checking.
+
+```jsx
+import { createContext, useContext, useReducer } from 'react'
+
+// Notification context with a reducer:
+const NotificationContext = createContext(null)
+
+export function NotificationProvider({ children }) {
+  const [notifications, dispatch] = useReducer((state, action) => {
+    switch (action.type) {
+      case 'ADD':    return [...state, { ...action.payload, id: Date.now() }]
+      case 'REMOVE': return state.filter(n => n.id !== action.id)
+      default:       return state
+    }
+  }, [])
+
+  const add    = (message, type = 'info') => dispatch({ type: 'ADD', payload: { message, type } })
+  const remove = (id) => dispatch({ type: 'REMOVE', id })
+
+  return (
+    <NotificationContext.Provider value={{ notifications, add, remove }}>
+      {children}
+      <NotificationList />
+    </NotificationContext.Provider>
+  )
+}
+
+export function useNotifications() {
+  const ctx = useContext(NotificationContext)
+  if (!ctx) throw new Error('useNotifications must be used inside NotificationProvider')
+  return ctx
+}
+
+// Use anywhere in the tree:
+function SaveButton({ onSave }) {
+  const { add } = useNotifications()
+
+  const handleClick = async () => {
+    try {
+      await onSave()
+      add('Saved successfully!', 'success')
+    } catch {
+      add('Failed to save.', 'error')
+    }
+  }
+
+  return <button onClick={handleClick}>Save</button>
+}
+```
+
 ---
 
 ## Custom Hooks — Reusable Logic
@@ -99,9 +475,9 @@ The real power of hooks is **composability**. Extract any stateful logic into a 
 
 ```jsx
 function useFetch(url) {
-  const [data, setData] = useState(null)
+  const [data, setData]       = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError]     = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -125,6 +501,60 @@ function Posts() {
 
 Custom hooks make it trivial to share logic across components without render props or HOCs.
 
+#### `useWindowSize` — responsive logic in JS
+
+```jsx
+function useWindowSize() {
+  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
+
+  useEffect(() => {
+    const handler = () => setSize({ width: window.innerWidth, height: window.innerHeight })
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
+  return size
+}
+
+function Banner() {
+  const { width } = useWindowSize()
+  return <p>{width < 768 ? 'Mobile' : 'Desktop'} layout</p>
+}
+```
+
+#### `useOnClickOutside` — dismiss modals and dropdowns
+
+```jsx
+function useOnClickOutside(ref, handler) {
+  useEffect(() => {
+    const listener = (e) => {
+      if (!ref.current || ref.current.contains(e.target)) return
+      handler(e)
+    }
+    document.addEventListener('mousedown', listener)
+    document.addEventListener('touchstart', listener)
+    return () => {
+      document.removeEventListener('mousedown', listener)
+      document.removeEventListener('touchstart', listener)
+    }
+  }, [ref, handler])
+}
+
+function Dropdown({ children }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useOnClickOutside(ref, () => setOpen(false))
+
+  return (
+    <div ref={ref}>
+      <button onClick={() => setOpen(o => !o)}>Toggle</button>
+      {open && <div className="dropdown-menu">{children}</div>}
+    </div>
+  )
+}
+```
+
 ---
 
 ## Key Rules of Hooks
@@ -134,8 +564,35 @@ Custom hooks make it trivial to share logic across components without render pro
 
 These rules exist because React relies on the order of hook calls to associate state with the right component. Break the order → break everything.
 
+```jsx
+// ❌ NEVER — conditional hook call breaks the order:
+function Component({ isAdmin }) {
+  if (isAdmin) {
+    const [data, setData] = useState(null)  // Error!
+  }
+}
+
+// ✅ Correct — hook always called, condition is inside:
+function Component({ isAdmin }) {
+  const [data, setData] = useState(null)
+  if (!isAdmin) return null
+  return <AdminPanel data={data} />
+}
+```
+
 ---
 
 ## Wrapping Up
 
-Hooks are not magic — they're just functions with special rules. Master `useState`, `useEffect`, and `useRef`, then learn to extract custom hooks, and you'll write React that is leaner, easier to test, and much easier to read.
+Hooks are not magic — they're just functions with special rules. Master `useState`, `useEffect`, and `useRef`, then layer in `useReducer` for complex state, `useMemo`/`useCallback` for performance-sensitive trees, and `useContext` for shared values. Finally, extract your own custom hooks and you'll write React that is leaner, easier to test, and much easier to read.
+
+| Hook | Purpose |
+|---|---|
+| `useState` | Local component state |
+| `useEffect` | Side effects, subscriptions, data fetching |
+| `useRef` | DOM access, mutable values without re-renders |
+| `useReducer` | Complex state with multiple sub-values |
+| `useMemo` | Memoize expensive computations |
+| `useCallback` | Stable function references for `memo`'d children |
+| `useContext` | Consume shared global context |
+| Custom `use*` | Extract and reuse any stateful logic |

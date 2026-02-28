@@ -110,7 +110,7 @@ export const posts = [
         description: 'NoSQL for beginners: Collections, Documents, and flexible Schema design.',
         tags: ['Development', 'JavaScript'],
         readTime: 11,
-        coverImage: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc48?auto=format&fit=crop&q=80&w=2070',
+        coverImage: 'https://i.ibb.co.com/0pfSnrg8/Mongodb.png',
     },
     {
         slug: 'basic-postgresql-prisma',

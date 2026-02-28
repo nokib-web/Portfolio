@@ -9,22 +9,655 @@ coverImage: https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=fo
 
 ## Simplicity is Sophistication
 
-Python is loved for its readability. It's the multi-tool of the programming world, used for web dev (Django/Flask), data science, and automation.
-
-### 1. Indentation
-Python uses indentation instead of curly braces to define code blocks. This forces clean code.
-
-### 2. Lists and Dictionaries
-Python's data structures are extremely intuitive.
-```python
-fruits = ["apple", "banana"]
-user = {"name": "Nokib", "role": "Dev"}
-```
-
-### 3. The Vast Ecosystem
-From `numpy` for math to `pandas` for data, Python has a library for everything.
+Python is loved for its readability. It's the multi-tool of the programming world, used for web development (Django/Flask/FastAPI), data science, machine learning, automation, scripting, and systems tooling. Its design philosophy — "there should be one obvious way to do it" — makes it both beginner-friendly and powerful enough to run the world's most advanced AI research.
 
 ---
 
-## Why learn Python?
-It's the best language for beginners and the only choice for modern AI development.
+### 1. Indentation
+
+Python uses indentation instead of curly braces to define code blocks. This forces clean, readable code as a language-level requirement — not a style guide suggestion.
+
+```python
+# Correct — consistent 4-space indentation:
+def greet(name):
+    if name:
+        print(f"Hello, {name}!")
+    else:
+        print("Hello, stranger!")
+
+# ❌ Wrong — mixing indentation causes IndentationError:
+def broken():
+  x = 1
+    y = 2   # IndentationError: unexpected indent
+```
+
+#### Variables & Assignment
+
+Python is dynamically typed — no type declarations needed. Variables are created on assignment.
+
+```python
+name     = "Nokib"       # str
+age      = 25            # int
+height   = 5.9           # float
+is_dev   = True          # bool
+nothing  = None          # NoneType (equivalent of null)
+
+# Multiple assignment:
+x, y, z  = 1, 2, 3
+a = b = c = 0
+
+# Type checking:
+print(type(name))        # <class 'str'>
+print(isinstance(age, int))  # True
+
+# Type conversion:
+int("42")        # 42
+float("3.14")    # 3.14
+str(100)         # "100"
+bool(0)          # False — falsy values: 0, "", [], {}, None
+```
+
+---
+
+### 2. Lists and Dictionaries
+
+Python's data structures are extremely intuitive.
+
+```python
+fruits = ["apple", "banana"]
+user   = {"name": "Nokib", "role": "Dev"}
+```
+
+#### Lists — ordered, mutable sequences
+
+```python
+fruits = ["apple", "banana", "cherry", "date"]
+
+# Indexing & slicing:
+fruits[0]          # "apple"   — first item
+fruits[-1]         # "date"    — last item
+fruits[1:3]        # ["banana", "cherry"]  — slice
+fruits[::-1]       # reversed list
+
+# Common methods:
+fruits.append("elderberry")       # add to end
+fruits.insert(1, "avocado")       # insert at index
+fruits.remove("banana")           # remove by value
+fruits.pop()                      # remove & return last item
+fruits.pop(0)                     # remove & return item at index
+fruits.sort()                     # sort in-place (alphabetical)
+fruits.sort(reverse=True)         # sort descending
+fruits.reverse()                  # reverse in-place
+len(fruits)                       # length
+"apple" in fruits                 # True — membership check
+
+# List comprehension — concise list building:
+squares   = [x**2 for x in range(1, 6)]         # [1, 4, 9, 16, 25]
+even_sq   = [x**2 for x in range(10) if x % 2 == 0]  # [0, 4, 16, 36, 64]
+flat      = [n for row in [[1,2],[3,4]] for n in row] # [1, 2, 3, 4]
+```
+
+#### Tuples — ordered, immutable sequences
+
+```python
+point       = (10, 20)
+rgb         = (255, 128, 0)
+
+x, y        = point          # tuple unpacking
+r, g, b     = rgb
+
+# Use tuples for data that shouldn't change:
+DIRECTIONS  = ("north", "south", "east", "west")
+```
+
+#### Sets — unordered, unique values
+
+```python
+tags   = {"python", "backend", "api"}
+other  = {"python", "data", "ml"}
+
+tags.add("fastapi")
+tags.discard("api")           # remove if present, no error if not
+
+# Set operations:
+tags | other                  # union:        all unique values from both
+tags & other                  # intersection: only in both
+tags - other                  # difference:   in tags but not in other
+tags ^ other                  # symmetric difference: in one but not both
+
+# Fast deduplication:
+unique = list(set([1, 2, 2, 3, 3, 3]))  # [1, 2, 3]
+```
+
+#### Dictionaries — key-value pairs
+
+```python
+user = {"name": "Nokib", "role": "Dev", "age": 25}
+
+# Accessing values:
+user["name"]                   # "Nokib" — KeyError if missing
+user.get("email")              # None — safe access, no error
+user.get("email", "N/A")       # "N/A" — with default
+
+# Modifying:
+user["email"] = "nokib@dev.io" # add or update
+del user["age"]                # delete key
+user.pop("role")               # remove and return value
+
+# Iterating:
+for key in user:               # iterate over keys
+    print(key, user[key])
+
+for key, value in user.items():  # iterate over key-value pairs
+    print(f"{key}: {value}")
+
+# Dictionary comprehension:
+squares = {x: x**2 for x in range(1, 6)}  # {1:1, 2:4, 3:9, 4:16, 5:25}
+
+# Merging dictionaries (Python 3.9+):
+defaults = {"theme": "light", "lang": "en"}
+overrides = {"theme": "dark"}
+merged = defaults | overrides   # {"theme": "dark", "lang": "en"}
+```
+
+---
+
+### 3. Functions
+
+```python
+# Basic function:
+def add(a, b):
+    return a + b
+
+# Default parameters:
+def greet(name, greeting="Hello"):
+    return f"{greeting}, {name}!"
+
+greet("Nokib")             # "Hello, Nokib!"
+greet("Nokib", "Hey")      # "Hey, Nokib!"
+
+# *args — variable positional arguments:
+def total(*numbers):
+    return sum(numbers)
+
+total(1, 2, 3, 4, 5)       # 15
+
+# **kwargs — variable keyword arguments:
+def build_profile(**data):
+    return data
+
+build_profile(name="Nokib", role="Dev", city="Dhaka")
+# {"name": "Nokib", "role": "Dev", "city": "Dhaka"}
+
+# Combined:
+def mixed(required, *args, **kwargs):
+    print(required, args, kwargs)
+
+mixed("must", 1, 2, 3, x=10, y=20)
+# "must" (1, 2, 3) {"x": 10, "y": 20}
+```
+
+#### Lambda Functions
+
+```python
+# Anonymous, single-expression functions:
+square = lambda x: x ** 2
+add    = lambda a, b: a + b
+
+# Common use — sorting with a key:
+users = [{"name": "Bob", "age": 30}, {"name": "Alice", "age": 25}]
+users.sort(key=lambda u: u["age"])         # sort by age
+users.sort(key=lambda u: u["name"].lower()) # sort by name, case-insensitive
+```
+
+#### Decorators
+
+Decorators wrap a function to extend its behavior without modifying it.
+
+```python
+import time
+from functools import wraps
+
+def timer(func):
+    @wraps(func)  # preserve original function metadata
+    def wrapper(*args, **kwargs):
+        start  = time.time()
+        result = func(*args, **kwargs)
+        end    = time.time()
+        print(f"{func.__name__} ran in {end - start:.4f}s")
+        return result
+    return wrapper
+
+@timer
+def slow_task():
+    time.sleep(1)
+    return "done"
+
+slow_task()  # "slow_task ran in 1.0012s"
+
+# Decorator with arguments:
+def repeat(n):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for _ in range(n):
+                result = func(*args, **kwargs)
+            return result
+        return wrapper
+    return decorator
+
+@repeat(3)
+def say_hello():
+    print("Hello!")
+
+say_hello()  # prints "Hello!" 3 times
+```
+
+---
+
+### 4. Object-Oriented Programming
+
+```python
+class Animal:
+    # Class variable — shared across all instances:
+    kingdom = "Animalia"
+
+    def __init__(self, name: str, sound: str):
+        # Instance variables:
+        self.name  = name
+        self.sound = sound
+
+    def speak(self) -> str:
+        return f"{self.name} says {self.sound}!"
+
+    def __repr__(self) -> str:
+        return f"Animal(name={self.name!r})"
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Dog(Animal):
+    def __init__(self, name: str, breed: str):
+        super().__init__(name, "Woof")   # call parent __init__
+        self.breed = breed
+
+    def fetch(self, item: str) -> str:
+        return f"{self.name} fetches the {item}!"
+
+    # Override parent method:
+    def speak(self) -> str:
+        return f"{self.name} barks: WOOF WOOF!"
+
+
+rex = Dog("Rex", "Labrador")
+print(rex.speak())         # "Rex barks: WOOF WOOF!"
+print(rex.fetch("ball"))   # "Rex fetches the ball!"
+print(rex.kingdom)         # "Animalia" — inherited class variable
+```
+
+#### Dataclasses — clean data containers
+
+```python
+from dataclasses import dataclass, field
+from datetime import datetime
+
+@dataclass
+class User:
+    name:       str
+    email:      str
+    role:       str          = "user"
+    tags:       list[str]    = field(default_factory=list)
+    created_at: datetime     = field(default_factory=datetime.now)
+
+    def is_admin(self) -> bool:
+        return self.role == "admin"
+
+alice = User(name="Alice", email="alice@example.com", role="admin")
+print(alice)            # User(name='Alice', email='alice@example.com', ...)
+print(alice.is_admin()) # True
+```
+
+---
+
+### 5. Error Handling
+
+```python
+# Basic try/except/else/finally:
+def divide(a, b):
+    try:
+        result = a / b
+    except ZeroDivisionError:
+        print("Cannot divide by zero")
+        return None
+    except TypeError as e:
+        print(f"Invalid types: {e}")
+        return None
+    else:
+        print("Division successful")  # runs only if no exception
+        return result
+    finally:
+        print("This always runs")     # cleanup code
+
+# Multiple exceptions in one block:
+try:
+    data = int(input("Enter a number: "))
+except (ValueError, TypeError) as e:
+    print(f"Input error: {e}")
+
+# Custom exceptions:
+class InsufficientFundsError(Exception):
+    def __init__(self, amount, balance):
+        self.amount  = amount
+        self.balance = balance
+        super().__init__(f"Cannot withdraw {amount}. Balance is only {balance}.")
+
+class BankAccount:
+    def __init__(self, balance: float):
+        self.balance = balance
+
+    def withdraw(self, amount: float):
+        if amount > self.balance:
+            raise InsufficientFundsError(amount, self.balance)
+        self.balance -= amount
+        return self.balance
+
+account = BankAccount(100)
+try:
+    account.withdraw(200)
+except InsufficientFundsError as e:
+    print(e)  # "Cannot withdraw 200. Balance is only 100."
+```
+
+---
+
+### 6. File I/O & Context Managers
+
+```python
+# Writing a file:
+with open("notes.txt", "w") as f:   # "w" = write, "a" = append
+    f.write("Line one\n")
+    f.write("Line two\n")
+# File is automatically closed when the with block exits
+
+# Reading a file:
+with open("notes.txt", "r") as f:
+    content = f.read()              # entire file as string
+    # OR:
+    lines = f.readlines()           # list of lines
+    # OR:
+    for line in f:                  # iterate line by line (memory efficient)
+        print(line.strip())
+
+# Working with JSON:
+import json
+
+data = {"name": "Nokib", "scores": [95, 87, 92]}
+
+# Write JSON to file:
+with open("data.json", "w") as f:
+    json.dump(data, f, indent=2)
+
+# Read JSON from file:
+with open("data.json", "r") as f:
+    loaded = json.load(f)
+
+# JSON to/from string:
+json_str = json.dumps(data)          # dict → JSON string
+parsed   = json.loads('{"x": 1}')   # JSON string → dict
+
+# Working with CSV:
+import csv
+
+with open("users.csv", "w", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=["name", "email"])
+    writer.writeheader()
+    writer.writerow({"name": "Alice", "email": "alice@example.com"})
+```
+
+---
+
+### 7. The Vast Ecosystem
+
+Python has a library for everything.
+
+```python
+fruits = ["apple", "banana"]
+user   = {"name": "Nokib", "role": "Dev"}
+```
+
+#### NumPy — numerical computing
+
+```python
+import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+matrix = np.array([[1, 2], [3, 4]])
+
+# Vectorized operations (no loops needed):
+arr * 2                    # array([2, 4, 6, 8, 10])
+arr ** 2                   # array([1, 4, 9, 16, 25])
+arr[arr > 3]               # array([4, 5]) — boolean indexing
+
+# Math operations:
+np.sum(arr)                # 15
+np.mean(arr)               # 3.0
+np.std(arr)                # standard deviation
+np.dot(matrix, matrix)     # matrix multiplication
+
+# Creating arrays:
+np.zeros((3, 3))           # 3x3 matrix of zeros
+np.ones((2, 4))            # 2x4 matrix of ones
+np.linspace(0, 1, 5)       # [0, 0.25, 0.5, 0.75, 1.0]
+np.random.rand(3, 3)       # 3x3 random floats between 0 and 1
+```
+
+#### Pandas — data analysis
+
+```python
+import pandas as pd
+
+# Create a DataFrame:
+df = pd.DataFrame({
+    "name":   ["Alice", "Bob", "Charlie", "Diana"],
+    "age":    [25, 30, 35, 28],
+    "salary": [70000, 90000, 85000, 95000],
+    "dept":   ["Engineering", "Marketing", "Engineering", "Engineering"],
+})
+
+# Exploring data:
+df.head(2)                 # first 2 rows
+df.info()                  # column types, null counts
+df.describe()              # mean, std, min, max for numeric columns
+df.shape                   # (4, 4)
+df.columns                 # Index(['name', 'age', 'salary', 'dept'])
+
+# Selecting data:
+df["name"]                 # single column → Series
+df[["name", "salary"]]     # multiple columns → DataFrame
+df[df["age"] > 28]         # filter rows
+df.loc[0]                  # row by label
+df.iloc[0]                 # row by position
+
+# Aggregation:
+df["salary"].mean()        # 85000.0
+df.groupby("dept")["salary"].mean()   # avg salary per department
+df.groupby("dept").agg({"salary": ["mean", "max"], "age": "mean"})
+
+# Data cleaning:
+df.dropna()                # drop rows with any null values
+df.fillna(0)               # replace nulls with 0
+df.drop_duplicates()       # remove duplicate rows
+df["age"] = df["age"].astype(float)  # change column type
+
+# Read/write:
+df.to_csv("output.csv", index=False)
+df = pd.read_csv("data.csv")
+df = pd.read_json("data.json")
+df = pd.read_excel("data.xlsx")
+```
+
+#### Requests — HTTP calls
+
+```python
+import requests
+
+# GET request:
+response = requests.get(
+    "https://api.github.com/users/nokib",
+    headers={"Accept": "application/json"},
+    timeout=10,
+)
+response.raise_for_status()       # raise exception for 4xx/5xx
+data = response.json()
+print(data["public_repos"])
+
+# POST request:
+response = requests.post(
+    "https://api.example.com/users",
+    json={"name": "Nokib", "email": "nokib@dev.io"},  # auto-sets Content-Type
+    headers={"Authorization": f"Bearer {token}"},
+)
+
+# Session — reuse connection & headers:
+with requests.Session() as session:
+    session.headers.update({"Authorization": f"Bearer {token}"})
+    users = session.get("/api/users").json()
+    posts = session.get("/api/posts").json()
+```
+
+---
+
+### 8. Async Python
+
+Python supports async/await for non-blocking I/O — critical for web servers and data pipelines.
+
+```python
+import asyncio
+import aiohttp
+
+# Basic coroutine:
+async def fetch_user(session, user_id):
+    async with session.get(f"https://api.example.com/users/{user_id}") as resp:
+        return await resp.json()
+
+# Run multiple requests concurrently:
+async def fetch_all_users(user_ids: list[int]):
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_user(session, uid) for uid in user_ids]
+        users = await asyncio.gather(*tasks)  # run all concurrently
+        return users
+
+# Run the async function:
+users = asyncio.run(fetch_all_users([1, 2, 3, 4, 5]))
+```
+
+#### FastAPI — modern async web framework
+
+```python
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+
+app = FastAPI(title="My API", version="1.0.0")
+
+class UserCreate(BaseModel):
+    name:  str
+    email: EmailStr
+    age:   Optional[int] = None
+
+class UserResponse(BaseModel):
+    id:    int
+    name:  str
+    email: str
+
+@app.get("/")
+async def root():
+    return {"message": "API is running!"}
+
+@app.get("/users", response_model=list[UserResponse])
+async def get_users():
+    return await db.fetch_all("SELECT * FROM users")
+
+@app.post("/users", response_model=UserResponse, status_code=201)
+async def create_user(user: UserCreate):
+    existing = await db.fetch_one("SELECT id FROM users WHERE email = :email",
+                                  {"email": user.email})
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already in use")
+    new_user = await db.execute("INSERT INTO users ...", user.dict())
+    return new_user
+```
+
+---
+
+### 9. Automation & Scripting
+
+Python is the undisputed king of automation. From renaming thousands of files to scraping the web, it does it all.
+
+```python
+import os
+import shutil
+from pathlib import Path
+
+# Pathlib — modern file system navigation:
+base    = Path("/home/nokib/projects")
+config  = base / "config" / "settings.json"   # path joining
+
+config.exists()          # True/False
+config.is_file()         # True
+config.parent            # Path("/home/nokib/projects/config")
+config.suffix            # ".json"
+config.stem              # "settings"
+
+# Reading/writing with pathlib:
+text = config.read_text()
+config.write_text('{"theme": "dark"}')
+
+# Directory operations:
+Path("new_folder").mkdir(parents=True, exist_ok=True)
+for file in Path(".").glob("*.py"):   # find all .py files
+    print(file.name)
+
+for file in Path(".").rglob("*.log"): # recursive glob
+    file.unlink()                     # delete each log file
+```
+
+```python
+# Web scraping with BeautifulSoup:
+import requests
+from bs4 import BeautifulSoup
+
+response = requests.get("https://news.ycombinator.com")
+soup     = BeautifulSoup(response.text, "html.parser")
+
+stories  = soup.select(".athing .titleline > a")
+for story in stories[:5]:
+    print(story.text, "→", story["href"])
+```
+
+```python
+# Scheduled tasks with schedule:
+import schedule
+import time
+
+def backup_database():
+    print("Running database backup...")
+
+def send_daily_report():
+    print("Sending report...")
+
+schedule.every().day.at("02:00").do(backup_database)
+schedule.every().monday.at("09:00").do(send_daily_report)
+schedule.every(30).minutes.do(lambda: print("Health check"))
+
+while True:
+    schedule.run_pending()
+    time.sleep(60)
+```
+
+---
+
+## Why Learn Python?
+
+It's the best language for beginners and the only choice for modern AI development. Every major machine learning framework — TensorFlow, PyTorch, scikit-learn, Hugging Face Transformers — has Python as its primary interface. Whether you're building a REST API with FastAPI, analyzing a dataset with Pandas, training a neural network, or automating your workflow with a quick script, Python is always the shortest path from idea to working code.

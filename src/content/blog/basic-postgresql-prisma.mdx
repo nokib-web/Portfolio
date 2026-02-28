@@ -9,12 +9,76 @@ coverImage: https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=forma
 
 ## Relationally Sound, Developer Friendly
 
-PostgreSQL is a powerful, open-source object-relational database. When paired with Prisma, it becomes an unstoppable force for typed backend development.
+PostgreSQL is a powerful, open-source object-relational database. When paired with Prisma, it becomes an unstoppable force for typed backend development. Together they give you the reliability and data integrity of a battle-hardened relational database with the developer experience of a modern TypeScript-first ORM.
+
+---
 
 ### 1. Why PostgreSQL?
-It's built for reliability and data integrity. It handles complex joins and transactions with ease.
+
+It's built for reliability and data integrity. It handles complex joins and transactions with ease — and far beyond that, PostgreSQL is packed with features that most developers never fully explore.
+
+#### Core Strengths
+
+- **ACID compliance** — every transaction is Atomic, Consistent, Isolated, and Durable
+- **Advanced data types** — JSON/JSONB, arrays, UUIDs, enums, ranges, geometric types
+- **Full-text search** — built-in `tsvector` and `tsquery` for powerful text indexing
+- **Window functions** — `ROW_NUMBER()`, `RANK()`, `LAG()`, `LEAD()` for analytics
+- **CTEs (Common Table Expressions)** — readable, reusable query building blocks
+- **Partial & expression indexes** — fine-grained index control for performance
+- **Row-level security** — enforce access control directly at the database layer
+
+#### Essential PostgreSQL Commands
+
+```sql
+-- Connect via psql:
+psql -U postgres -d myapp
+
+-- Database management:
+CREATE DATABASE myapp;
+DROP DATABASE myapp;
+\l                          -- list all databases
+\c myapp                    -- connect to a database
+
+-- Table management:
+\dt                         -- list all tables
+\d users                    -- describe a table's structure
+\di                         -- list all indexes
+
+-- Useful shortcuts:
+\timing                     -- show query execution time
+\e                          -- open query in external editor
+\q                          -- quit psql
+```
+
+#### PostgreSQL Data Types
+
+```sql
+-- Numeric:
+SMALLINT, INTEGER, BIGINT       -- whole numbers
+DECIMAL(10,2), NUMERIC          -- exact precision (money, measurements)
+REAL, DOUBLE PRECISION          -- floating point
+SERIAL, BIGSERIAL               -- auto-incrementing integers
+
+-- Text:
+VARCHAR(255), TEXT              -- variable length strings
+CHAR(10)                        -- fixed length
+
+-- Date & Time:
+DATE, TIME, TIMESTAMP           -- date/time values
+TIMESTAMPTZ                     -- timestamp with timezone (always prefer this)
+INTERVAL                        -- time duration ('3 days', '2 hours')
+
+-- Other:
+BOOLEAN                         -- true / false
+UUID                            -- universally unique identifier
+JSONB                           -- binary JSON (indexable, faster than JSON)
+TEXT[]                          -- array of text values
+```
+
+---
 
 ### 2. The Prisma Schema
+
 Prisma allows you to define your data models in a human-readable format and automatically syncs it with your DB via migrations.
 
 ```prisma
@@ -25,10 +89,486 @@ model User {
 }
 ```
 
+#### A Full, Real-World Schema
+
+```prisma
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  password  String
+  role      Role      @default(USER)
+  avatar    String?
+  posts     Post[]
+  comments  Comment[]
+  profile   Profile?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([email])
+  @@map("users")       // maps to "users" table in DB (not "User")
+}
+
+model Profile {
+  id        String  @id @default(uuid())
+  bio       String?
+  website   String?
+  location  String?
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Post {
+  id         String     @id @default(uuid())
+  title      String
+  slug       String     @unique
+  body       String
+  published  Boolean    @default(false)
+  views      Int        @default(0)
+  authorId   String
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  tags       Tag[]
+  comments   Comment[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@index([authorId])
+  @@index([published, createdAt(sort: Desc)])
+  @@map("posts")
+}
+
+model Tag {
+  id    String @id @default(uuid())
+  name  String @unique
+  posts Post[]
+
+  @@map("tags")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  body      String
+  authorId  String
+  postId    String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId],   references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("comments")
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+```
+
+#### Prisma Migrations
+
+```bash
+# Install Prisma:
+npm install prisma @prisma/client
+npx prisma init
+
+# Create and apply a migration:
+npx prisma migrate dev --name init
+npx prisma migrate dev --name add_profile_table
+
+# Apply migrations in production (no prompt, no shadow DB):
+npx prisma migrate deploy
+
+# Reset the database (wipe + re-migrate, dev only):
+npx prisma migrate reset
+
+# Pull schema from an existing database:
+npx prisma db pull
+
+# Push schema changes without a migration file (prototyping):
+npx prisma db push
+
+# Open Prisma Studio — visual DB browser:
+npx prisma studio
+
+# Regenerate the Prisma client after schema changes:
+npx prisma generate
+```
+
+---
+
 ### 3. Typesafe Queries
+
 Prisma generates a client that knows exactly what your data looks like, preventing runtime errors.
+
+#### Setup
+
+```typescript
+// lib/prisma.ts — singleton pattern (important in Next.js / serverless):
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'warn', 'error'] : ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+```
+
+#### CRUD Operations
+
+```typescript
+// CREATE:
+const user = await prisma.user.create({
+  data: {
+    email: 'alice@example.com',
+    name:  'Alice',
+    role:  'ADMIN',
+    profile: {
+      create: { bio: 'Full-stack developer', location: 'Dhaka' } // nested create
+    }
+  },
+  include: { profile: true }, // return the profile too
+});
+
+// CREATE MANY:
+await prisma.tag.createMany({
+  data:           [{ name: 'typescript' }, { name: 'nextjs' }, { name: 'prisma' }],
+  skipDuplicates: true, // ignore if name already exists
+});
+
+// READ — findUnique (by unique field):
+const user = await prisma.user.findUnique({
+  where:   { email: 'alice@example.com' },
+  include: { posts: true, profile: true },
+});
+
+// READ — findFirst:
+const latestPost = await prisma.post.findFirst({
+  where:   { published: true },
+  orderBy: { createdAt: 'desc' },
+});
+
+// READ — findMany with filtering, pagination, sorting:
+const posts = await prisma.post.findMany({
+  where: {
+    published: true,
+    author: { role: 'ADMIN' },           // filter by relation
+    title:  { contains: 'prisma', mode: 'insensitive' }, // case-insensitive search
+    createdAt: { gte: new Date('2024-01-01') },           // date range
+  },
+  include: {
+    author:   { select: { name: true, email: true } },   // select only needed fields
+    tags:     true,
+    comments: { take: 3, orderBy: { createdAt: 'desc' } }, // nested pagination
+    _count:   { select: { comments: true } },              // count comments
+  },
+  orderBy: { createdAt: 'desc' },
+  skip:    (page - 1) * limit,
+  take:    limit,
+});
+
+// UPDATE:
+const updated = await prisma.user.update({
+  where: { id: userId },
+  data:  { name: 'Alice Smith', updatedAt: new Date() },
+});
+
+// UPSERT — create if not exists, update if it does:
+const user = await prisma.user.upsert({
+  where:  { email: 'alice@example.com' },
+  update: { name: 'Alice Updated' },
+  create: { email: 'alice@example.com', name: 'Alice', password: 'hashed' },
+});
+
+// UPDATE MANY:
+await prisma.post.updateMany({
+  where: { authorId: userId },
+  data:  { published: false },
+});
+
+// DELETE:
+await prisma.user.delete({ where: { id: userId } });
+
+// DELETE MANY:
+await prisma.post.deleteMany({ where: { published: false } });
+```
+
+---
+
+### 4. Relations & Nested Queries
+
+Prisma makes working with relational data feel natural — nested reads, writes, and connects in a single query.
+
+```typescript
+// Create a post and connect it to an existing author and tags:
+const post = await prisma.post.create({
+  data: {
+    title:   'Building with Prisma',
+    slug:    'building-with-prisma',
+    body:    'Prisma makes database access type-safe...',
+    author:  { connect: { id: authorId } },       // connect to existing user
+    tags: {
+      connectOrCreate: [                           // connect or create each tag
+        { where: { name: 'prisma' }, create: { name: 'prisma' } },
+        { where: { name: 'postgresql' }, create: { name: 'postgresql' } },
+      ],
+    },
+  },
+  include: { author: true, tags: true },
+});
+
+// Disconnect a tag from a post (many-to-many):
+await prisma.post.update({
+  where: { id: postId },
+  data:  { tags: { disconnect: { name: 'old-tag' } } },
+});
+
+// Delete all comments on a post, then delete the post:
+await prisma.comment.deleteMany({ where: { postId } });
+await prisma.post.delete({ where: { id: postId } });
+// Or use onDelete: Cascade in the schema and let Prisma handle it automatically.
+```
+
+---
+
+### 5. Transactions
+
+Use transactions when multiple operations must all succeed or all fail together.
+
+```typescript
+// Sequential transactions:
+const [order, updatedInventory] = await prisma.$transaction([
+  prisma.order.create({ data: { userId, items, total } }),
+  prisma.product.update({
+    where: { id: productId },
+    data:  { stock: { decrement: quantity } },
+  }),
+]);
+
+// Interactive transactions — use when one result depends on another:
+const result = await prisma.$transaction(async (tx) => {
+  const user = await tx.user.findUnique({ where: { id: userId } });
+
+  if (user.balance < amount) {
+    throw new Error('Insufficient balance');
+  }
+
+  await tx.user.update({
+    where: { id: userId },
+    data:  { balance: { decrement: amount } },
+  });
+
+  const transaction = await tx.transaction.create({
+    data: { userId, amount, type: 'DEBIT' },
+  });
+
+  return transaction;
+});
+// If any operation throws, ALL changes are automatically rolled back.
+```
+
+---
+
+### 6. Aggregations & Raw SQL
+
+```typescript
+// Count:
+const totalUsers = await prisma.user.count();
+const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
+
+// Aggregate — sum, avg, min, max:
+const stats = await prisma.order.aggregate({
+  where: { createdAt: { gte: new Date('2024-01-01') } },
+  _sum:  { total: true },
+  _avg:  { total: true },
+  _max:  { total: true },
+  _min:  { total: true },
+  _count: true,
+});
+console.log(stats._sum.total); // total revenue
+
+// GroupBy — posts per author:
+const postsByAuthor = await prisma.post.groupBy({
+  by:      ['authorId'],
+  where:   { published: true },
+  _count:  { id: true },
+  orderBy: { _count: { id: 'desc' } },
+  take:    10,
+});
+
+// Raw SQL — when Prisma's API isn't enough:
+const results = await prisma.$queryRaw`
+  SELECT u.name, COUNT(p.id) as post_count
+  FROM users u
+  LEFT JOIN posts p ON p."authorId" = u.id
+  WHERE u."createdAt" > ${new Date('2024-01-01')}
+  GROUP BY u.id
+  ORDER BY post_count DESC
+  LIMIT 10
+`;
+
+// Raw execute — for INSERT, UPDATE, DELETE:
+await prisma.$executeRaw`
+  UPDATE posts SET views = views + 1 WHERE id = ${postId}
+`;
+```
+
+---
+
+### 7. PostgreSQL Advanced Features
+
+#### JSONB Columns
+
+```sql
+-- In PostgreSQL directly:
+ALTER TABLE users ADD COLUMN metadata JSONB;
+
+-- Query JSONB:
+SELECT * FROM users WHERE metadata->>'theme' = 'dark';
+SELECT * FROM users WHERE metadata @> '{"notifications": true}';
+
+-- Index JSONB for performance:
+CREATE INDEX idx_users_metadata ON users USING GIN (metadata);
+```
+
+```prisma
+// In Prisma schema:
+model User {
+  id       String @id @default(uuid())
+  metadata Json?
+}
+```
+
+```typescript
+// In Prisma queries:
+await prisma.user.create({
+  data: { metadata: { theme: 'dark', notifications: true, language: 'en' } },
+});
+
+await prisma.user.findMany({
+  where: { metadata: { path: ['theme'], equals: 'dark' } },
+});
+```
+
+#### Full-Text Search
+
+```sql
+-- Add a tsvector column and index:
+ALTER TABLE posts ADD COLUMN search_vector TSVECTOR;
+
+CREATE INDEX idx_posts_search ON posts USING GIN(search_vector);
+
+-- Populate and auto-update via trigger:
+UPDATE posts SET search_vector = to_tsvector('english', title || ' ' || body);
+
+-- Search:
+SELECT title, ts_rank(search_vector, query) AS rank
+FROM posts, to_tsquery('english', 'prisma & postgresql') query
+WHERE search_vector @@ query
+ORDER BY rank DESC;
+```
+
+#### Window Functions
+
+```sql
+-- Rank users by post count within each role:
+SELECT
+  name,
+  role,
+  post_count,
+  RANK()       OVER (PARTITION BY role ORDER BY post_count DESC) AS rank,
+  ROW_NUMBER() OVER (PARTITION BY role ORDER BY post_count DESC) AS row_num,
+  LAG(post_count)  OVER (ORDER BY post_count) AS prev_count,
+  LEAD(post_count) OVER (ORDER BY post_count) AS next_count
+FROM (
+  SELECT u.name, u.role, COUNT(p.id) AS post_count
+  FROM users u LEFT JOIN posts p ON p."authorId" = u.id
+  GROUP BY u.id
+) sub;
+```
+
+---
+
+### 8. Performance & Indexing
+
+#### Indexes in Prisma
+
+```prisma
+model Post {
+  id        String   @id
+  title     String
+  authorId  String
+  published Boolean
+  createdAt DateTime
+
+  @@index([authorId])                              // single-field index
+  @@index([published, createdAt(sort: Desc)])      // compound index
+  @@index([title], type: Hash)                     // hash index for equality checks
+}
+```
+
+#### Indexes in Raw SQL
+
+```sql
+-- Standard index:
+CREATE INDEX idx_posts_author ON posts("authorId");
+
+-- Compound index — order matters, put most selective first:
+CREATE INDEX idx_posts_published_date ON posts(published, "createdAt" DESC);
+
+-- Partial index — only index published posts (smaller, faster):
+CREATE INDEX idx_published_posts ON posts("createdAt" DESC) WHERE published = true;
+
+-- Unique index:
+CREATE UNIQUE INDEX idx_users_email ON users(email);
+
+-- Check if queries are using indexes:
+EXPLAIN ANALYZE SELECT * FROM posts WHERE "authorId" = 'some-uuid';
+-- Look for "Index Scan" vs "Seq Scan" (sequential scan = no index used)
+```
+
+#### N+1 Problem & select
+
+```typescript
+// ❌ N+1 problem — fetches posts, then 1 query per post for author:
+const posts = await prisma.post.findMany();
+for (const post of posts) {
+  const author = await prisma.user.findUnique({ where: { id: post.authorId } });
+}
+
+// ✅ Use include — fetches everything in 2 queries:
+const posts = await prisma.post.findMany({
+  include: { author: true },
+});
+
+// ✅ Use select to only return what you need (reduces payload):
+const posts = await prisma.post.findMany({
+  select: {
+    id:    true,
+    title: true,
+    author: { select: { name: true } }, // only name, not password/email/etc
+  },
+});
+```
 
 ---
 
 ## Data Integrity
-Relational databases remain the gold standard for structured data and complex relationships.
+
+Relational databases remain the gold standard for structured data and complex relationships. PostgreSQL's rock-solid ACID guarantees, combined with Prisma's type-safe client and migration system, give you the confidence to evolve your schema without fear — knowing that every query is validated at compile time, every migration is tracked in version control, and every transaction either completes fully or not at all.
