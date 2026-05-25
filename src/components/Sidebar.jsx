@@ -18,7 +18,7 @@ const Sidebar = ({ activeSection, isOpen, setIsOpen }) => {
 
     return (
         <aside
-            className={`fixed left-4 top-24 bottom-4 z-40 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-white/80 dark:bg-[#0A0F1E]/80 backdrop-blur-2xl border border-slate-200 dark:border-white/5 rounded-none shadow-2xl overflow-hidden ${isOpen ? 'w-64' : 'w-20'
+            className={`absolute left-0 top-0 bottom-0 z-40 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-white/80 dark:bg-[#0A0F1E]/80 backdrop-blur-2xl border border-slate-200 dark:border-white/5 rounded-none shadow-2xl overflow-hidden ${isOpen ? 'w-64' : 'w-20'
                 }`}
         >
             {/* Toggle Button */}
