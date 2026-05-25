@@ -76,9 +76,9 @@ const Layout = ({ children }) => {
             <MeshGradient />
             <Header activeSection={activeSection} />
             <div className="flex-1 w-full relative z-10 pt-16">
-                <div className={`${isBlogPage ? 'w-full' : 'max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 transition-all duration-500 ' + (!isBlogPage && isSidebarOpen ? 'lg:pl-[18rem]' : !isBlogPage ? 'lg:pl-[7rem]' : '')} flex`}>
+                <div className={`${isBlogPage ? 'w-full' : 'max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 transition-all duration-500'} flex relative`}>
                     {!isBlogPage && <Sidebar activeSection={activeSection} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />}
-                    <main className="flex-1 min-w-0 transition-all duration-500">
+                    <main className={`flex-1 min-w-0 transition-all duration-500 ${!isBlogPage && isSidebarOpen ? 'lg:ml-[18rem]' : !isBlogPage ? 'lg:ml-[7rem]' : ''}`}>
                         {children}
                     </main>
                 </div>
