@@ -431,11 +431,8 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     </div>
  
                     {/* Live Clock Widget */}
-                    <div className={`hidden sm:flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium border-0
-                        ${isLightMode
-                            ? 'bg-stone-200/60 text-stone-600'
-                            : 'bg-slate-900/60 text-slate-400'
-                        }`}>
+                    <div className={`hidden sm:flex items-center space-x-2.5 px-2 py-1.5 rounded-full text-xs font-mono font-medium border-0 bg-transparent
+                        ${isLightMode ? 'text-stone-600' : 'text-slate-400'}`}>
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                         <span>{formatTime(currentTime)}</span>
                     </div>
@@ -445,10 +442,10 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                         whileHover={{ scale: 1.05, rotate: 15 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={toggleDarkMode}
-                        className={`p-2 rounded-full transition-colors border-0
+                        className={`p-2 rounded-full transition-colors border-0 bg-transparent
                             ${isLightMode
-                                ? 'bg-stone-200/60 hover:bg-stone-200 text-stone-600'
-                                : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-400 hover:text-white'
+                                ? 'hover:bg-stone-150/40 text-stone-600 hover:text-stone-900'
+                                : 'hover:bg-slate-800/35 text-slate-400 hover:text-white'
                             }`}
                         aria-label="Toggle dark mode"
                     >
@@ -461,10 +458,10 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     <motion.a
                         whileHover={{ scale: 1.05, y: -1 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`p-2 rounded-full transition-colors flex items-center justify-center border-0
+                        className={`p-2 rounded-full transition-colors flex items-center justify-center border-0 bg-transparent
                             ${isLightMode
-                                ? 'bg-stone-200/60 hover:bg-stone-200 text-stone-600'
-                                : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-400 hover:text-white'
+                                ? 'hover:bg-stone-150/40 text-stone-600 hover:text-stone-900'
+                                : 'hover:bg-slate-800/35 text-slate-400 hover:text-white'
                             }`}
                         href="https://github.com/nokib-web"
                         target="_blank"
