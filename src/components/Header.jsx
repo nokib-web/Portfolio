@@ -19,6 +19,27 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
 
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isVisible, setIsVisible] = useState(true);
+
+    // Scroll Direction Tracking for adaptive Header visibility (hides on scroll down, shows on scroll up)
+    useEffect(() => {
+        let prevScrollY = window.scrollY;
+        
+        const controlNavbar = () => {
+            const currentScrollY = window.scrollY;
+            
+            if (currentScrollY > prevScrollY && currentScrollY > 80) {
+                setIsVisible(false); // scrolling down
+            } else if (currentScrollY < prevScrollY) {
+                setIsVisible(true); // scrolling up
+            }
+            
+            prevScrollY = currentScrollY;
+        };
+
+        window.addEventListener('scroll', controlNavbar, { passive: true });
+        return () => window.removeEventListener('scroll', controlNavbar);
+    }, []);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -267,44 +288,64 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
         // Developer Link Set
         return (
             <nav className="hidden md:flex items-center space-x-1 font-sans">
-                <a className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeSection === 'hero' && !isBlogPage
-                    ? "text-white bg-primary-600 shadow-sm"
-                    : "text-slate-350 hover:text-white hover:bg-slate-800/40"
-                    }`} href={isBlogPage ? "/developer/#hero" : "#hero"}>
+                <a className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                    activeSection === 'hero' && !isBlogPage
+                        ? isLightMode
+                            ? "text-primary-750 bg-primary-100/90 shadow-sm"
+                            : "text-primary-300 bg-primary-950/65 border border-primary-800/20"
+                        : isLightMode
+                            ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
+                            : "text-slate-350 hover:text-white hover:bg-slate-800/40"
+                }`} href={isBlogPage ? "/developer/#hero" : "#hero"}>
                     Home
                 </a>
-                <Link className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${isBlogPage
-                    ? "text-white bg-primary-600 shadow-sm"
-                    : "text-slate-350 hover:text-white hover:bg-slate-800/40"
-                    }`} to="/developer/blog">
+                <Link className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                    isBlogPage
+                        ? isLightMode
+                            ? "text-primary-750 bg-primary-100/90 shadow-sm"
+                            : "text-primary-300 bg-primary-950/65 border border-primary-800/20"
+                        : isLightMode
+                            ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
+                            : "text-slate-350 hover:text-white hover:bg-slate-800/40"
+                }`} to="/developer/blog">
                     Blog
                 </Link>
                 <motion.a
                     whileHover={{ y: -2 }}
-                    className="px-4 py-2 rounded-full text-sm font-bold text-slate-350 hover:text-white hover:bg-slate-800/40 transition-all flex items-center gap-1.5"
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1 ${
+                        isLightMode
+                            ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
+                            : "text-slate-350 hover:text-white hover:bg-slate-800/40"
+                    }`}
                     href="https://www.linkedin.com/in/nazmulhasan-nokib/" target="_blank" rel="noopener noreferrer">
                     <span>LinkedIn</span>
-                    <span className="material-icons-outlined text-[10px]">open_in_new</span>
+                    <span className="text-[10px] font-mono leading-none">↗</span>
                 </motion.a>
                 <motion.a
                     whileHover={{ y: -2 }}
-                    className="px-4 py-2 rounded-full text-sm font-bold text-slate-350 hover:text-white hover:bg-slate-800/40 transition-all flex items-center gap-1.5"
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1 ${
+                        isLightMode
+                            ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
+                            : "text-slate-350 hover:text-white hover:bg-slate-800/40"
+                    }`}
                     href="https://drive.google.com/uc?export=download&id=1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY"
                     target="_blank" rel="noopener noreferrer">
                     <span>Resume</span>
-                    <span className="material-icons-outlined text-[10px]">download</span>
+                    <span className="text-[10px] font-mono leading-none">⭳</span>
                 </motion.a>
             </nav>
         );
     };
 
-    // Responsive styling classes depending on theme
+    // Responsive styling classes depending on theme (high-contrast, borderless)
     const headerClass = isLightMode
-        ? "bg-[#fdf6f0]/85 border-b border-stone-250/20 text-stone-850 supports-[backdrop-filter]:bg-[#fdf6f0]/70 shadow-sm"
-        : "bg-[#12151e]/85 border-b border-slate-900/60 text-slate-200 supports-[backdrop-filter]:bg-[#12151e]/70";
+        ? "bg-[#FDF6F0]/95 text-stone-850 supports-[backdrop-filter]:bg-[#FDF6F0]/90 shadow-sm"
+        : "bg-[#0B0F19]/95 text-slate-200 supports-[backdrop-filter]:bg-[#0B0F19]/90 shadow-md";
 
     return (
-        <header className={`fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md ${headerClass}`}>
+        <header className={`fixed top-0 w-full z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform backdrop-blur-md ${headerClass} ${
+            isVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}>
             <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
                 
                 {/* Brand Logo & Nav */}
@@ -335,28 +376,28 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onFocus={() => setShowResults(true)}
                             onBlur={() => setTimeout(() => setShowResults(false), 200)}
-                            className={`rounded-full py-2 pl-4 pr-12 text-sm focus:ring-2 transition-all w-40 md:w-56 focus:outline-none
+                            className={`rounded-full py-2 pl-4 pr-12 text-sm focus:ring-2 transition-all w-40 md:w-56 focus:outline-none border-0
                                 ${isLightMode
-                                    ? 'bg-stone-200/50 focus:bg-white border border-stone-300/40 focus:border-amber-600 focus:ring-amber-500/20 text-stone-900 placeholder:text-stone-400'
-                                    : 'bg-slate-900/50 focus:bg-slate-900/90 border border-slate-800/80 focus:border-primary-500 focus:ring-primary-500/20 text-slate-100 placeholder:text-slate-500'
+                                    ? 'bg-stone-200/60 focus:bg-white focus:ring-amber-500/25 text-stone-900 placeholder:text-stone-400'
+                                    : 'bg-slate-900/60 focus:bg-slate-900/90 focus:ring-primary-500/25 text-slate-100 placeholder:text-slate-500'
                                 }`}
                             placeholder="Search..."
                             type="text"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
-                            <kbd className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono rounded-md border
+                            <kbd className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono rounded-md border-0
                                 ${isLightMode
-                                    ? 'text-stone-500 bg-stone-100 border-stone-250'
-                                    : 'text-slate-500 bg-slate-800 border-slate-700/50'
+                                    ? 'text-stone-550 bg-stone-250/50'
+                                    : 'text-slate-450 bg-slate-800/60'
                                 }`}>⌘K</kbd>
                         </div>
  
                         {/* Search Results Dropdown */}
                         {showResults && searchResults.length > 0 && (
-                            <div className={`absolute top-full right-0 mt-3.5 w-80 rounded-2xl shadow-2xl border overflow-hidden z-50 backdrop-blur-xl
+                            <div className={`absolute top-full right-0 mt-3.5 w-80 rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl border-0
                                 ${isLightMode
-                                    ? 'bg-white border-stone-200 text-stone-850'
-                                    : 'bg-slate-950/95 border-slate-800/80 text-slate-100'
+                                    ? 'bg-white text-stone-850 shadow-stone-200/40'
+                                    : 'bg-slate-950/95 text-slate-100 shadow-black/80'
                                 }`}>
                                 {searchResults.slice(0, 6).map((result, index) => (
                                     <a
@@ -390,10 +431,10 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     </div>
  
                     {/* Live Clock Widget */}
-                    <div className={`hidden sm:flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full border text-xs font-mono font-medium shadow-sm
+                    <div className={`hidden sm:flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium border-0
                         ${isLightMode
-                            ? 'bg-stone-200/40 border-stone-300/40 text-stone-600'
-                            : 'bg-slate-900/40 border-slate-800/60 text-slate-450'
+                            ? 'bg-stone-200/60 text-stone-600'
+                            : 'bg-slate-900/60 text-slate-400'
                         }`}>
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                         <span>{formatTime(currentTime)}</span>
@@ -404,10 +445,10 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                         whileHover={{ scale: 1.05, rotate: 15 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={toggleDarkMode}
-                        className={`p-2 rounded-full border transition-colors
+                        className={`p-2 rounded-full transition-colors border-0
                             ${isLightMode
-                                ? 'border-stone-300/50 hover:bg-stone-100 text-stone-600'
-                                : 'border-slate-800 hover:bg-slate-800/40 text-slate-400 hover:text-white'
+                                ? 'bg-stone-200/60 hover:bg-stone-200 text-stone-600'
+                                : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-400 hover:text-white'
                             }`}
                         aria-label="Toggle dark mode"
                     >
@@ -420,10 +461,10 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     <motion.a
                         whileHover={{ scale: 1.05, y: -1 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`p-2 rounded-full border transition-colors flex items-center justify-center
+                        className={`p-2 rounded-full transition-colors flex items-center justify-center border-0
                             ${isLightMode
-                                ? 'border-stone-300/50 hover:bg-stone-100 text-stone-600'
-                                : 'border-slate-800 hover:bg-slate-800/40 text-slate-400 hover:text-white'
+                                ? 'bg-stone-200/60 hover:bg-stone-200 text-stone-600'
+                                : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-400 hover:text-white'
                             }`}
                         href="https://github.com/nokib-web"
                         target="_blank"
@@ -435,10 +476,10 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     {/* Persona Switcher Pill */}
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className={`flex items-center space-x-1.5 px-4 py-2 rounded-full border text-[11px] font-sans font-bold uppercase tracking-widest transition-all duration-300 shadow-sm
+                        className={`flex items-center space-x-1.5 px-4 py-2 rounded-full text-[11px] font-sans font-bold uppercase tracking-widest transition-all duration-300 border-0
                             ${isLightMode
-                                ? 'border-stone-300 bg-white hover:bg-stone-100 text-stone-700 hover:text-black'
-                                : 'border-slate-800 bg-slate-900/60 hover:bg-slate-800/90 text-slate-350 hover:text-white'
+                                ? 'bg-stone-200/60 hover:bg-stone-200 text-stone-700 hover:text-black'
+                                : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-350 hover:text-white'
                             }`}
                     >
                         <span className="material-icons-outlined text-sm">grid_view</span>
@@ -448,10 +489,10 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     {/* Mobile Menu Toggle */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className={`lg:hidden p-2 rounded-full border
+                        className={`lg:hidden p-2 rounded-full border-0
                             ${isLightMode
-                                ? 'border-stone-300/50 hover:bg-stone-100 text-stone-600'
-                                : 'border-slate-800 hover:bg-slate-800/40 text-slate-400'
+                                ? 'bg-stone-200/60 hover:bg-stone-250 text-stone-600'
+                                : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-450'
                             }`}
                         aria-label="Toggle menu"
                     >
