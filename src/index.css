@@ -8,6 +8,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Brand logo specific font styling */
+.brand-logo {
+  font-family: 'Playfair Display', 'Lora', serif;
+  letter-spacing: 0.04em;
+}
+
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -462,4 +468,4 @@ h6 {
 .animate-typewriter-blink {
   animation: typewriter-blink 1s step-end infinite;
 }
-
+

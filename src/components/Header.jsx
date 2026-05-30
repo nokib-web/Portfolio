@@ -220,9 +220,9 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
             case 'philosopher':
                 return {
                     name: 'nokib.think',
-                    icon: 'psychology',
-                    font: 'font-serif tracking-widest uppercase italic',
-                    accent: 'text-purple-400'
+                    icon: 'history_edu',
+                    font: 'font-serif tracking-wide',
+                    accent: 'text-amber-700'
                 };
             default:
                 return {
@@ -280,6 +280,9 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     </a>
                     <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#expertise">
                         Expertise
+                    </a>
+                    <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#epistemology">
+                        Epistemology
                     </a>
                 </nav>
             );
