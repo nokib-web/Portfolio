@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import PersonaSelectorModal from './PersonaSelectorModal';
 
 const Sidebar = ({ activeSection, isOpen, setIsOpen }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const location = useLocation();
     const isBlogPage = location.pathname.startsWith('/blog');
 
@@ -18,39 +20,46 @@ const Sidebar = ({ activeSection, isOpen, setIsOpen }) => {
 
     return (
         <aside
-            className={`absolute left-0 top-0 bottom-0 z-40 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-white/80 dark:bg-[#0A0F1E]/80 backdrop-blur-2xl border border-slate-200 dark:border-white/5 rounded-none shadow-2xl overflow-hidden ${isOpen ? 'w-64' : 'w-20'
-                }`}
+            className={`fixed left-4 top-24 bottom-4 z-40 transition-all duration-550 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-[#1a1f2e]/95 border border-slate-800/80 rounded-[2rem] shadow-2xl overflow-hidden ${
+                isOpen ? 'w-64' : 'w-20'
+            }`}
         >
             {/* Toggle Button */}
-            <div className="flex justify-center p-4">
+            <div className="flex justify-center py-6 shrink-0">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="p-3 rounded-none hover:bg-primary-500/10 dark:hover:bg-primary-500/20 text-slate-400 hover:text-primary-500 transition-all group"
+                    className="p-2.5 rounded-xl bg-slate-800/10 dark:bg-white/5 hover:bg-slate-800/50 dark:hover:bg-white/10 text-slate-400 hover:text-white transition-all group"
                 >
-                    <span className="material-icons-outlined text-2xl group-hover:rotate-180 transition-transform duration-500">
+                    <span className="material-icons-outlined text-xl group-hover:rotate-185 transition-transform duration-500">
                         {isOpen ? 'menu_open' : 'menu'}
                     </span>
                 </button>
             </div>
 
             {/* Nav Items */}
-            <div className="flex-1 px-3 space-y-2 overflow-y-auto scrollbar-hide">
+            <div className="flex-1 px-4 space-y-3 overflow-y-auto scrollbar-hide flex flex-col items-center py-2 w-full">
                 {navItems.map((item) => {
                     const isActive = item.id === 'blog' ? isBlogPage : (activeSection === item.id && !isBlogPage);
                     const isRoute = item.path.startsWith('/');
 
                     const Content = (
-                        <>
-                            <span className={`material-icons-outlined transition-colors w-10 text-center text-xl ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>
+                        <div className={`flex items-center w-full ${isOpen ? 'justify-start px-2' : 'justify-center'}`}>
+                            <span className="material-icons-outlined text-[22px]">
                                 {item.icon}
                             </span>
-                            <span className={`text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-500 ${isActive ? 'text-white' : 'text-slate-600 dark:text-slate-400 group-hover:text-white'} ${isOpen ? 'opacity-100 translate-x-3' : 'opacity-0 -translate-x-10'}`}>
-                                {item.name}
-                            </span>
-                        </>
+                            {isOpen && (
+                                <span className="text-[11px] font-black uppercase tracking-widest whitespace-nowrap ml-4">
+                                    {item.name}
+                                </span>
+                            )}
+                        </div>
                     );
 
-                    const classes = `group flex items-center h-12 rounded-none transition-all px-3 ${isActive ? 'bg-primary-500 shadow-lg shadow-primary-500/30' : 'hover:bg-primary-500'}`;
+                    const classes = `group flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${
+                        isActive
+                            ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/35 border border-primary-500/20'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800/40 dark:hover:bg-white/5'
+                    } ${isOpen ? 'w-full h-12' : ''}`;
 
                     if (isRoute) {
                         return (
@@ -72,13 +81,37 @@ const Sidebar = ({ activeSection, isOpen, setIsOpen }) => {
                 })}
             </div>
 
-            {/* Bottom Decoration */}
-            <div className="p-6">
-                <div className={`h-1 w-full rounded-none bg-gradient-to-r from-primary-500 to-purple-500 transition-all duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'}`} />
+            {/* Switch Persona Button */}
+            <div className="px-4 py-3 border-t border-slate-200/5 dark:border-white/5 w-full flex justify-center shrink-0">
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className={`group flex items-center justify-center h-12 rounded-2xl transition-all duration-300 w-12 text-slate-400 hover:text-white hover:bg-slate-800/40 dark:hover:bg-white/5 ${
+                        isOpen ? 'w-full px-4 justify-start' : 'justify-center'
+                    }`}
+                    title="Switch Persona"
+                >
+                    <span className="material-icons-outlined text-[22px]">
+                        switch_account
+                    </span>
+                    {isOpen && (
+                        <span className="text-[11px] font-black uppercase tracking-widest whitespace-nowrap ml-4">
+                            Switch Persona
+                        </span>
+                    )}
+                </button>
             </div>
+
+            {/* Bottom Decoration */}
+            <div className="p-6 shrink-0 w-full flex justify-center">
+                <div className={`h-1 rounded-full bg-gradient-to-r from-primary-500 to-purple-500 transition-all duration-500 ${isOpen ? 'w-32' : 'w-8'}`} />
+            </div>
+
+            <PersonaSelectorModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
         </aside>
     );
 };
 
 export default Sidebar;
-

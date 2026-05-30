@@ -3,21 +3,59 @@ import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const MobileMenu = ({ isOpen, onClose, activeSection }) => {
+const MobileMenu = ({ isOpen, onClose, activeSection, activePersonaId = 'developer', onSwitchPersonaClick }) => {
     const location = useLocation();
-    const isBlogPage = location.pathname.startsWith('/blog');
+    const isBlogPage = location.pathname.startsWith('/developer/blog') || location.pathname.startsWith('/blog');
 
-    const navItems = [
-        { name: "Introduction", path: "#hero", id: "hero", icon: "home" },
-        { name: "About Me", path: "#about", id: "about", icon: "person" },
-        { name: "Projects", path: "#projects", id: "projects", icon: "code" },
-        { name: "Skills & Tools", path: "#skills", id: "skills", icon: "handyman" },
-        { name: "Experience", path: "#experience", id: "experience", icon: "work" },
-        { name: "Education", path: "#education", id: "education", icon: "school" },
-        { name: "Contact", path: "#contact", id: "contact", icon: "mail" },
-        { name: "Stats", path: "#stats", id: "stats", icon: "insights" },
-        { name: "Blog", path: "/blog", id: "blog", icon: "article" }
-    ];
+    const getNavItems = () => {
+        switch (activePersonaId) {
+            case 'writer':
+                return [
+                    { name: "Selected Writing", path: "#essays", id: "essays", icon: "history_edu" },
+                    { name: "About the Writer", path: "#about", id: "about", icon: "person" },
+                    { name: "Send a Letter", path: "#contact", id: "contact", icon: "mail" }
+                ];
+            case 'friend':
+                return [
+                    { name: "Voice Note", path: "#greeting", id: "greeting", icon: "favorite_border" },
+                    { name: "Moments", path: "#moments", id: "moments", icon: "calendar_today" },
+                    { name: "Life in Pixels", path: "#gallery", id: "gallery", icon: "photo_camera" }
+                ];
+            case 'philosopher':
+                return [
+                    { name: "Treatise", path: "#treatise", id: "treatise", icon: "psychology" },
+                    { name: "Expertise", path: "#expertise", id: "expertise", icon: "psychology" }
+                ];
+            default:
+                return [
+                    { name: "Introduction", path: "#hero", id: "hero", icon: "home" },
+                    { name: "About Me", path: "#about", id: "about", icon: "person" },
+                    { name: "Projects", path: "#projects", id: "projects", icon: "code" },
+                    { name: "Skills & Tools", path: "#skills", id: "skills", icon: "handyman" },
+                    { name: "Experience", path: "#experience", id: "experience", icon: "work" },
+                    { name: "Education", path: "#education", id: "education", icon: "school" },
+                    { name: "Contact", path: "#contact", id: "contact", icon: "mail" },
+                    { name: "Stats", path: "#stats", id: "stats", icon: "insights" },
+                    { name: "Blog", path: "/developer/blog", id: "blog", icon: "article" }
+                ];
+        }
+    };
+
+    const getBrandConfig = () => {
+        switch (activePersonaId) {
+            case 'writer':
+                return { name: 'nokib.write', icon: 'history_edu' };
+            case 'friend':
+                return { name: 'nokib.friend', icon: 'favorite_border' };
+            case 'philosopher':
+                return { name: 'nokib.think', icon: 'psychology' };
+            default:
+                return { name: 'nokib.dev', icon: 'north_east' };
+        }
+    };
+
+    const navItems = getNavItems();
+    const brand = getBrandConfig();
 
     return createPortal(
         <AnimatePresence>
@@ -41,8 +79,8 @@ const MobileMenu = ({ isOpen, onClose, activeSection }) => {
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
                             <Link to="/" onClick={onClose} className="flex items-center space-x-2 text-lg font-bold font-display text-slate-900 dark:text-white">
-                                <span className="material-icons-outlined text-primary-500">north_east</span>
-                                <span>nokib.dev</span>
+                                <span className="material-icons-outlined text-primary-500">{brand.icon}</span>
+                                <span>{brand.name}</span>
                             </Link>
                             <button
                                 onClick={onClose}
@@ -79,7 +117,7 @@ const MobileMenu = ({ isOpen, onClose, activeSection }) => {
                                 return (
                                     <a
                                         key={item.name}
-                                        href={isBlogPage && !isExternal ? `/${item.path}` : item.path}
+                                        href={isBlogPage && !isExternal ? `/developer/${item.path}` : item.path}
                                         onClick={onClose}
                                         className={`flex items-center px-6 py-4 text-lg font-medium rounded-2xl transition-all duration-300 ${isActive
                                             ? "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 shadow-sm"
@@ -91,6 +129,16 @@ const MobileMenu = ({ isOpen, onClose, activeSection }) => {
                                     </a>
                                 );
                             })}
+
+                            {onSwitchPersonaClick && (
+                                <button
+                                    onClick={onSwitchPersonaClick}
+                                    className="flex items-center w-full px-6 py-4 text-lg font-medium rounded-2xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-all duration-300 border-t border-slate-100 dark:border-slate-800/80 mt-4 pt-4"
+                                >
+                                    <span className="material-icons-outlined mr-4 opacity-70">switch_account</span>
+                                    <span>Switch Persona</span>
+                                </button>
+                            )}
                         </div>
 
                         {/* Footer Links */}

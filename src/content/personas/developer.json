@@ -1,0 +1,49 @@
+{
+  "id": "developer",
+  "title": "Software Developer",
+  "slug": "developer",
+  "route": "/developer",
+  "tagline": "Building High-Performance Web Applications",
+  "description": "I design, build, and deploy robust full-stack web applications with modern tech.",
+  "theme": {
+    "accentColor": "text-cyan-400",
+    "bgColor": "bg-slate-950",
+    "textColor": "text-slate-200",
+    "fontFamily": "font-mono",
+    "gradient": "from-blue-600 to-cyan-500"
+  },
+  "about": "I'm Nazmul Hasan Nokib, a software developer passionate about building performant apps, optimizing databases, and designing intuitive interfaces.",
+  "projects": [
+    {
+      "title": "StyleDecor",
+      "description": "Full-stack client-decorator marketplace platform built with React, Next.js, Firebase, and Stripe.",
+      "tech": ["React", "Next.js", "Firebase", "Stripe"],
+      "image": "/style-decor.png",
+      "liveLink": "https://style-decor-client-two.vercel.app/"
+    },
+    {
+      "title": "NexCart",
+      "description": "Full-featured e-commerce platform with Stripe payment, real-time cart, and admin dashboard.",
+      "tech": ["Next.js", "MongoDB", "Tailwind CSS"],
+      "image": "https://i.ibb.co.com/5xrL57tz/logo.png",
+      "liveLink": "https://nexcart-mu.vercel.app/"
+    }
+  ],
+  "skills": [
+    {
+      "category": "Frontend",
+      "items": [
+        { "name": "React", "level": "Hooks/Context" },
+        { "name": "Next.js", "level": "SSR/ISR" },
+        { "name": "Tailwind CSS", "level": "JIT/Tokens" }
+      ]
+    },
+    {
+      "category": "Backend & DB",
+      "items": [
+        { "name": "Node.js", "level": "Runtime Opt." },
+        { "name": "PostgreSQL", "level": "SQL/Prisma" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "id": "writer",
+  "title": "Writer & Essayist",
+  "slug": "writer",
+  "route": "/writer",
+  "tagline": "Here are my thoughts.",
+  "description": "I write articles, essays, and technical guides about technology, philosophy, and the human experience.",
+  "theme": {
+    "accentColor": "text-amber-700",
+    "bgColor": "bg-[#fdfbf7]",
+    "textColor": "text-stone-900",
+    "fontFamily": "font-serif",
+    "gradient": "from-amber-300 to-orange-200",
+    "borderColor": "border-stone-200",
+    "mutedText": "text-stone-500",
+    "cardBg": "bg-white"
+  },
+  "heroIntro": "I believe words are the most powerful technology we have. I write to think clearly, to share what I learn, and to make the complex feel simple.",
+  "about": "I'm a developer who writes — not just code, but ideas. My essays sit at the crossroads of technology, philosophy, and everyday experience. I believe in slow reading, careful thinking, and writing that respects the reader's time.",
+  "epigraph": {
+    "quote": "The scariest moment is always just before you start.",
+    "attribution": "Stephen King"
+  },
+  "essays": [
+    {
+      "title": "Understanding React 19 Server Components",
+      "slug": "react-19-server-components",
+      "excerpt": "Server components blur the line between the server and the browser. In this deep dive, I explore what that means for the way we think about rendering, state, and the future of the web.",
+      "date": "2024-11-12",
+      "readTime": "9 min read",
+      "tags": ["React", "Technical"],
+      "content": "The React team has been working on server components for years. Now that they are here in React 19, it is worth taking a step back and asking: what problem do they actually solve?",
+      "issue": 4
+    },
+    {
+      "title": "The Philosophy of Clean Code",
+      "slug": "philosophy-of-clean-code",
+      "excerpt": "Writing clean code is not merely a technical discipline — it is an ethical one. Every function you name, every abstraction you choose, is a message to the next person who reads it.",
+      "date": "2024-09-04",
+      "readTime": "7 min read",
+      "tags": ["Philosophy", "Software"],
+      "content": "There is a particular kind of pride a developer takes in a well-crafted function. Not pride of authorship, but something closer to the satisfaction of a sentence that says exactly what it means.",
+      "issue": 3
+    },
+    {
+      "title": "On Learning in Public",
+      "slug": "learning-in-public",
+      "excerpt": "Sharing your process before you have the answers is uncomfortable. It is also one of the most effective ways to learn, connect, and build something that lasts.",
+      "date": "2024-07-22",
+      "readTime": "5 min read",
+      "tags": ["Career", "Learning"],
+      "content": "I started writing publicly because I was afraid to. That fear, it turned out, was the exact reason I needed to do it.",
+      "issue": 2
+    },
+    {
+      "title": "Why Developers Should Read More Fiction",
+      "slug": "developers-read-fiction",
+      "excerpt": "Fiction teaches empathy. And empathy, as it turns out, is the most underrated engineering skill there is.",
+      "date": "2024-05-15",
+      "readTime": "6 min read",
+      "tags": ["Books", "Craft"],
+      "content": "The best systems I have ever worked with were designed by people who understood how other people think. Not algorithms — people.",
+      "issue": 1
+    }
+  ],
+  "skills": [
+    {
+      "category": "Writing Styles",
+      "items": [
+        { "name": "Technical Essays", "level": "Guides & deep dives" },
+        { "name": "Blogging", "level": "SEO-aware" },
+        { "name": "Analytical Writing", "level": "Philosophy & ideas" }
+      ]
+    },
+    {
+      "category": "Platforms & Tools",
+      "items": [
+        { "name": "Markdown / MDX", "level": "Formatting" },
+        { "name": "Substack / Medium", "level": "Publishing" },
+        { "name": "Git & GitHub Docs", "level": "Open source docs" }
+      ]
+    }
+  ]
+}

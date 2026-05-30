@@ -230,7 +230,7 @@ export default function BlogPost() {
         <div className="flex flex-col justify-center items-center min-h-[70vh] gap-6">
             <span className="material-icons-outlined text-6xl text-slate-800 dark:text-slate-200">error_outline</span>
             <div className="text-slate-500 dark:text-slate-400 font-display text-2xl uppercase tracking-[0.2em] text-center">Post Not Found.</div>
-            <Link to="/blog" className="px-10 py-4 bg-primary-600 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 transition-transform">Back to Blog</Link>
+            <Link to="/developer/blog" className="px-10 py-4 bg-primary-600 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 transition-transform">Back to Blog</Link>
         </div>
     )
 
@@ -262,7 +262,7 @@ export default function BlogPost() {
                         <div className="mb-6">
                             <Magnetic strength={0.2}>
                                 <Link
-                                    to="/blog"
+                                    to="/developer/blog"
                                     className="inline-flex items-center gap-2 group text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all font-bold uppercase tracking-[0.2em] text-[10px]"
                                 >
                                     <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform">west</span>
@@ -345,7 +345,7 @@ export default function BlogPost() {
                         <div className="mt-12 text-center lg:text-left">
                             <Magnetic strength={0.2}>
                                 <Link
-                                    to="/blog"
+                                    to="/developer/blog"
                                     className="inline-flex items-center gap-2 group px-8 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black text-slate-700 dark:text-white uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white hover:border-primary-500 transition-all font-display"
                                 >
                                     <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform font-bold">west</span>
@@ -375,7 +375,7 @@ export default function BlogPost() {
             {/* Floating Back Button (Mobile only or as extra) */}
             <div className="fixed bottom-6 left-6 z-50 lg:hidden">
                 <Magnetic strength={0.2}>
-                    <Link to="/blog" className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95">
+                    <Link to="/developer/blog" className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95">
                         <span className="material-icons-outlined">west</span>
                     </Link>
                 </Magnetic>

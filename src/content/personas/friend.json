@@ -1,0 +1,71 @@
+{
+  "id": "friend",
+  "title": "Human / Friend",
+  "slug": "friend",
+  "route": "/friend",
+  "tagline": "Coffee Enthusiast, Gamer, and Life Adventurer",
+  "description": "Get to know me outside the IDE. I love talking about gaming, coffee, travel, and sci-fi movies.",
+  "theme": {
+    "accentColor": "text-rose-500",
+    "bgColor": "bg-[#faf9f6]",
+    "textColor": "text-stone-700",
+    "fontFamily": "font-sans",
+    "gradient": "from-rose-400 to-orange-300",
+    "borderColor": "border-rose-100"
+  },
+  "about": "Hey there! I'm Nokib. Beyond compiling code and writing articles, I'm just a guy who enjoys a freshly brewed cup of pour-over coffee, playing cooperative role-playing games, and traveling to quiet mountain terrains. I believe the best parts of life happen off-screen, usually accompanied by good friends and a great soundtrack.",
+  "voiceNote": {
+    "timestamp": "Today, 10:42 AM",
+    "duration": "0:45",
+    "transcript": "Hey! Thanks for stopping by this corner of the site. I built this part because resumes and portfolios can feel so sterile. If you're ever in my city, let's grab a coffee. I'm always down to chat about the latest sci-fi movie or just share some good vibes."
+  },
+  "timeline": [
+    {
+      "year": "2023",
+      "title": "Trek to Sajek Valley",
+      "description": "A week-long trekking journey through the beautiful clouds of Sajek. Discovered a new love for high altitudes."
+    },
+    {
+      "year": "2022",
+      "title": "First Mechanical Keyboard",
+      "description": "Fell down the rabbit hole and built a custom 65% keyboard. My fingers have never been happier, though my wallet disagrees."
+    },
+    {
+      "year": "2020",
+      "title": "Adopted a Cat (or she adopted me)",
+      "description": "Luna walked into my apartment and decided it was hers now. The best lockdown companion."
+    },
+    {
+      "year": "2018",
+      "title": "Graduation Trip",
+      "description": "Backpacked across three countries with my best friends. We got lost twice, but the food was incredible."
+    },
+    {
+      "year": "2015",
+      "title": "First Line of Code",
+      "description": "Wrote my first HTML script. It was terrible, but seeing 'Hello World' on screen changed my life trajectory."
+    }
+  ],
+  "gallery": [
+    {
+      "url": "https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "caption": "Morning mist in the mountains",
+      "span": "col-span-2 row-span-2"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "caption": "The thocky keyboard",
+      "span": "col-span-1 row-span-1"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "caption": "Perfect pour-over coffee",
+      "span": "col-span-1 row-span-1"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "caption": "Gaming night setup",
+      "span": "col-span-2 row-span-1"
+    }
+  ]
+}

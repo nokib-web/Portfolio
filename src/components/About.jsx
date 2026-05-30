@@ -84,7 +84,7 @@ const About = () => {
                     <img
                         alt="Nokib Profile"
                         className="rounded-2xl shadow-lg w-full h-auto object-cover transform hover:scale-[1.02] transition-transform duration-500"
-                        src="https://i.ibb.co.com/TBcCs9XZ/Gemini-Generated-Image-5d1t635d1t635d1t.png"
+                        src="https://i.ibb.co.com/gLxfJKQQ/nokib111.png"
                         onLoad={() => ScrollTrigger.refresh()}
                     />
                 </div>

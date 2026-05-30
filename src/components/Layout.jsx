@@ -9,7 +9,7 @@ const Layout = ({ children }) => {
     const [activeSection, setActiveSection] = useState('hero');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const location = useLocation();
-    const isBlogPage = location.pathname.startsWith('/blog');
+    const isBlogPage = location.pathname.startsWith('/developer/blog') || location.pathname.startsWith('/blog');
 
     // Handle scroll to hash on route change/initial load
     useEffect(() => {
@@ -29,7 +29,7 @@ const Layout = ({ children }) => {
                 }, 1000);
             }, 100);
             return () => clearTimeout(timer);
-        } else if (location.pathname === '/') {
+        } else if (location.pathname === '/' || location.pathname === '/developer' || location.pathname === '/developer/') {
             // If on home with no hash, scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
                 if (entry.isIntersecting) {
                     setActiveSection(entry.target.id);
                     // Update URL hash without jumping
-                    if (window.location.pathname === '/') {
+                    if (window.location.pathname === '/' || window.location.pathname === '/developer' || window.location.pathname === '/developer/') {
                         window.history.replaceState(null, null, `#${entry.target.id}`);
                     }
                 }

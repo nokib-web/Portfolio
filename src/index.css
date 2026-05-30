@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Outlined');
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -405,3 +406,60 @@ h6 {
 .spotlight-card:hover::before {
   opacity: 1;
 }
+
+/* Galaxy Orbit Animations */
+@keyframes galaxy-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-galaxy-spin {
+  animation: galaxy-spin 120s linear infinite;
+}
+
+@keyframes planet-counter-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(-360deg);
+  }
+}
+
+.animate-planet-counter-spin {
+  animation: planet-counter-spin 120s linear infinite;
+}
+
+/* Twinkle and space effects */
+@keyframes nebula-float {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate(-45%, -45%) scale(1.15) rotate(180deg);
+  }
+}
+
+.animate-nebula-float-1 {
+  animation: nebula-float 35s ease-in-out infinite;
+}
+
+.animate-nebula-float-2 {
+  animation: nebula-float 45s ease-in-out infinite alternate-reverse;
+}
+
+/* Typewriter Caret Blinking Animation */
+@keyframes typewriter-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-typewriter-blink {
+  animation: typewriter-blink 1s step-end infinite;
+}
+

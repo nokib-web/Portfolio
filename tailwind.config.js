@@ -36,10 +36,13 @@ export default {
         },
         "background-light": "#F8FAFC", // slate-50
         "background-dark": "#0F172A", // slate-900
+        "navy-card": "#1a1f2e",        // dark navy UI cards
       },
       fontFamily: {
         display: ["Outfit", "sans-serif"],
         body: ["Inter", "sans-serif"], // Adding Inter for body text if needed
+        'writer-display': ['"Playfair Display"', 'Georgia', 'serif'],
+        'writer-body': ['Lora', 'Georgia', '"Times New Roman"', 'serif'],
       },
       borderRadius: {
         DEFAULT: "0.5rem",
@@ -63,11 +66,16 @@ export default {
         'fade-in-up': {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        }
+        },
+        'typewriter-blink': {
+          '0%, 49%': { opacity: '1' },
+          '50%, 100%': { opacity: '0' },
+        },
       },
       animation: {
         float: 'float 6s ease-in-out infinite',
         'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
+        'typewriter-blink': 'typewriter-blink 1s step-end infinite',
       },
     },
   },
