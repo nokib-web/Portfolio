@@ -1,9 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { getPostMeta, getPostComponent } from '../../lib/posts'
+import { useParams, useLocation, Link } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import Magnetic from '../Common/Magnetic'
 import Subscribe from './Subscribe'
 import BlogSidebar from './BlogSidebar'
+import { appConfig } from '../../config'
 
 /* ── Table of Contents ────────────────────────────────────────── */
 function TOC({ headings, activeId }) {
@@ -150,14 +153,23 @@ function ProgressCircle({ progress }) {
 /* ── Main BlogPost component ────────────────────────────────────────── */
 export default function BlogPost() {
     const { slug } = useParams()
-    const [Content, setContent] = useState(null)
+    const location = useLocation()
+
+    // Derive personaId from the URL path (e.g. /writer/blog/slug → 'writer')
+    const personaId = location.pathname.split('/').filter(Boolean)[0] || 'developer'
+    const isDeveloper = personaId === 'developer'
+
+    // Back URL: developer → /developer/blog, others → /${personaId} homepage
+    const backUrl = isDeveloper ? '/developer/blog' : `/${personaId}`
+
+    const [post, setPost] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(false)
     const [readProgress, setReadProgress] = useState(0)
     const [headings, setHeadings] = useState([])
     const [activeId, setActiveId] = useState('')
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-    const post = getPostMeta(slug)
     const postUrl = typeof window !== 'undefined' ? window.location.href : ''
 
     /* Read progress bar & Heading Tracker */
@@ -183,15 +195,15 @@ export default function BlogPost() {
         return () => window.removeEventListener('scroll', onScroll)
     }, [])
 
-    /* Generate Headings */
     useEffect(() => {
-        if (!loading && Content) {
+        if (!loading && post) {
             // Wait for content to sync to DOM
             setTimeout(() => {
-                const hElements = Array.from(document.querySelectorAll('.article-body h2, .article-body h3'))
-                const items = hElements.map(h => {
-                    const id = h.textContent.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-')
-                    h.id = id // Inject ID for linking
+                const hElements = Array.from(document.querySelectorAll('.article-body h1, .article-body h2, .article-body h3'))
+                const items = hElements.map((h, index) => {
+                    // Try to use existing ID or create one
+                    const id = h.id || h.textContent.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-') + '-' + index
+                    if (!h.id) h.id = id // Inject ID for linking
                     return {
                         id,
                         text: h.textContent,
@@ -199,19 +211,29 @@ export default function BlogPost() {
                     }
                 })
                 setHeadings(items)
-            }, 100)
+            }, 500)
         }
-    }, [loading, Content])
+    }, [loading, post])
 
     useEffect(() => {
         window.scrollTo(0, 0)
         setLoading(true)
-        setContent(null)
+        setPost(null)
+        setError(false)
 
-        getPostComponent(slug).then(Component => {
-            setContent(() => Component)
-            setLoading(false)
-        }).catch(() => setLoading(false))
+        fetch(`${appConfig.apiBaseUrl}/api/blogs/${slug}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Not found')
+                return res.json()
+            })
+            .then(data => {
+                setPost(data)
+                setLoading(false)
+            })
+            .catch(() => {
+                setError(true)
+                setLoading(false)
+            })
     }, [slug])
 
     if (loading) return (
@@ -226,20 +248,20 @@ export default function BlogPost() {
         </div>
     )
 
-    if (!post || !Content) return (
+    if (error || !post) return (
         <div className="flex flex-col justify-center items-center min-h-[70vh] gap-6">
             <span className="material-icons-outlined text-6xl text-slate-800 dark:text-slate-200">error_outline</span>
             <div className="text-slate-500 dark:text-slate-400 font-display text-2xl uppercase tracking-[0.2em] text-center">Post Not Found.</div>
-            <Link to="/developer/blog" className="px-10 py-4 bg-primary-600 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 transition-transform">Back to Blog</Link>
+            <Link to={backUrl} className="px-10 py-4 bg-primary-600 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 transition-transform">Back to Blog</Link>
         </div>
     )
 
-    const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
+    const formattedDate = new Date(post.createdAt || new Date()).toLocaleDateString('en-US', {
         month: 'long', day: 'numeric', year: 'numeric'
     })
 
     return (
-        <div className="min-h-screen bg-white dark:bg-[#0A0F1E] transition-colors duration-300">
+        <div className="min-h-screen transition-colors duration-300">
 
             {/* ── Reading Progress Bar ── */}
             <div
@@ -247,48 +269,59 @@ export default function BlogPost() {
                 style={{ width: `${readProgress}%` }}
             />
 
-            {/* Sidebar Component */}
-            <BlogSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+            {/* Developer sidebar — only shown on developer persona */}
+            {isDeveloper && <BlogSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />}
 
             <div
-                className={`max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 transition-all duration-500 ${isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]'
-                    }`}
+                className={`w-8/12 max-w-[1200px] mx-auto px-4 sm:px-6 transition-all duration-500 ${
+                    isDeveloper
+                        ? (isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]')
+                        : 'pt-8'
+                }`}
             >
                 <div className="flex flex-col lg:flex-row lg:justify-center gap-0 lg:gap-0 relative">
 
                     {/* ── Left Content Column ── */}
-                    <article className="max-w-4xl pt-8 pb-12">
+                    <article className="w-full max-w-3xl pt-4 pb-16 mx-auto">
                         {/* Back Link */}
-                        <div className="mb-6">
+                        <div className="mb-8">
                             <Magnetic strength={0.2}>
                                 <Link
-                                    to="/developer/blog"
+                                    to={backUrl}
                                     className="inline-flex items-center gap-2 group text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all font-bold uppercase tracking-[0.2em] text-[10px]"
                                 >
                                     <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform">west</span>
-                                    All Posts
+                                    {isDeveloper ? 'All Posts' : 'Back to Home'}
                                 </Link>
                             </Magnetic>
                         </div>
 
                         {/* Tags */}
-                        <div className="flex gap-2.5 flex-wrap mb-6">
+                        <div className="flex gap-2.5 flex-wrap mb-5">
                             {post.tags?.map(tag => (
-                                <span key={tag} className="px-3.5 py-1 bg-primary-500/10 border border-primary-500/20 rounded-full text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">
+                                <span key={tag} className="px-3 py-1 bg-primary-500/10 border border-primary-500/25 rounded-full text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">
                                     {tag}
                                 </span>
                             ))}
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-slate-900 dark:text-white leading-[1] tracking-tighter font-display mb-6">
+                        <h1
+                            className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tight font-display mb-5"
+                            style={{ fontFamily: "'Lora', 'Georgia', serif" }}
+                        >
                             {post.title}
                         </h1>
 
-                        {/* Description */}
-                        <p className="text-slate-500 dark:text-slate-400 text-lg md:text-xl leading-relaxed mb-8 font-medium border-l-4 border-primary-500/40 pl-6">
-                            {post.description}
-                        </p>
+                        {/* Description / Excerpt */}
+                        {post.description && (
+                            <p
+                                className="text-slate-500 dark:text-slate-400 text-lg md:text-xl leading-relaxed mb-7 font-medium border-l-4 border-primary-500/40 pl-5"
+                                style={{ fontFamily: "'Inter', sans-serif" }}
+                            >
+                                {post.description || post.excerpt}
+                            </p>
+                        )}
 
                         {/* Meta Row */}
                         <div className="flex flex-wrap items-center justify-between gap-4 pb-8 border-b border-slate-100 dark:border-white/5">
@@ -322,8 +355,28 @@ export default function BlogPost() {
                         )}
 
                         {/* Article Content */}
-                        <div className={`article-body mt-6 ${post.tags?.some(t => t.toLowerCase() === 'bangla') ? 'bn-content' : ''}`}>
-                            <Content />
+                        <div
+                            className={`article-body mt-8 ${
+                                post.tags?.some(t => t.toLowerCase() === 'bangla') ? 'bn-content' : ''
+                            } prose prose-lg dark:prose-invert max-w-none
+                            prose-headings:font-display prose-headings:tracking-tight prose-headings:text-slate-900 dark:prose-headings:text-white
+                            prose-p:leading-[1.9] prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-p:text-[1.05rem]
+                            prose-a:text-primary-500 prose-a:no-underline hover:prose-a:underline
+                            prose-strong:text-slate-800 dark:prose-strong:text-slate-100
+                            prose-blockquote:border-l-primary-500 prose-blockquote:bg-slate-50 dark:prose-blockquote:bg-slate-900/40 prose-blockquote:rounded-r-xl prose-blockquote:py-1 prose-blockquote:pr-4
+                            prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-code:bg-slate-100 dark:prose-code:bg-slate-800/60 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:font-mono
+                            prose-pre:bg-slate-900 dark:prose-pre:bg-slate-950 prose-pre:rounded-2xl prose-pre:border prose-pre:border-slate-800
+                            prose-img:rounded-2xl prose-img:shadow-lg
+                            prose-hr:border-slate-200 dark:prose-hr:border-slate-800
+                            `}
+                            style={{ fontFamily: "'Lora', 'Georgia', serif" }}
+                        >
+                            <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                rehypePlugins={[rehypeRaw]}
+                            >
+                                {post.content}
+                            </ReactMarkdown>
                         </div>
 
                         {/* Bottom Share Row */}
@@ -345,11 +398,11 @@ export default function BlogPost() {
                         <div className="mt-12 text-center lg:text-left">
                             <Magnetic strength={0.2}>
                                 <Link
-                                    to="/developer/blog"
+                                    to={backUrl}
                                     className="inline-flex items-center gap-2 group px-8 py-3.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-[10px] font-black text-slate-700 dark:text-white uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white hover:border-primary-500 transition-all font-display"
                                 >
                                     <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform font-bold">west</span>
-                                    All Publications
+                                    {isDeveloper ? 'All Publications' : 'Back to Home'}
                                 </Link>
                             </Magnetic>
                         </div>
@@ -375,7 +428,7 @@ export default function BlogPost() {
             {/* Floating Back Button (Mobile only or as extra) */}
             <div className="fixed bottom-6 left-6 z-50 lg:hidden">
                 <Magnetic strength={0.2}>
-                    <Link to="/developer/blog" className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95">
+                    <Link to={backUrl} className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95">
                         <span className="material-icons-outlined">west</span>
                     </Link>
                 </Magnetic>

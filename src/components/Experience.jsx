@@ -3,6 +3,13 @@ import React from 'react';
 const Experience = () => {
     const experiences = [
         {
+            role: "Frontend Developer",
+            company: "Betopia Group Limited",
+            period: "15 May 2026 - Present",
+            description:
+                "Building and maintaining responsive user interfaces using modern frontend technologies. Collaborating with cross-functional teams to deliver high-quality, high-performance web applications and features."
+        },
+        {
             role: "Full-Stack Developer (Trainee)",
             company: "Programming Hero",
             period: "Last 6 Months",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import Hero from './Hero';
 import About from './About';
 import Projects from './Projects';
@@ -8,16 +8,26 @@ import Education from './Education';
 import Contact from './Contact';
 import Stats from './Stats';
 import Footer from './Footer';
+import FloatingProfilePhoto from './FloatingProfilePhoto';
 
 const Home = () => {
+    const heroAnchorRef = useRef(null);
+    const aboutAnchorRef = useRef(null);
+
     return (
-        <div className="w-full mx-auto px-4 md:px-8 lg:px-12 flex flex-col space-y-12 md:space-y-20">
+        <div className="w-full mx-auto px-4 md:px-8 lg:px-12 flex flex-col space-y-12 md:space-y-20 relative">
+            {/* Scroll-traveling Profile Photo */}
+            <FloatingProfilePhoto 
+                heroAnchorRef={heroAnchorRef} 
+                aboutAnchorRef={aboutAnchorRef} 
+            />
+
             <section id="hero" className="scroll-mt-20">
-                <Hero />
+                <Hero heroAnchorRef={heroAnchorRef} />
             </section>
 
             <section id="about" className="scroll-mt-24">
-                <About />
+                <About aboutAnchorRef={aboutAnchorRef} />
             </section>
 
             <section id="skills" className="scroll-mt-24">

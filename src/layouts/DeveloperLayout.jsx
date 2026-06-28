@@ -78,18 +78,24 @@ const DeveloperLayout = ({ children }) => {
       {/* Top minimal header */}
       <Header activeSection={activeSection} activePersonaId="developer" />
 
-      {/* Content wrapper with sidebar */}
-      <div className="flex-1 w-full relative z-10 pt-28">
-        <div className={`${isBlogPage ? 'w-full' : 'max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 transition-all duration-500'} flex relative`}>
-          {!isBlogPage && (
-            <Sidebar 
-              activeSection={activeSection} 
-              isOpen={isSidebarOpen} 
-              setIsOpen={setIsSidebarOpen} 
-            />
-          )}
+      {/* Content wrapper with spacer for fixed sidebar */}
+      <div className="flex-1 w-full relative z-10 pt-8 lg:pt-12">
+        <div className={`${isBlogPage ? 'w-full' : 'w-11/12 max-w-[1800px] mx-auto px-4 md:px-6 transition-all duration-550 ease-out'} flex gap-8 relative items-start`}>
           
-          <main className={`flex-1 min-w-0 transition-all duration-500 ${!isBlogPage ? (isSidebarOpen ? 'lg:pl-72' : 'lg:pl-24') : ''}`}>
+          {!isBlogPage && (
+            <>
+              {/* Actual fixed sidebar */}
+              <Sidebar
+                activeSection={activeSection}
+                isOpen={isSidebarOpen}
+                setIsOpen={setIsSidebarOpen}
+              />
+              {/* Invisible spacer to reserve space in the flex layout for the fixed sidebar */}
+              <div className={`hidden lg:block shrink-0 transition-all duration-550 ease-[cubic-bezier(0.23,1,0.32,1)] ${isSidebarOpen ? 'w-64' : 'w-20'}`} aria-hidden="true" />
+            </>
+          )}
+
+          <main className="flex-1 min-w-0">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

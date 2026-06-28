@@ -7,6 +7,9 @@ import BlogPost from './components/Blog/BlogPost';
 import SelectPersona from './components/SelectPersona';
 import GalaxyLanding from './components/GalaxyLanding';
 import PersonaLayout from './layouts/PersonaLayout';
+import AdminLayout from './pages/Admin/AdminLayout';
+import Login from './pages/Admin/Login';
+import Dashboard from './pages/Admin/Dashboard';
 import { appConfig } from './config';
 
 function LandingWrapper() {
@@ -36,7 +39,7 @@ function App() {
         {/* Landing page to select a persona */}
         <Route path="/" element={<LandingWrapper />} />
 
-        {/* Existing developer portfolio UI hosted under /developer */}
+        {/* Developer persona — full layout with blog */}
         <Route
           path="/developer/*"
           element={
@@ -51,8 +54,20 @@ function App() {
           }
         />
 
-        {/* Dynamic routing shell for other personas */}
-        <Route path="/:personaId/*" element={<PersonaLayout />} />
+        {/* Writer persona */}
+        <Route path="/writer/*" element={<PersonaLayout />} />
+
+        {/* Friend persona */}
+        <Route path="/friend/*" element={<PersonaLayout />} />
+
+        {/* Philosopher persona */}
+        <Route path="/philosopher/*" element={<PersonaLayout />} />
+
+        {/* Admin Dashboard */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+        </Route>
+        <Route path="/admin/login" element={<Login />} />
 
         {/* Fallback to root landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -62,4 +77,3 @@ function App() {
 }
 
 export default App;
-

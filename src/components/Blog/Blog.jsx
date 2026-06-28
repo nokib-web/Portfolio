@@ -1,31 +1,47 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getAllPosts } from '../../lib/posts'
 import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Magnetic from '../Common/Magnetic'
 import BlogSidebar from './BlogSidebar'
 import Pagination from '../Common/Pagination'
+import { appConfig } from '../../config'
 
 gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORIES = ['All', 'Development', 'Dailylife', 'Religion']
 
-const allPosts = getAllPosts()
-
 export default function Blog() {
+    const [allPosts, setAllPosts] = useState([])
     const [active, setActive] = useState('All')
     const [searchQuery, setSearchQuery] = useState('')
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
+    const [loading, setLoading] = useState(true)
     const postsPerPage = 12
     const containerRef = useRef(null);
 
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const res = await fetch(`${appConfig.apiBaseUrl}/api/blogs?personaId=developer`);
+                const data = await res.json();
+                setAllPosts(data);
+                setLoading(false);
+            } catch (err) {
+                console.error("Failed to fetch blogs:", err);
+                setLoading(false);
+            }
+        };
+        fetchPosts();
+    }, []);
+
     const filtered = allPosts.filter(p => {
         const matchesCategory = active === 'All' || p.tags?.some(t => t.toLowerCase() === active.toLowerCase());
-        const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const desc = (p.excerpt || p.description || '').toLowerCase();
+        const matchesSearch = (p.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            desc.includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
@@ -47,6 +63,7 @@ export default function Blog() {
     };
 
     useGSAP(() => {
+        if (loading) return;
         ScrollTrigger.refresh();
 
         const tl = gsap.timeline({
@@ -89,12 +106,12 @@ export default function Blog() {
                 }
             );
         }
-    }, [filtered.length, active]);
+    }, [filtered.length, active, loading]);
 
     return (
         <div ref={containerRef} className="blog-section relative py-12 transition-all duration-300 min-h-screen">
             <BlogSidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
-            <div className={`max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 transition-all duration-500 relative z-10 ${isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]'}`}>
+            <div className={`w-8/12 max-w-[1200px] mx-auto px-4 sm:px-8 lg:px-12 transition-all duration-500 relative z-10 ${isSidebarOpen ? 'lg:pl-[18rem]' : 'lg:pl-[7rem]'}`}>
                 {/* Header */}
                 <div className="blog-header text-center mb-10 space-y-4">
                     <div className="blog-header-animate inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-slate-100 dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200 dark:border-white/5 text-primary-500 dark:text-primary-400 text-[10px] font-black uppercase tracking-[0.4em] shadow-xl">
@@ -157,8 +174,12 @@ export default function Blog() {
                     </div>
                 </div>
 
-                {/* Posts Grid */}
-                {filtered.length === 0 ? (
+                {/* Loading / Posts Grid */}
+                {loading ? (
+                    <div className="flex justify-center items-center h-48">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
+                    </div>
+                ) : filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 bg-slate-900/5 backdrop-blur-3xl rounded-xl border border-dashed border-slate-200 dark:border-white/10">
                         <span className="material-icons-outlined text-xl text-slate-400 mb-2">inventory_2</span>
                         <p className="text-slate-500 text-xs font-medium tracking-tight">The archive is empty.</p>
@@ -173,7 +194,7 @@ export default function Blog() {
                     <div className="posts-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {paginatedPosts.map(post => (
                             <Link
-                                to={`/blog/${post.slug}`}
+                                to={`/developer/blog/${post.slug}`}
                                 key={post.slug}
                                 onMouseMove={(e) => {
                                     const rect = e.currentTarget.getBoundingClientRect();
@@ -197,7 +218,7 @@ export default function Blog() {
                                         </div>
                                     )}
                                     <div className="absolute top-3 left-3 z-20 px-2.5 py-1 bg-white/90 dark:bg-black/60 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-lg text-[8px] font-black text-slate-900 dark:text-white uppercase tracking-widest shadow-sm">
-                                        {new Date(post.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                        {new Date(post.createdAt || new Date()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                     </div>
                                 </div>
 
@@ -213,12 +234,12 @@ export default function Blog() {
                                         {post.title}
                                     </h3>
                                     <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed line-clamp-2 font-medium group-hover:opacity-100 transition-opacity mb-4">
-                                        {post.description}
+                                        {post.excerpt || post.description || ''}
                                     </p>
                                     <div className="mt-auto flex items-center justify-between">
                                         <div className="flex items-center gap-1.5">
                                             <span className="material-icons-outlined text-[10px] text-primary-500">schedule</span>
-                                            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{post.readTime}m read</span>
+                                            <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{post.readTime?.replace('min read', '')}m read</span>
                                         </div>
                                         <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 flex items-center justify-center group-hover:bg-primary-600 group-hover:border-primary-500 transition-all duration-300">
                                             <span className="material-icons-outlined text-slate-600 dark:text-white text-[12px] group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform font-bold">north_east</span>

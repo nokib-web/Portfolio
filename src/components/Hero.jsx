@@ -4,7 +4,6 @@ import { SiLeetcode, SiCodechef } from 'react-icons/si';
 import Magnetic from './Common/Magnetic';
 import Typewriter from './Common/Typewriter';
 import CozyParticles from './Background/CozyParticles';
-import GlobeHero from './GlobeHero';
 import { problemSolvingLinks } from '../data/portfolioData';
 
 const containerVariants = {
@@ -27,7 +26,7 @@ const itemVariants = {
   },
 };
 
-const Hero = () => {
+const Hero = ({ heroAnchorRef }) => {
   return (
     <section className="relative w-full min-h-[calc(100vh-100px)] flex items-center justify-center overflow-hidden bg-background-light dark:bg-background-dark transition-colors duration-500">
       
@@ -38,7 +37,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#e5e5e0_1px,transparent_1px)] dark:bg-[radial-gradient(#2d2d2a_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none z-0" />
 
       {/* Hero content container */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-4 md:py-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center w-full">
           {/* Left Column (Text & Bio) */}
           <motion.div 
@@ -144,9 +143,14 @@ const Hero = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right Column (Three.js Globe) - Hidden on Mobile */}
+          {/* Right Column — Hero photo anchor (FloatingProfilePhoto renders here) */}
           <div className="col-span-1 md:col-span-5 hidden md:flex items-center justify-center relative w-full h-[400px] md:h-[480px]">
-            <GlobeHero />
+            {/* Invisible anchor — centered in column, sized to match the floating photo */}
+            <div
+              ref={heroAnchorRef}
+              style={{ width: 340, height: 340, borderRadius: 20, opacity: 0, background: 'transparent' }}
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>

@@ -20,7 +20,8 @@ const Sidebar = ({ activeSection, isOpen, setIsOpen }) => {
 
     return (
         <aside
-            className={`fixed left-4 top-24 bottom-4 z-40 transition-all duration-550 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-[#1a1f2e]/95 border border-slate-800/80 rounded-[2rem] shadow-2xl overflow-hidden ${
+            style={{ left: 'max(calc((100vw - 1800px) / 2 + 1.5rem), calc(100vw / 24 + 1.5rem))' }}
+            className={`fixed top-28 h-[calc(100vh-8rem)] z-40 transition-all duration-550 ease-[cubic-bezier(0.23,1,0.32,1)] hidden lg:flex flex-col bg-[#1a1f2e]/95 border border-slate-800/80 rounded-[2rem] shadow-2xl overflow-hidden shrink-0 ${
                 isOpen ? 'w-64' : 'w-20'
             }`}
         >

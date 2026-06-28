@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Typewriter from './Common/Typewriter';
+import { appConfig } from '../config';
 
 /* ─── animation variants ─────────────────────────────────────── */
 const fadeUp = (delay = 0) => ({
@@ -16,49 +18,65 @@ const formatDate = (dateStr) => {
 };
 
 /* ─── EssayCard ──────────────────────────────────────────────── */
-const EssayCard = ({ essay, index }) => (
+const EssayCard = ({ essay, index, personaId }) => (
   <motion.article
     {...fadeUp(0.1 * index)}
     className="group border-b border-stone-200 dark:border-stone-800 py-10 first:border-t"
   >
-    {/* Tags */}
-    <div className="flex items-center gap-2 mb-3">
-      {essay.tags.map((tag) => (
-        <span
-          key={tag}
-          className="text-[10px] uppercase tracking-widest font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 px-2 py-0.5 rounded-full"
-        >
-          {tag}
+    <Link to={`/${personaId}/blog/${essay.slug}`} className="block">
+      {/* Tags */}
+      <div className="flex items-center gap-2 mb-3">
+        {essay.tags.map((tag) => (
+          <span
+            key={tag}
+            className="text-[10px] uppercase tracking-widest font-semibold text-amber-700 dark:text-amber-405 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 px-2 py-0.5 rounded-full"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {/* Title */}
+      <h2 className="text-2xl md:text-3xl font-bold font-serif text-stone-900 dark:text-stone-100 leading-snug mb-3 group-hover:text-amber-800 dark:group-hover:text-amber-405 transition-colors duration-300">
+        {essay.title}
+      </h2>
+
+      {/* Excerpt */}
+      <p className="text-stone-600 dark:text-stone-350 text-lg leading-relaxed font-serif mb-4 max-w-2xl">
+        {essay.excerpt}
+      </p>
+
+      {/* Meta */}
+      <div className="flex items-center gap-4 text-sm text-stone-400 dark:text-stone-500 font-sans">
+        <span>{formatDate(essay.createdAt || essay.date)}</span>
+        <span className="text-stone-300 dark:text-stone-700">·</span>
+        <span>{essay.readTime}</span>
+        <span className="ml-auto text-amber-700 dark:text-amber-450 font-semibold text-sm group-hover:translate-x-1 transition-transform duration-300">
+          Read →
         </span>
-      ))}
-    </div>
-
-    {/* Title */}
-    <h2 className="text-2xl md:text-3xl font-bold font-serif text-stone-900 dark:text-stone-100 leading-snug mb-3 group-hover:text-amber-800 dark:group-hover:text-amber-400 transition-colors duration-300 cursor-pointer">
-      {essay.title}
-    </h2>
-
-    {/* Excerpt */}
-    <p className="text-stone-600 dark:text-stone-350 text-lg leading-relaxed font-serif mb-4 max-w-2xl">
-      {essay.excerpt}
-    </p>
-
-    {/* Meta */}
-    <div className="flex items-center gap-4 text-sm text-stone-400 dark:text-stone-500 font-sans">
-      <span>{formatDate(essay.date)}</span>
-      <span className="text-stone-300 dark:text-stone-700">·</span>
-      <span>{essay.readTime}</span>
-      <span className="ml-auto text-amber-700 dark:text-amber-400 font-semibold text-sm group-hover:translate-x-1 transition-transform duration-300">
-        Read →
-      </span>
-    </div>
+      </div>
+    </Link>
   </motion.article>
 );
 
 /* ─── WriterHome (main export) ───────────────────────────────── */
 const WriterHome = ({ persona }) => {
   const [typewriterDone, setTypewriterDone] = useState(false);
-  const essays = persona.essays || [];
+  const [essays, setEssays] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${appConfig.apiBaseUrl}/api/blogs?personaId=writer`)
+      .then(res => res.json())
+      .then(data => {
+        setEssays(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch writer essays:", err);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div
@@ -67,7 +85,7 @@ const WriterHome = ({ persona }) => {
     >
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section id="hero" className="max-w-3xl mx-auto px-6 pt-20 pb-16">
+      <section id="hero" className="w-8/12 max-w-[1200px] mx-auto px-4 pt-20 pb-16">
         {/* Eyebrow */}
         <motion.div {...fadeUp(0)} className="mb-6">
           <span className="inline-block text-xs font-sans font-bold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-405 border-b-2 border-amber-300 dark:border-amber-800 pb-0.5">
@@ -111,7 +129,7 @@ const WriterHome = ({ persona }) => {
       </section>
 
       {/* ── ESSAYS LIST ───────────────────────────────────────── */}
-      <section id="essays" className="max-w-3xl mx-auto px-6 pb-20">
+      <section id="essays" className="w-8/12 max-w-[1200px] mx-auto px-4 pb-20">
         <motion.h2
           {...fadeUp(0.2)}
           className="text-xs font-sans font-bold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 mb-2"
@@ -120,14 +138,18 @@ const WriterHome = ({ persona }) => {
         </motion.h2>
 
         <div>
-          {essays.map((essay, idx) => (
-            <EssayCard key={essay.slug} essay={essay} index={idx} />
-          ))}
-
-          {essays.length === 0 && (
+          {loading ? (
+            <p className="text-stone-400 dark:text-stone-550 italic py-10 text-center">
+              Loading essays...
+            </p>
+          ) : essays.length === 0 ? (
             <p className="text-stone-400 dark:text-stone-550 italic py-10 text-center">
               No essays yet — check back soon.
             </p>
+          ) : (
+            essays.map((essay, idx) => (
+              <EssayCard key={essay.slug} essay={essay} index={idx} personaId={persona.personaId || persona.id} />
+            ))
           )}
         </div>
       </section>
@@ -207,7 +229,7 @@ const WriterHome = ({ persona }) => {
       {/* ── FOOTER ────────────────────────────────────────────── */}
       <footer className="border-t border-stone-200 dark:border-stone-850 bg-[#fdfbf7] dark:bg-stone-950">
         <div className="max-w-3xl mx-auto px-6 py-8 flex items-center justify-between text-xs font-sans text-stone-400 dark:text-stone-550">
-          <span>© {new Date().getFullYear()} Nokib Sarkar</span>
+          <span>© {new Date().getFullYear()} Nokib</span>
           <span className="italic">Written with care.</span>
         </div>
       </footer>

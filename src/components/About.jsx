@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const About = () => {
+const About = ({ aboutAnchorRef }) => {
     const containerRef = useRef(null);
 
     useGSAP(() => {
@@ -28,24 +28,16 @@ const About = () => {
             }
         );
 
-        // Image and content stagger
-        tl.fromTo(".about-image",
-            { opacity: 0, scale: 0.8 },
+        // Image area fade-in (no longer needed for floating photo, keep for content)
+        tl.fromTo(".about-content p",
+            { opacity: 0, y: 20 },
             {
                 opacity: 1,
-                scale: 1,
-                duration: 1,
-                ease: "back.out(1.7)"
-            }, "-=0.4")
-            .fromTo(".about-content p",
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    stagger: 0.2,
-                    duration: 0.8,
-                    ease: "power2.out"
-                }, "-=0.6");
+                y: 0,
+                stagger: 0.2,
+                duration: 0.8,
+                ease: "power2.out"
+            }, "-=0.4");
 
         // Interests cards animation
         gsap.fromTo(".interest-card",
@@ -80,13 +72,15 @@ const About = () => {
 
             <div className="flex flex-col lg:flex-row gap-12">
 
-                <div className="lg:w-1/3 about-image">
-                    <img
-                        alt="Nokib Profile"
-                        className="rounded-2xl shadow-lg w-full h-auto object-cover transform hover:scale-[1.02] transition-transform duration-500"
-                        src="https://i.ibb.co.com/gLxfJKQQ/nokib111.png"
-                        onLoad={() => ScrollTrigger.refresh()}
-                    />
+                <div className="lg:w-1/3 about-image relative">
+                    <div className="sticky top-[25vh] mt-8 flex justify-center">
+                        {/* Invisible anchor — the floating photo lands here */}
+                        <div
+                            ref={aboutAnchorRef}
+                            style={{ width: 280, height: 280, borderRadius: '20px', opacity: 0, background: 'transparent', flexShrink: 0 }}
+                            aria-hidden="true"
+                        />
+                    </div>
                 </div>
 
                 <div className="lg:w-2/3 about-content">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { personas } from '../data/personasData';
+import ImageGlobe from './ImageGlobe';
 
 const GalaxyLanding = ({ onViewModeChange }) => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const GalaxyLanding = ({ onViewModeChange }) => {
     if (!hoveredPersona) return null;
     const index = personas.findIndex((p) => p.id === hoveredPersona.id);
     const angle = (index / personas.length) * 2 * Math.PI - Math.PI / 2;
-    const radius = 35; // orbit radius percentage
+    const radius = 38; // orbit radius percentage (increased for responsive spacing)
     return {
       x2: `${50 + Math.cos(angle) * radius}%`,
       y2: `${50 + Math.sin(angle) * radius}%`,
@@ -70,36 +71,41 @@ const GalaxyLanding = ({ onViewModeChange }) => {
       <div className="absolute top-1/2 left-1/2 w-[55vmin] h-[55vmin] bg-fuchsia-600/10 rounded-full blur-[90px] pointer-events-none animate-nebula-float-2" />
 
       {/* Header Info */}
-      <div className="absolute top-8 left-8 z-30">
-        <h2 className="text-lg md:text-xl font-bold tracking-[0.25em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-slate-200 to-slate-400">
+      <div className="absolute top-6 left-4 md:top-8 md:left-8 z-30 max-w-[60%] md:max-w-none">
+        <h2 className="text-sm md:text-xl font-bold tracking-[0.15em] md:tracking-[0.25em] uppercase bg-clip-text text-transparent bg-gradient-to-r from-slate-200 to-slate-400 leading-tight">
           Nazmul Hasan Nokib
         </h2>
-        <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] mt-1">
+        <p className="text-[8px] md:text-[10px] text-slate-500 uppercase tracking-[0.2em] md:tracking-[0.3em] mt-1">
           Interactive Portfolio
         </p>
       </div>
 
       {/* View Switcher Toggle */}
-      <div className="absolute top-8 right-8 z-30">
+      <div className="absolute top-6 right-4 md:top-8 md:right-8 z-30">
         <button
           onClick={onViewModeChange}
-          className="flex items-center space-x-2 px-4 py-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-slate-300 hover:text-white text-xs font-semibold uppercase tracking-widest transition-all duration-300 backdrop-blur-md shadow-lg"
+          className="flex items-center space-x-1.5 md:space-x-2 px-3 py-2 md:px-4 md:py-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-slate-300 hover:text-white text-[10px] md:text-xs font-semibold uppercase tracking-widest transition-all duration-300 backdrop-blur-md shadow-lg"
         >
           <span className="material-icons-outlined text-sm">grid_view</span>
-          <span>Classic Grid</span>
+          <span className="hidden sm:inline">Classic Grid</span>
         </button>
       </div>
 
-      {/* Orbit Rings (Beneath everything) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vmin] h-[70vmin] rounded-full border border-dashed border-indigo-500/10 pointer-events-none z-0" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vmin] h-[70vmin] rounded-full border border-indigo-500/5 pointer-events-none z-0 scale-[1.03]" />
+      {/* Central 3D Globe (Always Mounted - Full-Screen Viewport) */}
+      <div className="absolute inset-0 w-full h-full pointer-events-auto z-10 overflow-hidden">
+        <ImageGlobe activePersona={hoveredPersona} />
+      </div>
 
       {/* Outer Orbit Area */}
-      <div className="relative w-[80vmin] h-[80vmin] max-w-4xl max-h-4xl flex items-center justify-center">
+      <div className="relative w-[92vw] h-[92vw] sm:w-[78vmin] sm:h-[78vmin] md:w-[80vmin] md:h-[80vmin] max-w-4xl max-h-4xl flex items-center justify-center pointer-events-none z-20">
+        
+        {/* Orbit Rings (Placed inside relative parent container so they scale dynamically at 76%) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[76%] h-[76%] rounded-full border border-dashed border-indigo-500/10 pointer-events-none z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[76%] h-[76%] rounded-full border border-indigo-500/5 pointer-events-none z-0 scale-[1.03]" />
 
         {/* Rotating Planets Container */}
         <div
-          className="absolute inset-0 animate-galaxy-spin"
+          className="absolute inset-0 animate-galaxy-spin pointer-events-none"
           style={{ animationPlayState: hoveredPersona ? 'paused' : 'running' }}
         >
           {/* SVG Constellation Line (inside the rotating space so it aligns automatically) */}
@@ -129,7 +135,7 @@ const GalaxyLanding = ({ onViewModeChange }) => {
 
           {personas.map((persona, index) => {
             const angle = (index / personas.length) * 2 * Math.PI - Math.PI / 2;
-            const radius = 35; // percentage
+            const radius = 38; // percentage (increased for responsive spacing)
             const left = `calc(50% + ${Math.cos(angle) * radius}%)`;
             const top = `calc(50% + ${Math.sin(angle) * radius}%)`;
             const Icon = persona.icon;
@@ -137,7 +143,7 @@ const GalaxyLanding = ({ onViewModeChange }) => {
             return (
               <div
                 key={persona.id}
-                className="absolute flex flex-col items-center justify-center cursor-pointer group z-10 animate-planet-counter-spin"
+                className="absolute flex flex-col items-center justify-center cursor-pointer group z-30 animate-planet-counter-spin pointer-events-auto"
                 style={{
                   top,
                   left,
@@ -148,7 +154,7 @@ const GalaxyLanding = ({ onViewModeChange }) => {
                 onClick={() => handlePlanetClick(persona.route)}
               >
                 {/* Celestial Planet Body */}
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full shadow-[0_0_30px_rgba(99,102,241,0.05)] group-hover:scale-110 transition-all duration-500 overflow-hidden ring-1 ring-white/10 group-hover:ring-white/40 group-hover:shadow-[0_0_50px_rgba(244,63,94,0.25)]">
+                <div className="relative w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full shadow-[0_0_30px_rgba(99,102,241,0.05)] group-hover:scale-110 transition-all duration-500 overflow-hidden ring-1 ring-white/10 group-hover:ring-white/40 group-hover:shadow-[0_0_50px_rgba(244,63,94,0.25)]">
                   {/* Planet Texture Gradient */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${persona.theme.gradient} opacity-85 group-hover:opacity-100 transition-opacity duration-300`} />
 
@@ -160,12 +166,12 @@ const GalaxyLanding = ({ onViewModeChange }) => {
 
                   {/* Icon */}
                   <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <Icon className="text-3xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] group-hover:scale-110 transition-transform duration-300" />
+                    <Icon className="text-xl sm:text-2xl md:text-3xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)] group-hover:scale-110 transition-transform duration-300" />
                   </div>
                 </div>
 
                 {/* Planet Label */}
-                <span className="mt-4 text-xs md:text-sm font-bold tracking-[0.2em] uppercase text-slate-400 group-hover:text-white transition-colors duration-300">
+                <span className="mt-1 md:mt-3 text-[9px] sm:text-xs md:text-sm font-bold tracking-[0.1em] md:tracking-[0.2em] uppercase text-slate-400 group-hover:text-white transition-colors duration-300 text-center max-w-[70px] sm:max-w-[100px] md:max-w-none break-words leading-tight">
                   {persona.title}
                 </span>
               </div>
@@ -173,53 +179,44 @@ const GalaxyLanding = ({ onViewModeChange }) => {
           })}
         </div>
 
-        {/* Central Info / Description Panel (Non-rotating) */}
-        <AnimatePresence mode="wait">
-          {hoveredPersona ? (
-            <motion.div
-              key="description"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.25 }}
-              className="absolute w-64 md:w-80 p-8 bg-slate-950/80 border border-slate-800/80 backdrop-blur-xl rounded-3xl text-center pointer-events-none z-20 shadow-[0_0_60px_rgba(0,0,0,0.85)]"
-            >
-              <h3 className={`text-xl font-black mb-3 bg-clip-text text-transparent bg-gradient-to-r ${hoveredPersona.theme.gradient} tracking-wide`}>
-                {hoveredPersona.title}
-              </h3>
-              <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.2em] mb-3">
-                {hoveredPersona.tagline}
-              </p>
-              <p className="text-slate-300 text-sm leading-relaxed font-light font-body">
-                {hoveredPersona.description}
-              </p>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="instruction"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute pointer-events-none z-0 flex flex-col items-center justify-center text-center"
-            >
-              <div className="text-indigo-500/10 text-9xl material-icons-outlined select-none animate-pulse">
-                language
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
       </div>
 
+      {/* Floating Description Overlay (Fades on top of the globe in the absolute center) */}
+      <AnimatePresence>
+        {hoveredPersona && (
+          <motion.div
+            key="description"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.25 }}
+            className="absolute w-64 md:w-80 p-8 bg-slate-950/90 border border-indigo-500/25 backdrop-blur-xl rounded-3xl text-center pointer-events-none z-20 shadow-[0_0_50px_rgba(99,102,241,0.2)]"
+          >
+            <h3 className={`text-xl font-black mb-3 pb-1 leading-relaxed bg-clip-text text-transparent bg-gradient-to-r ${hoveredPersona.theme.gradient} tracking-wide`}>
+              {hoveredPersona.title}
+            </h3>
+            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-[0.2em] mb-3">
+              {hoveredPersona.tagline}
+            </p>
+            <p className="text-slate-300 text-sm leading-relaxed font-light font-body">
+              {hoveredPersona.description}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Footer Helper text */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-500 text-[10px] uppercase tracking-[0.4em] pointer-events-none text-center w-full px-4"
-      >
-        Hover over a planet to scan • Click to land
-      </motion.div>
+      <div className="absolute bottom-6 w-full flex justify-center md:justify-end md:bottom-8 md:pr-8 pointer-events-none z-30">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="text-slate-400 text-[8px] md:text-[10px] uppercase tracking-[0.2em] flex items-center space-x-1.5 md:space-x-2 bg-white/5 border border-white/10 px-3 py-2 md:px-4 md:py-2.5 rounded-full backdrop-blur-md shadow-lg whitespace-nowrap"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-ping shrink-0" />
+          <span>Hover to scan • Click to land</span>
+        </motion.div>
+      </div>
     </motion.div>
   );
 };

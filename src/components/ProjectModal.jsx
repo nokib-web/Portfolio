@@ -56,7 +56,7 @@ const ProjectModal = ({ project, onClose }) => {
                     <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">{project.title}</h2>
 
                     <div className="flex flex-wrap gap-2 mb-6">
-                        {project.tech.map((t, i) => (
+                        {(project.techStack || project.tech || []).map((t, i) => (
                             <span key={i} className="px-3 py-1 text-xs font-semibold bg-primary/10 text-primary rounded-full border border-primary/20">
                                 {t}
                             </span>
@@ -93,9 +93,9 @@ const ProjectModal = ({ project, onClose }) => {
                                 <span className="material-icons-outlined ml-2 text-sm">open_in_new</span>
                             </a>
                         )}
-                        {project.codeLink && (
+                        {(project.githubLink || project.codeLink) && (
                             <a
-                                href={project.codeLink}
+                                href={project.githubLink || project.codeLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-lg transition-colors"

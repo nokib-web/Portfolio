@@ -13,18 +13,18 @@ const SelectPersona = ({ onViewModeChange }) => {
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 rounded-full blur-[120px]" />
 
       {/* View Switcher Toggle */}
-      <div className="absolute top-8 right-8 z-30">
+      <div className="absolute top-6 right-4 md:top-8 md:right-8 z-30">
         <button
           onClick={onViewModeChange}
-          className="flex items-center space-x-2 px-4 py-2.5 rounded-full border border-slate-800 bg-slate-900/40 hover:bg-slate-900/80 hover:border-slate-700/60 text-slate-350 hover:text-white text-xs font-semibold uppercase tracking-widest transition-all duration-300 backdrop-blur-md shadow-lg"
+          className="flex items-center space-x-1.5 md:space-x-2 px-3 py-2 md:px-4 md:py-2.5 rounded-full border border-slate-800 bg-slate-900/40 hover:bg-slate-900/80 hover:border-slate-700/60 text-slate-350 hover:text-white text-[10px] md:text-xs font-semibold uppercase tracking-widest transition-all duration-300 backdrop-blur-md shadow-lg"
         >
           <span className="material-icons-outlined text-sm">auto_awesome</span>
-          <span>Galaxy Layout</span>
+          <span className="hidden sm:inline">Galaxy Layout</span>
         </button>
       </div>
 
 
-      <div className="z-10 text-center max-w-2xl mb-16">
+      <div className="z-10 text-center max-w-2xl mt-12 md:mt-0 mb-12 md:mb-16">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -4,8 +4,8 @@ import { FaGithub } from "react-icons/fa";
 import { motion } from 'framer-motion';
 import MobileMenu from './MobileMenu';
 import PersonaSelectorModal from './PersonaSelectorModal';
-import { projects, skills } from '../data/portfolioData';
-import { posts } from '../lib/posts';
+import { skills } from '../data/portfolioData';
+import { appConfig } from '../config';
 
 const Header = ({ activeSection, activePersonaId = 'developer', light = false }) => {
     const location = useLocation();
@@ -46,6 +46,22 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
     const [showResults, setShowResults] = useState(false);
     const searchInputRef = useRef(null);
 
+    const [liveProjects, setLiveProjects] = useState([]);
+    const [liveBlogs, setLiveBlogs] = useState([]);
+
+    // Fetch live data for search index
+    useEffect(() => {
+        fetch(`${appConfig.apiBaseUrl}/api/projects`)
+            .then(res => res.json())
+            .then(data => setLiveProjects(data))
+            .catch(err => console.error(err));
+
+        fetch(`${appConfig.apiBaseUrl}/api/blogs`)
+            .then(res => res.json())
+            .then(data => setLiveBlogs(data))
+            .catch(err => console.error(err));
+    }, []);
+
     // Apply theme to DOM when isDarkMode changes
     useEffect(() => {
         if (isDarkMode) {
@@ -67,12 +83,12 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
         const query = searchQuery.toLowerCase();
         const results = [];
 
-        // Search Projects
-        projects.forEach(project => {
+        // Search Projects (Live)
+        liveProjects.forEach(project => {
             if (
                 project.title.toLowerCase().includes(query) ||
                 project.description.toLowerCase().includes(query) ||
-                project.tech.some(t => t.toLowerCase().includes(query))
+                (project.tech && project.tech.some(t => t.toLowerCase().includes(query)))
             ) {
                 results.push({ type: 'Project', title: project.title, link: '#projects', icon: 'code' });
             }
@@ -87,11 +103,11 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
             });
         });
 
-        // Search Blog Posts
-        posts.forEach(post => {
+        // Search Blog Posts (Live)
+        liveBlogs.forEach(post => {
             if (
                 post.title.toLowerCase().includes(query) ||
-                post.tags?.some(tag => tag.toLowerCase().includes(query))
+                (post.tags && post.tags.some(tag => tag.toLowerCase().includes(query)))
             ) {
                 results.push({
                     type: 'Blog',
@@ -272,17 +288,18 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
             );
         }
 
-        if (activePersonaId === 'philosopher') {
+        // Custom Persona fallback (Philosopher, etc)
+        if (activePersonaId !== 'developer' && activePersonaId !== 'writer' && activePersonaId !== 'friend') {
             return (
                 <nav className="hidden md:flex items-center space-x-1 font-serif">
                     <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#treatise">
-                        Treatise
+                        Featured Work
                     </a>
                     <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#expertise">
                         Expertise
                     </a>
-                    <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#epistemology">
-                        Epistemology
+                    <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#writings">
+                        Writings
                     </a>
                 </nav>
             );
@@ -349,7 +366,7 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
         <header className={`fixed top-0 w-full z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform backdrop-blur-md ${headerClass} ${
             isVisible ? 'translate-y-0' : '-translate-y-full'
         }`}>
-            <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
+            <div className="w-11/12 max-w-[1800px] mx-auto px-4 md:px-6 h-20 flex items-center justify-between">
                 
                 {/* Brand Logo & Nav */}
                 <div className="flex items-center space-x-10">

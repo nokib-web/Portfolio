@@ -1,18 +1,33 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ProjectModal from './ProjectModal';
 import Pagination from './Common/Pagination';
-import { projects } from '../data/portfolioData';
+import { appConfig } from '../config';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Projects = () => {
     const [selectedProject, setSelectedProject] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
     const projectsPerPage = 8;
     const containerRef = useRef(null);
+
+    useEffect(() => {
+        fetch(`${appConfig.apiBaseUrl}/api/projects?personaId=developer`)
+            .then(res => res.json())
+            .then(data => {
+                setProjects(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to fetch projects", err);
+                setLoading(false);
+            });
+    }, []);
 
     const totalPages = Math.ceil(projects.length / projectsPerPage);
     const paginatedProjects = projects.slice(
@@ -114,7 +129,12 @@ const Projects = () => {
                 </div>
 
                 {/* Projects Grid */}
-                <div className="projects-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                {loading ? (
+                    <div className="flex justify-center items-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
+                    </div>
+                ) : (
+                    <div className="projects-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                     {paginatedProjects.map((project, index) => (
                         <article
                             key={index}
@@ -145,7 +165,7 @@ const Projects = () => {
 
                                 {/* Primary Tech Badges */}
                                 <div className="absolute bottom-3 left-3 z-20 flex gap-1.5 sm:gap-2">
-                                    {project.tech.slice(0, 2).map((tech, i) => (
+                                    {(project.techStack || project.tech || []).slice(0, 2).map((tech, i) => (
                                         <span
                                             key={i}
                                             className="px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-200 rounded-lg backdrop-blur-sm shadow-lg border border-white/50 dark:border-slate-700/50 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500"
@@ -174,7 +194,7 @@ const Projects = () => {
 
                                 {/* Tech Stack */}
                                 <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                                    {project.tech.slice(0, 4).map((tech, i) => (
+                                    {(project.techStack || project.tech || []).slice(0, 4).map((tech, i) => (
                                         <span
                                             key={i}
                                             className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-semibold bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 rounded-md border border-slate-200 dark:border-slate-700/50 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors duration-300"
@@ -182,9 +202,9 @@ const Projects = () => {
                                             {tech}
                                         </span>
                                     ))}
-                                    {project.tech.length > 4 && (
+                                    {(project.techStack || project.tech || []).length > 4 && (
                                         <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-semibold bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-md border border-primary-200 dark:border-primary-800">
-                                            +{project.tech.length - 4} more
+                                            +{(project.techStack || project.tech || []).length - 4} more
                                         </span>
                                     )}
                                 </div>
@@ -202,7 +222,8 @@ const Projects = () => {
                             <div className="absolute inset-0 rounded-2xl ring-2 ring-primary-500/0 group-hover:ring-primary-500/30 dark:group-hover:ring-primary-500/20 transition-all duration-700 pointer-events-none" />
                         </article>
                     ))}
-                </div>
+                    </div>
+                )}
 
                 <Pagination
                     currentPage={currentPage}

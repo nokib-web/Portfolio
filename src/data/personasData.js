@@ -21,7 +21,7 @@ export const personas = [
   },
   {
     id: 'philosopher',
-    title: 'Deep Thinker / Philosopher',
+    title: 'Deep Thinker',
     slug: 'philosopher',
     route: '/philosopher',
     tagline: "Asking the big questions about life and tech.",

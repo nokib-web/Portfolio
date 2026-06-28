@@ -31,7 +31,7 @@ const FriendHome = ({ persona }) => {
       {/* Grid Pattern Overlay for scrapbook feel */}
       <div className="absolute inset-0 bg-[radial-gradient(#e5e5e0_1px,transparent_1px)] dark:bg-[radial-gradient(#2d2d2a_1px,transparent_1px)] [background-size:24px_24px] opacity-60 pointer-events-none" />
 
-      <div className="max-w-4xl mx-auto px-6 py-20 relative z-10 space-y-28">
+      <div className="w-8/12 max-w-[1200px] mx-auto px-4 py-20 relative z-10 space-y-28">
 
         {/* HERO / BIO */}
         <section id="greeting" className="space-y-8">
