@@ -16,9 +16,22 @@ app.use(express.urlencoded({ extended: true }));
 // Database connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/pixelora-portfolio';
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+let isConnected = false;
+const connectDB = async () => {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(MONGODB_URI);
+    isConnected = true;
+    console.log('✅ Connected to MongoDB');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err);
+  }
+};
+
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // Define Routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -32,11 +45,13 @@ app.get('/', (req, res) => {
   res.send('Portfolio Backend API is running!');
 });
 
-// Start server only if not running in Vercel (serverless)
-if (process.env.NODE_ENV !== 'production') {
+// Start server only if run directly (local development)
+if (require.main === module) {
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   });
 }
 
