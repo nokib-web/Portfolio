@@ -12,4 +12,7 @@ export default defineConfig({
     }),
     react(),
   ],
+  build: {
+    chunkSizeWarningLimit: 2000,
+  }
 })
