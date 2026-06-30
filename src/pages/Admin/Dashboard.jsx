@@ -31,7 +31,8 @@ const Dashboard = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (res.ok) setItems(data);
+      if (res.ok) setItems(Array.isArray(data) ? data : []);
+      else setItems([]);
     } catch (err) {
       console.error(err);
     }

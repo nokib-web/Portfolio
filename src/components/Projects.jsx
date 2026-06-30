@@ -20,7 +20,7 @@ const Projects = () => {
         fetch(`${appConfig.apiBaseUrl}/api/projects?personaId=developer`)
             .then(res => res.json())
             .then(data => {
-                setProjects(data);
+                setProjects(Array.isArray(data) ? data : []);
                 setLoading(false);
             })
             .catch(err => {

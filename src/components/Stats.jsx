@@ -16,7 +16,7 @@ const Stats = () => {
             try {
                 const response = await fetch(`${appConfig.apiBaseUrl}/api/stats?personaId=developer`);
                 const data = await response.json();
-                setStatsData(data);
+                setStatsData(Array.isArray(data) ? data : []);
                 setLoading(false);
             } catch (error) {
                 console.error("Failed to fetch stats:", error);

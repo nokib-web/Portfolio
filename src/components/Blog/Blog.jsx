@@ -27,7 +27,7 @@ export default function Blog() {
             try {
                 const res = await fetch(`${appConfig.apiBaseUrl}/api/blogs?personaId=developer`);
                 const data = await res.json();
-                setAllPosts(data);
+                setAllPosts(Array.isArray(data) ? data : []);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch blogs:", err);
