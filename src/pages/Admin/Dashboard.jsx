@@ -102,6 +102,11 @@ const Dashboard = () => {
       const res = await fetch(`${appConfig.apiBaseUrl}${endpoint}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+        return;
+      }
       const data = await res.json();
       if (res.ok) setItems(Array.isArray(data) ? data : []);
       else setItems([]);
@@ -198,6 +203,11 @@ const Dashboard = () => {
             [activeTab]: updatedArray
           })
         });
+        if (res.status === 401) {
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin/login';
+          return;
+        }
         if (res.ok) {
           fetchItems();
           setItemToDelete(null);
@@ -217,6 +227,11 @@ const Dashboard = () => {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+        return;
+      }
       if (res.ok) {
         fetchItems();
         setItemToDelete(null);
@@ -255,6 +270,12 @@ const Dashboard = () => {
             [activeTab]: updatedArray
           })
         });
+
+        if (res.status === 401) {
+          localStorage.removeItem('adminToken');
+          window.location.href = '/admin/login';
+          return;
+        }
 
         if (res.ok) {
           setIsModalOpen(false);
@@ -297,6 +318,12 @@ const Dashboard = () => {
         },
         body: JSON.stringify(parsedData)
       });
+
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        window.location.href = '/admin/login';
+        return;
+      }
 
       if (res.ok) {
         setIsModalOpen(false);
