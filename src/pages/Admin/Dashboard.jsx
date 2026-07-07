@@ -552,7 +552,8 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in-up">
+    <>
+      <div className="space-y-6 animate-fade-in-up">
       {/* Main Sidebar + Content Grid */}
       <div className="flex flex-col md:flex-row gap-8 relative">
         {/* Sidebar */}
@@ -579,23 +580,34 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {getTabsForPersona(activePersonaTab).map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`w-full px-5 py-4 rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] transition-all duration-350 border flex items-center ${
-                isSidebarOpen ? 'justify-start space-x-3.5' : 'justify-center'
-              } ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 border-indigo-400/20 text-white shadow-[0_0_20px_rgba(99,102,241,0.25)]'
-                  : 'bg-slate-900/40 border-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-800/60 hover:border-slate-700'
-              }`}
-              title={!isSidebarOpen ? `${tab.label} Management` : ''}
-            >
-              <span className="material-icons-outlined text-base shrink-0">{tab.icon}</span>
-              {isSidebarOpen && <span>{tab.label}</span>}
-            </button>
-          ))}
+          {(personasData.length > 0 ? personasData : personas).map(p => {
+            const targetId = p.personaId || p.id;
+            let icon = 'person';
+            if (targetId === 'developer') icon = 'code';
+            else if (targetId === 'writer') icon = 'history_edu';
+            else if (targetId === 'friend') icon = 'people_outline';
+            else if (targetId === 'philosopher') icon = 'psychology';
+
+            const isActive = activePersonaTab === targetId;
+
+            return (
+              <button
+                key={targetId}
+                onClick={() => handlePersonaTabChange(targetId)}
+                className={`w-full px-5 py-4 rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] transition-all duration-350 border flex items-center ${
+                  isSidebarOpen ? 'justify-start space-x-3.5' : 'justify-center'
+                } ${
+                  isActive
+                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 border-indigo-400/20 text-white shadow-[0_0_20px_rgba(99,102,241,0.25)]'
+                    : 'bg-slate-900/40 border-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-800/60 hover:border-slate-700'
+                }`}
+                title={!isSidebarOpen ? p.title : ''}
+              >
+                <span className="material-icons-outlined text-base shrink-0">{icon}</span>
+                {isSidebarOpen && <span>{p.title}</span>}
+              </button>
+            );
+          })}
         </aside>
 
         {/* Main Panel */}
@@ -612,26 +624,31 @@ const Dashboard = () => {
                 <span className="capitalize">{getTabsForPersona(activePersonaTab).find(t => t.id === activeTab)?.label || activeTab} Management</span>
               </h2>
               <div className="flex gap-2 mt-4 overflow-x-auto pb-1 scrollbar-hide">
-                {(personasData.length > 0 ? personasData : personas).map(p => {
-                  const targetId = p.personaId || p.id;
-                  return (
-                    <button
-                      key={targetId}
-                      onClick={() => handlePersonaTabChange(targetId)}
-                      className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${
-                        activePersonaTab === targetId
-                          ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.15)]' 
-                          : 'bg-slate-900/60 border-slate-800 text-slate-500 hover:text-slate-350 hover:border-slate-700'
-                      }`}
-                    >
-                      {p.title}
-                    </button>
-                  );
-                })}
+                {getTabsForPersona(activePersonaTab).map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${
+                      activeTab === tab.id
+                        ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.15)]' 
+                        : 'bg-slate-900/60 border-slate-800 text-slate-500 hover:text-slate-350 hover:border-slate-700'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
             </div>
             
-            {activeTab !== 'quote' && (
+            {activeTab === 'quote' ? (
+              <button 
+                onClick={() => handleEdit(items[0] || { quote: '', attribution: '' })}
+                className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 border border-indigo-400/20 text-white px-5 py-3 rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-all duration-300 flex items-center space-x-2 shrink-0"
+              >
+                <span className="material-icons-outlined text-sm">edit</span>
+                <span>Update Quote</span>
+              </button>
+            ) : (
               <button 
                 onClick={handleCreate}
                 className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 border border-indigo-400/20 text-white px-5 py-3 rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-all duration-300 flex items-center space-x-2 shrink-0"
@@ -691,46 +708,55 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+    </div>
 
       {/* Form Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 overflow-y-auto py-10 md:py-20">
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setIsModalOpen(false)}></div>
-          <div className="relative bg-slate-900/95 border border-slate-800 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col">
-            <div className="p-6 border-b border-slate-800/85 flex justify-between items-center bg-slate-950/20">
-              <h3 className="text-lg font-display font-black text-white flex items-center gap-3">
+        <div className="fixed inset-0 z-[100] bg-slate-950 w-screen h-screen flex flex-col overflow-hidden animate-fade-in">
+          {/* Header */}
+          <div className="p-6 border-b border-slate-800/80 bg-slate-950/40 flex shrink-0 w-full">
+            <div className="max-w-4xl mx-auto w-full flex justify-between items-center">
+              <h3 className="text-lg md:text-xl font-display font-black text-white flex items-center gap-3">
                 <span>{editingItem ? 'Edit Item' : 'Create New Item'}</span>
                 <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-950/60 text-indigo-400 border border-indigo-900/40">
                   Persona: {formData.personaId}
                 </span>
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="p-1.5 rounded-xl bg-slate-950/40 border border-slate-800 hover:bg-slate-850 text-slate-400 hover:text-white transition-all">
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-all shadow-inner"
+              >
                 <span className="material-icons-outlined text-sm flex items-center justify-center">close</span>
               </button>
             </div>
-            
-            <div className="p-6 flex-1">
+          </div>
+          
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto w-full p-6 md:p-12">
+            <div className="max-w-4xl mx-auto w-full">
               {formError && (
-                <div className="mb-5 p-4 bg-red-900/20 border border-red-500/30 rounded-2xl text-red-400 text-xs font-semibold uppercase tracking-wider">
+                <div className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-2xl text-red-400 text-xs font-semibold uppercase tracking-wider">
                   {formError}
                 </div>
               )}
 
               {/* Render appropriate form based on active tab */}
               {renderFormFields()}
-              
             </div>
-            
-            <div className="p-6 border-t border-slate-800/85 flex justify-end space-x-4 bg-slate-950/20">
+          </div>
+          
+          {/* Footer */}
+          <div className="p-6 border-t border-slate-800/80 bg-slate-950/40 flex shrink-0 mt-auto w-full">
+            <div className="max-w-4xl mx-auto w-full flex justify-end space-x-4">
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="px-5 py-2.5 text-xs font-display font-bold uppercase tracking-wider text-slate-450 hover:text-white transition-colors"
+                className="px-6 py-3 text-xs font-display font-bold uppercase tracking-wider text-slate-450 hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSave}
-                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/20 text-white rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(99,102,241,0.2)] transition-all duration-300"
+                className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/20 text-white rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-all duration-300"
               >
                 Save Changes
               </button>
@@ -765,7 +791,7 @@ const Dashboard = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
