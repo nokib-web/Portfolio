@@ -169,7 +169,7 @@ const Dashboard = () => {
       };
       case 'blogs': return {
         title: '', slug: '', excerpt: '', content: '', 
-        tags: '', readTime: '5 min read', coverImage: '', published: true, personaId: activePersonaTab
+        tags: '', readTime: '5 min read', coverImage: '', published: true, category: 'Development', personaId: activePersonaTab
       };
       case 'timeline': return { year: '', title: '', description: '', personaId: activePersonaTab };
       case 'gallery': return { url: '', caption: '', span: 'col-span-1 row-span-1', personaId: activePersonaTab };
@@ -193,7 +193,11 @@ const Dashboard = () => {
     if (activeTab === 'projects') {
       data.techStack = Array.isArray(data.techStack) ? data.techStack.join(', ') : data.techStack;
     } else if (activeTab === 'blogs') {
-      data.tags = Array.isArray(data.tags) ? data.tags.join(', ') : data.tags;
+      const category = item.category || 'Development';
+      const tagsArray = Array.isArray(item.tags) ? item.tags : (typeof item.tags === 'string' ? item.tags.split(',').map(s => s.trim()) : []);
+      const otherTags = tagsArray.filter(t => t.toLowerCase() !== category.toLowerCase());
+      data.tags = otherTags.join(', ');
+      data.category = category;
     }
 
     setFormData(data);
@@ -330,9 +334,19 @@ const Dashboard = () => {
           ? parsedData.techStack.split(',').map(s => s.trim()).filter(Boolean) 
           : parsedData.techStack;
       } else if (activeTab === 'blogs') {
-        parsedData.tags = typeof parsedData.tags === 'string' 
-          ? parsedData.tags.split(',').map(s => s.trim()).filter(Boolean) 
-          : parsedData.tags;
+        let parsedTags = [];
+        if (typeof parsedData.tags === 'string') {
+          parsedTags = parsedData.tags.split(',').map(s => s.trim()).filter(Boolean);
+        } else if (Array.isArray(parsedData.tags)) {
+          parsedTags = [...parsedData.tags];
+        }
+        
+        const category = parsedData.category || 'Development';
+        parsedTags = parsedTags.filter(t => t.toLowerCase() !== category.toLowerCase());
+        parsedTags.unshift(category);
+        
+        parsedData.tags = parsedTags;
+        parsedData.category = category;
       }
 
       const endpoint = activeTab === 'blogs' ? '/api/blogs' : `/api/${activeTab}`;
@@ -468,14 +482,22 @@ const Dashboard = () => {
             <label className={labelClass}>Content (Markdown)</label>
             <textarea name="content" value={formData.content || ''} onChange={handleChange} className={`${inputClass} font-mono text-xs`} rows="8"></textarea>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className={labelClass}>Tags (comma separated)</label>
-              <input type="text" name="tags" value={formData.tags || ''} onChange={handleChange} className={inputClass} />
+              <label className={labelClass}>Category / Blog Type</label>
+              <select name="category" value={formData.category || 'Development'} onChange={handleChange} className={selectClass}>
+                <option value="Development">Development</option>
+                <option value="Dailylife">Dailylife</option>
+                <option value="Religion">Religion</option>
+              </select>
             </div>
             <div>
               <label className={labelClass}>Read Time</label>
               <input type="text" name="readTime" value={formData.readTime || ''} onChange={handleChange} className={inputClass} placeholder="5 min read" />
+            </div>
+            <div>
+              <label className={labelClass}>Other Tags (comma separated)</label>
+              <input type="text" name="tags" value={formData.tags || ''} onChange={handleChange} className={inputClass} placeholder="React, Node" />
             </div>
           </div>
           <div>

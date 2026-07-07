@@ -33,6 +33,10 @@ const blogSchema = new mongoose.Schema({
   personaId: {
     type: String,
     default: 'developer',
+  },
+  category: {
+    type: String,
+    default: 'Development',
   }
 }, { timestamps: true });
 
