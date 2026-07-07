@@ -6,6 +6,7 @@ import WriterHome from '../components/WriterHome';
 import FriendHome from '../components/FriendHome';
 import BlogPost from '../components/Blog/BlogPost';
 import { appConfig } from '../config';
+import { getPersonaById } from '../data/personasData';
 
 /* ─────────────────────────────────────────────────────────────── */
 /*  PersonaLayout — top-level shell                               */
@@ -32,18 +33,52 @@ const PersonaLayout = () => {
         if (found) {
           setPersona(found);
           const pid = found.personaId || found.id;
-          const [projs, blgs] = await Promise.all([
-            fetch(`${appConfig.apiBaseUrl}/api/projects?personaId=${pid}`).then(res => res.json()),
-            fetch(`${appConfig.apiBaseUrl}/api/blogs?personaId=${pid}`).then(res => res.json())
-          ]);
-          setProjects(Array.isArray(projs) ? projs : []);
-          setBlogs(Array.isArray(blgs) ? blgs : []);
+          try {
+            const [projs, blgs] = await Promise.all([
+              fetch(`${appConfig.apiBaseUrl}/api/projects?personaId=${pid}`).then(res => res.json()),
+              fetch(`${appConfig.apiBaseUrl}/api/blogs?personaId=${pid}`).then(res => res.json())
+            ]);
+            setProjects(Array.isArray(projs) ? projs : []);
+            setBlogs(Array.isArray(blgs) ? blgs : []);
+          } catch (e) {
+            console.warn('Failed to fetch projects or blogs for persona from backend', e);
+            const localPersona = getPersonaById(personaId);
+            setProjects(localPersona?.projects || []);
+            setBlogs(localPersona?.blogs || localPersona?.essays || []);
+          }
+        } else {
+          // fallback to local data if not found in db
+          const localPersona = getPersonaById(personaId);
+          if (localPersona) {
+            setPersona(localPersona);
+            const pid = localPersona.id;
+            try {
+              const [projs, blgs] = await Promise.all([
+                fetch(`${appConfig.apiBaseUrl}/api/projects?personaId=${pid}`).then(res => res.json()),
+                fetch(`${appConfig.apiBaseUrl}/api/blogs?personaId=${pid}`).then(res => res.json())
+              ]);
+              setProjects(Array.isArray(projs) && projs.length > 0 ? projs : (localPersona.projects || []));
+              setBlogs(Array.isArray(blgs) && blgs.length > 0 ? blgs : (localPersona.blogs || localPersona.essays || []));
+            } catch (e) {
+              setProjects(localPersona.projects || []);
+              setBlogs(localPersona.blogs || localPersona.essays || []);
+            }
+          } else {
+            setPersona(null);
+          }
+        }
+      })
+      .catch(async (err) => {
+        console.warn('Backend unavailable or persona not found', err);
+        // fallback to local data
+        const localPersona = getPersonaById(personaId);
+        if (localPersona) {
+          setPersona(localPersona);
+          setProjects(localPersona.projects || []);
+          setBlogs(localPersona.blogs || localPersona.essays || []);
         } else {
           setPersona(null);
         }
-      })
-      .catch(err => {
-        console.warn('Backend unavailable or persona not found', err);
       })
       .finally(() => {
         setLoading(false);

@@ -69,14 +69,19 @@ const WriterHome = ({ persona }) => {
     fetch(`${appConfig.apiBaseUrl}/api/blogs?personaId=writer`)
       .then(res => res.json())
       .then(data => {
-        setEssays(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setEssays(data);
+        } else {
+          setEssays(persona.essays || []);
+        }
         setLoading(false);
       })
       .catch(err => {
         console.error("Failed to fetch writer essays:", err);
+        setEssays(persona.essays || []);
         setLoading(false);
       });
-  }, []);
+  }, [persona.essays]);
 
   return (
     <div
