@@ -694,9 +694,9 @@ const Dashboard = () => {
 
       {/* Form Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 overflow-y-auto pt-10 md:pt-20">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 overflow-y-auto py-10 md:py-20">
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setIsModalOpen(false)}></div>
-          <div className="relative bg-slate-900/95 border border-slate-800 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
+          <div className="relative bg-slate-900/95 border border-slate-800 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col">
             <div className="p-6 border-b border-slate-800/85 flex justify-between items-center bg-slate-950/20">
               <h3 className="text-lg font-display font-black text-white flex items-center gap-3">
                 <span>{editingItem ? 'Edit Item' : 'Create New Item'}</span>
@@ -709,7 +709,7 @@ const Dashboard = () => {
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto flex-1 scrollbar-hide">
+            <div className="p-6 flex-1">
               {formError && (
                 <div className="mb-5 p-4 bg-red-900/20 border border-red-500/30 rounded-2xl text-red-400 text-xs font-semibold uppercase tracking-wider">
                   {formError}
