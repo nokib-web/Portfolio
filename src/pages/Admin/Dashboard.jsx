@@ -39,7 +39,8 @@ const Dashboard = () => {
       case 'friend':
         return [
           { id: 'timeline', label: 'Timeline (Moments)', icon: 'calendar_today' },
-          { id: 'gallery', label: 'Gallery (Pixels)', icon: 'photo_camera' }
+          { id: 'gallery', label: 'Gallery (Pixels)', icon: 'photo_camera' },
+          { id: 'voiceNote', label: 'Voice Greeting', icon: 'mic' }
         ];
       default:
         return [];
@@ -64,7 +65,7 @@ const Dashboard = () => {
   const fetchItems = async () => {
     setLoading(true);
 
-    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote') {
+    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote') {
       try {
         const res = await fetch(`${appConfig.apiBaseUrl}/api/personas`);
         if (res.ok) {
@@ -79,6 +80,14 @@ const Dashboard = () => {
               _id: 'writer-epigraph',
               title: quoteObj.quote || 'No quote set yet',
               attribution: quoteObj.attribution || '',
+              _index: 0
+            }]);
+          } else if (activeTab === 'voiceNote') {
+            const vn = personaObj?.voiceNote || { transcript: '', duration: '', timestamp: '' };
+            setItems([{
+              ...vn,
+              _id: 'friend-voiceNote',
+              title: vn.transcript ? vn.transcript.slice(0, 60) + '…' : 'No voice note set yet',
               _index: 0
             }]);
           } else {
@@ -174,6 +183,7 @@ const Dashboard = () => {
       case 'timeline': return { year: '', title: '', description: '', personaId: activePersonaTab };
       case 'gallery': return { url: '', caption: '', span: 'col-span-1 row-span-1', personaId: activePersonaTab };
       case 'quote': return { quote: '', attribution: '', personaId: activePersonaTab };
+      case 'voiceNote': return { transcript: '', duration: '0:00', timestamp: '', personaId: activePersonaTab };
       default: return {};
     }
   };
@@ -276,7 +286,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
 
-      if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote') {
+      if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote') {
         const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
         if (!activeObj) {
           setFormError('Active persona not found.');
@@ -289,6 +299,14 @@ const Dashboard = () => {
             epigraph: {
               quote: formData.quote,
               attribution: formData.attribution
+            }
+          };
+        } else if (activeTab === 'voiceNote') {
+          bodyUpdate = {
+            voiceNote: {
+              transcript: formData.transcript,
+              duration: formData.duration,
+              timestamp: formData.timestamp || new Date().toLocaleString()
             }
           };
         } else {
@@ -565,6 +583,31 @@ const Dashboard = () => {
           <div>
             <label className={labelClass}>Attribution</label>
             <input type="text" name="attribution" value={formData.attribution || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Stephen King" />
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'voiceNote') {
+      return (
+        <div className="space-y-5">
+          <div className="bg-slate-950/60 border border-slate-800/60 rounded-2xl p-4 text-slate-400 text-xs leading-relaxed">
+            <span className="material-icons-outlined text-indigo-400 text-sm align-middle mr-1">info</span>
+            This voice note will appear on the Friend page as an interactive player card. The transcript is shown below the player. Duration should be in <code className="text-indigo-400">m:ss</code> format.
+          </div>
+          <div>
+            <label className={labelClass}>Transcript</label>
+            <textarea name="transcript" value={formData.transcript || ''} onChange={handleChange} className={inputClass} rows="5" placeholder="Hey! Thanks for stopping by this corner of the site..."></textarea>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Duration (e.g. 0:45)</label>
+              <input type="text" name="duration" value={formData.duration || ''} onChange={handleChange} className={inputClass} placeholder="0:45" />
+            </div>
+            <div>
+              <label className={labelClass}>Timestamp Label</label>
+              <input type="text" name="timestamp" value={formData.timestamp || ''} onChange={handleChange} className={inputClass} placeholder="Today, 10:42 AM" />
+            </div>
           </div>
         </div>
       );
