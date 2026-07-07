@@ -7,6 +7,7 @@ const Dashboard = () => {
   const [activePersonaTab, setActivePersonaTab] = useState('developer');
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [personasData, setPersonasData] = useState([]);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,8 +17,79 @@ const Dashboard = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  // Helper for tabs
+  const getTabsForPersona = (personaId) => {
+    switch (personaId) {
+      case 'developer':
+        return [
+          { id: 'projects', label: 'Projects', icon: 'grid_view' },
+          { id: 'blogs', label: 'Blogs', icon: 'article' },
+          { id: 'stats', label: 'Stats', icon: 'insights' }
+        ];
+      case 'writer':
+        return [
+          { id: 'blogs', label: 'Essays', icon: 'article' }
+        ];
+      case 'philosopher':
+        return [
+          { id: 'projects', label: 'Treatises', icon: 'grid_view' },
+          { id: 'blogs', label: 'Writings', icon: 'article' }
+        ];
+      case 'friend':
+        return [
+          { id: 'timeline', label: 'Timeline (Moments)', icon: 'calendar_today' },
+          { id: 'gallery', label: 'Gallery (Pixels)', icon: 'photo_camera' }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const handlePersonaTabChange = (personaId) => {
+    setActivePersonaTab(personaId);
+    const newTabs = getTabsForPersona(personaId);
+    if (newTabs.length > 0) {
+      const hasCurrentTab = newTabs.some(t => t.id === activeTab);
+      if (!hasCurrentTab) {
+        setActiveTab(newTabs[0].id);
+      }
+    }
+  };
+
+  const activePersonaObj = (personasData.length > 0 ? personasData : personas).find(
+    p => p.personaId === activePersonaTab || p.id === activePersonaTab
+  );
+
   const fetchItems = async () => {
     setLoading(true);
+
+    if (activeTab === 'timeline' || activeTab === 'gallery') {
+      try {
+        const res = await fetch(`${appConfig.apiBaseUrl}/api/personas`);
+        if (res.ok) {
+          const data = await res.json();
+          setPersonasData(data);
+          const personaObj = data.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
+          const itemsWithIds = (personaObj?.[activeTab] || []).map((item, idx) => ({
+            ...item,
+            _id: item._id || `${activeTab}-${idx}`,
+            _index: idx
+          }));
+          setItems(itemsWithIds);
+        }
+      } catch (err) {
+        console.error(err);
+        const itemsWithIds = (activePersonaObj?.[activeTab] || []).map((item, idx) => ({
+          ...item,
+          _id: item._id || `${activeTab}-${idx}`,
+          _index: idx
+        }));
+        setItems(itemsWithIds);
+      }
+      setLoading(false);
+      return;
+    }
+
     let endpoint = '';
     if (activeTab === 'projects') endpoint = '/api/projects';
     else if (activeTab === 'blogs') endpoint = '/api/blogs/all';
@@ -39,6 +111,22 @@ const Dashboard = () => {
     setLoading(false);
   };
 
+  // Initial load of personas Data
+  useEffect(() => {
+    const loadPersonas = async () => {
+      try {
+        const res = await fetch(`${appConfig.apiBaseUrl}/api/personas`);
+        if (res.ok) {
+          const data = await res.json();
+          setPersonasData(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadPersonas();
+  }, []);
+
   useEffect(() => {
     fetchItems();
   }, [activeTab, activePersonaTab]);
@@ -54,6 +142,8 @@ const Dashboard = () => {
         title: '', slug: '', excerpt: '', content: '', 
         tags: '', readTime: '5 min read', coverImage: '', published: true, personaId: activePersonaTab
       };
+      case 'timeline': return { year: '', title: '', description: '', personaId: activePersonaTab };
+      case 'gallery': return { url: '', caption: '', span: 'col-span-1 row-span-1', personaId: activePersonaTab };
       default: return {};
     }
   };
@@ -89,6 +179,37 @@ const Dashboard = () => {
     if (!itemToDelete) return;
     
     const token = localStorage.getItem('adminToken');
+
+    if (activeTab === 'timeline' || activeTab === 'gallery') {
+      const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
+      if (!activeObj) {
+        alert('Active persona not found.');
+        return;
+      }
+      const updatedArray = (activeObj[activeTab] || []).filter((_, idx) => idx !== itemToDelete._index);
+      try {
+        const res = await fetch(`${appConfig.apiBaseUrl}/api/personas/${activeObj._id}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({
+            [activeTab]: updatedArray
+          })
+        });
+        if (res.ok) {
+          fetchItems();
+          setItemToDelete(null);
+        } else {
+          alert('Failed to delete item.');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      return;
+    }
+    
     let endpoint = activeTab === 'blogs' ? '/api/blogs' : `/api/${activeTab}`;
     
     try {
@@ -109,6 +230,42 @@ const Dashboard = () => {
 
   const handleSave = async () => {
     try {
+      const token = localStorage.getItem('adminToken');
+
+      if (activeTab === 'timeline' || activeTab === 'gallery') {
+        const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
+        if (!activeObj) {
+          setFormError('Active persona not found.');
+          return;
+        }
+        const updatedArray = [...(activeObj[activeTab] || [])];
+        if (editingItem) {
+          updatedArray[editingItem._index] = { ...formData };
+        } else {
+          updatedArray.push({ ...formData });
+        }
+
+        const res = await fetch(`${appConfig.apiBaseUrl}/api/personas/${activeObj._id}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({
+            [activeTab]: updatedArray
+          })
+        });
+
+        if (res.ok) {
+          setIsModalOpen(false);
+          fetchItems();
+        } else {
+          const errData = await res.json();
+          setFormError(errData.msg || errData.error || 'Failed to save.');
+        }
+        return;
+      }
+
       const parsedData = { ...formData };
       
       // Transform strings back to arrays/objects
@@ -122,7 +279,6 @@ const Dashboard = () => {
           : parsedData.tags;
       }
 
-      const token = localStorage.getItem('adminToken');
       const endpoint = activeTab === 'blogs' ? '/api/blogs' : `/api/${activeTab}`;
       
       let url = `${appConfig.apiBaseUrl}${endpoint}`;
@@ -272,6 +428,49 @@ const Dashboard = () => {
       );
     }
 
+    if (activeTab === 'timeline') {
+      return (
+        <div className="space-y-5">
+          <div>
+            <label className={labelClass}>Year</label>
+            <input type="text" name="year" value={formData.year || ''} onChange={handleChange} className={inputClass} placeholder="e.g. 2023" />
+          </div>
+          <div>
+            <label className={labelClass}>Title</label>
+            <input type="text" name="title" value={formData.title || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Trek to Sajek Valley" />
+          </div>
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea name="description" value={formData.description || ''} onChange={handleChange} className={inputClass} rows="4" placeholder="Describe the moment..."></textarea>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'gallery') {
+      return (
+        <div className="space-y-5">
+          <div>
+            <label className={labelClass}>Image URL</label>
+            <input type="text" name="url" value={formData.url || ''} onChange={handleChange} className={inputClass} placeholder="e.g. https://images.unsplash.com/..." />
+          </div>
+          <div>
+            <label className={labelClass}>Caption</label>
+            <input type="text" name="caption" value={formData.caption || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Morning mist in the mountains" />
+          </div>
+          <div>
+            <label className={labelClass}>Span Layout</label>
+            <select name="span" value={formData.span || 'col-span-1 row-span-1'} onChange={handleChange} className={selectClass}>
+              <option value="col-span-1 row-span-1">Standard (1x1)</option>
+              <option value="col-span-2 row-span-1">Wide (2x1)</option>
+              <option value="col-span-1 row-span-2">Tall (1x2)</option>
+              <option value="col-span-2 row-span-2">Large Square (2x2)</option>
+            </select>
+          </div>
+        </div>
+      );
+    }
+
     return null;
   };
 
@@ -303,11 +502,7 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {[
-            { id: 'projects', label: 'Projects', icon: 'grid_view' },
-            { id: 'blogs', label: 'Blogs', icon: 'article' },
-            { id: 'stats', label: 'Stats', icon: 'insights' }
-          ].map(tab => (
+          {getTabsForPersona(activePersonaTab).map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -335,24 +530,27 @@ const Dashboard = () => {
             <div>
               <h2 className="text-xl font-display font-black text-white capitalize tracking-wide flex items-center gap-2.5">
                 <span className="material-icons-outlined text-indigo-400 text-xl">
-                  {activeTab === 'projects' ? 'grid_view' : (activeTab === 'blogs' ? 'article' : 'insights')}
+                  {activeTab === 'projects' ? 'grid_view' : (activeTab === 'blogs' ? 'article' : (activeTab === 'stats' ? 'insights' : (activeTab === 'timeline' ? 'calendar_today' : 'photo_camera')))}
                 </span>
-                <span>{activeTab} Management</span>
+                <span className="capitalize">{getTabsForPersona(activePersonaTab).find(t => t.id === activeTab)?.label || activeTab} Management</span>
               </h2>
               <div className="flex gap-2 mt-4 overflow-x-auto pb-1 scrollbar-hide">
-                {personas.map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => setActivePersonaTab(p.id)}
-                    className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${
-                      activePersonaTab === p.id 
-                        ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.15)]' 
-                        : 'bg-slate-900/60 border-slate-800 text-slate-500 hover:text-slate-350 hover:border-slate-700'
-                    }`}
-                  >
-                    {p.title}
-                  </button>
-                ))}
+                {(personasData.length > 0 ? personasData : personas).map(p => {
+                  const targetId = p.personaId || p.id;
+                  return (
+                    <button
+                      key={targetId}
+                      onClick={() => handlePersonaTabChange(targetId)}
+                      className={`px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all duration-300 ${
+                        activePersonaTab === targetId
+                          ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.15)]' 
+                          : 'bg-slate-900/60 border-slate-800 text-slate-500 hover:text-slate-350 hover:border-slate-700'
+                      }`}
+                    >
+                      {p.title}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             
@@ -372,18 +570,20 @@ const Dashboard = () => {
           ) : (
             <div className="space-y-3.5 relative z-10">
               {items.length === 0 ? (
-                <p className="text-slate-500 text-center py-16 text-sm font-medium">No {activeTab} found in the database.</p>
+                <p className="text-slate-500 text-center py-16 text-sm font-medium">No {activeTab} found.</p>
               ) : (
                 items.map(item => (
                   <div key={item._id} className="flex justify-between items-center p-5 bg-slate-950/40 border border-slate-800/80 rounded-2xl group hover:border-indigo-500/30 hover:bg-slate-950/90 transition-all duration-300 shadow-sm">
                     <div>
                       <h3 className="font-display font-bold text-slate-200 group-hover:text-indigo-400 transition-colors text-base tracking-wide">
-                        {item.title || item.label || item.id || 'Unnamed Item'}
+                        {item.title || item.caption || item.label || item.id || 'Unnamed Item'}
                       </h3>
-                      {(item.slug || item.value !== undefined || item.personaId) && (
+                      {(item.slug || item.value !== undefined || item.personaId || item.year || item.span) && (
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {item.slug && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Slug: {item.slug}</span>}
                           {item.value !== undefined && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Value: {item.value}</span>}
+                          {item.year && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Year: {item.year}</span>}
+                          {item.span && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Span: {item.span}</span>}
                           {item.personaId && <span className="text-[8px] font-black uppercase tracking-widest bg-indigo-950/40 border border-indigo-900/40 text-indigo-400 px-2.5 py-0.5 rounded-full">Persona: {item.personaId}</span>}
                         </div>
                       )}
