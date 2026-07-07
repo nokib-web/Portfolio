@@ -28,7 +28,8 @@ const Dashboard = () => {
         ];
       case 'writer':
         return [
-          { id: 'blogs', label: 'Essays', icon: 'article' }
+          { id: 'blogs', label: 'Essays', icon: 'article' },
+          { id: 'quote', label: 'My Quote', icon: 'format_quote' }
         ];
       case 'philosopher':
         return [
@@ -63,28 +64,51 @@ const Dashboard = () => {
   const fetchItems = async () => {
     setLoading(true);
 
-    if (activeTab === 'timeline' || activeTab === 'gallery') {
+    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote') {
       try {
         const res = await fetch(`${appConfig.apiBaseUrl}/api/personas`);
         if (res.ok) {
           const data = await res.json();
           setPersonasData(data);
           const personaObj = data.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
-          const itemsWithIds = (personaObj?.[activeTab] || []).map((item, idx) => ({
+          
+          if (activeTab === 'quote') {
+            const quoteObj = personaObj?.epigraph || { quote: '', attribution: '' };
+            setItems([{
+              ...quoteObj,
+              _id: 'writer-epigraph',
+              title: quoteObj.quote || 'No quote set yet',
+              attribution: quoteObj.attribution || '',
+              _index: 0
+            }]);
+          } else {
+            const itemsWithIds = (personaObj?.[activeTab] || []).map((item, idx) => ({
+              ...item,
+              _id: item._id || `${activeTab}-${idx}`,
+              _index: idx
+            }));
+            setItems(itemsWithIds);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        if (activeTab === 'quote') {
+          const quoteObj = activePersonaObj?.epigraph || { quote: '', attribution: '' };
+          setItems([{
+            ...quoteObj,
+            _id: 'writer-epigraph',
+            title: quoteObj.quote || 'No quote set yet',
+            attribution: quoteObj.attribution || '',
+            _index: 0
+          }]);
+        } else {
+          const itemsWithIds = (activePersonaObj?.[activeTab] || []).map((item, idx) => ({
             ...item,
             _id: item._id || `${activeTab}-${idx}`,
             _index: idx
           }));
           setItems(itemsWithIds);
         }
-      } catch (err) {
-        console.error(err);
-        const itemsWithIds = (activePersonaObj?.[activeTab] || []).map((item, idx) => ({
-          ...item,
-          _id: item._id || `${activeTab}-${idx}`,
-          _index: idx
-        }));
-        setItems(itemsWithIds);
       }
       setLoading(false);
       return;
@@ -149,6 +173,7 @@ const Dashboard = () => {
       };
       case 'timeline': return { year: '', title: '', description: '', personaId: activePersonaTab };
       case 'gallery': return { url: '', caption: '', span: 'col-span-1 row-span-1', personaId: activePersonaTab };
+      case 'quote': return { quote: '', attribution: '', personaId: activePersonaTab };
       default: return {};
     }
   };
@@ -247,17 +272,29 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
 
-      if (activeTab === 'timeline' || activeTab === 'gallery') {
+      if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote') {
         const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
         if (!activeObj) {
           setFormError('Active persona not found.');
           return;
         }
-        const updatedArray = [...(activeObj[activeTab] || [])];
-        if (editingItem) {
-          updatedArray[editingItem._index] = { ...formData };
+
+        let bodyUpdate = {};
+        if (activeTab === 'quote') {
+          bodyUpdate = {
+            epigraph: {
+              quote: formData.quote,
+              attribution: formData.attribution
+            }
+          };
         } else {
-          updatedArray.push({ ...formData });
+          const updatedArray = [...(activeObj[activeTab] || [])];
+          if (editingItem) {
+            updatedArray[editingItem._index] = { ...formData };
+          } else {
+            updatedArray.push({ ...formData });
+          }
+          bodyUpdate = { [activeTab]: updatedArray };
         }
 
         const res = await fetch(`${appConfig.apiBaseUrl}/api/personas/${activeObj._id}`, {
@@ -266,9 +303,7 @@ const Dashboard = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}` 
           },
-          body: JSON.stringify({
-            [activeTab]: updatedArray
-          })
+          body: JSON.stringify(bodyUpdate)
         });
 
         if (res.status === 401) {
@@ -498,6 +533,21 @@ const Dashboard = () => {
       );
     }
 
+    if (activeTab === 'quote') {
+      return (
+        <div className="space-y-5">
+          <div>
+            <label className={labelClass}>Quote</label>
+            <textarea name="quote" value={formData.quote || ''} onChange={handleChange} className={inputClass} rows="4" placeholder="Enter the quote..."></textarea>
+          </div>
+          <div>
+            <label className={labelClass}>Attribution</label>
+            <input type="text" name="attribution" value={formData.attribution || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Stephen King" />
+          </div>
+        </div>
+      );
+    }
+
     return null;
   };
 
@@ -581,13 +631,15 @@ const Dashboard = () => {
               </div>
             </div>
             
-            <button 
-              onClick={handleCreate}
-              className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 border border-indigo-400/20 text-white px-5 py-3 rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-all duration-300 flex items-center space-x-2 shrink-0"
-            >
-              <span className="material-icons-outlined text-sm">add</span>
-              <span>Create New</span>
-            </button>
+            {activeTab !== 'quote' && (
+              <button 
+                onClick={handleCreate}
+                className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 border border-indigo-400/20 text-white px-5 py-3 rounded-2xl font-display font-bold uppercase tracking-widest text-[9px] shadow-[0_0_20px_rgba(99,102,241,0.25)] transition-all duration-300 flex items-center space-x-2 shrink-0"
+              >
+                <span className="material-icons-outlined text-sm">add</span>
+                <span>Create New</span>
+              </button>
+            )}
           </div>
 
           {loading ? (
@@ -605,12 +657,13 @@ const Dashboard = () => {
                       <h3 className="font-display font-bold text-slate-200 group-hover:text-indigo-400 transition-colors text-base tracking-wide">
                         {item.title || item.caption || item.label || item.id || 'Unnamed Item'}
                       </h3>
-                      {(item.slug || item.value !== undefined || item.personaId || item.year || item.span) && (
+                      {(item.slug || item.value !== undefined || item.personaId || item.year || item.span || item.attribution) && (
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {item.slug && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Slug: {item.slug}</span>}
                           {item.value !== undefined && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Value: {item.value}</span>}
                           {item.year && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Year: {item.year}</span>}
                           {item.span && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Span: {item.span}</span>}
+                          {item.attribution && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">By: {item.attribution}</span>}
                           {item.personaId && <span className="text-[8px] font-black uppercase tracking-widest bg-indigo-950/40 border border-indigo-900/40 text-indigo-400 px-2.5 py-0.5 rounded-full">Persona: {item.personaId}</span>}
                         </div>
                       )}
@@ -622,12 +675,14 @@ const Dashboard = () => {
                       >
                         <span className="material-icons-outlined text-sm flex items-center justify-center">edit</span>
                       </button>
-                      <button 
-                        onClick={() => handleDelete(item)} 
-                        className="p-2 rounded-xl bg-slate-900/85 hover:bg-red-600/15 border border-slate-800/80 hover:border-red-500/30 text-red-450 transition-all duration-200 shadow-inner"
-                      >
-                        <span className="material-icons-outlined text-sm flex items-center justify-center">delete</span>
-                      </button>
+                      {activeTab !== 'quote' && (
+                        <button 
+                          onClick={() => handleDelete(item)} 
+                          className="p-2 rounded-xl bg-slate-900/85 hover:bg-red-600/15 border border-slate-800/80 hover:border-red-500/30 text-red-450 transition-all duration-200 shadow-inner"
+                        >
+                          <span className="material-icons-outlined text-sm flex items-center justify-center">delete</span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))
@@ -639,7 +694,7 @@ const Dashboard = () => {
 
       {/* Form Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 overflow-y-auto pt-10 md:pt-20">
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm animate-fade-in" onClick={() => setIsModalOpen(false)}></div>
           <div className="relative bg-slate-900/95 border border-slate-800 backdrop-blur-xl rounded-3xl shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden">
             <div className="p-6 border-b border-slate-800/85 flex justify-between items-center bg-slate-950/20">

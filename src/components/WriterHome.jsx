@@ -131,6 +131,21 @@ const WriterHome = ({ persona }) => {
             className="mt-10 h-px bg-gradient-to-r from-amber-300 dark:from-amber-600 via-stone-300 dark:via-stone-700 to-transparent origin-left"
           />
         )}
+
+        {/* Epigraph (Quote) */}
+        {typewriterDone && persona.epigraph && persona.epigraph.quote && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+            className="mt-12 pl-6 border-l-2 border-amber-500/70 dark:border-amber-600/70 italic max-w-2xl text-stone-700 dark:text-stone-300"
+          >
+            <p className="text-xl font-serif mb-2.5">"{persona.epigraph.quote}"</p>
+            {persona.epigraph.attribution && (
+              <cite className="text-xs font-sans uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 not-italic block font-bold">— {persona.epigraph.attribution}</cite>
+            )}
+          </motion.div>
+        )}
       </section>
 
       {/* ── ESSAYS LIST ───────────────────────────────────────── */}
