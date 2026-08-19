@@ -5,6 +5,7 @@ import WriterHome from '../components/WriterHome';
 import FriendHome from '../components/FriendHome';
 import PhilosopherHome from '../components/PhilosopherHome';
 import BlogPost from '../components/Blog/BlogPost';
+import OnekoCat from '../components/Writer/OnekoCat';
 import { getPersonaById } from '../data/personasData';
 
 /* ─────────────────────────────────────────────────────────────── */
@@ -33,8 +34,9 @@ const PersonaLayout = () => {
   /* ── 1. WRITER — Bespoke Layout & Theme ─────────────────────── */
   if (persona.id === 'writer' || persona.slug === 'writer') {
     const WriterThemeWrapper = ({ children }) => (
-      <div className="min-h-screen bg-[#fdfbf7] dark:bg-stone-950 text-stone-900 dark:text-stone-150 transition-colors duration-500 pt-20">
+      <div className="min-h-screen bg-[#fdfbf7] dark:bg-stone-950 text-stone-900 dark:text-stone-150 transition-colors duration-500 pt-20 relative">
         <Header activePersonaId="writer" light={true} />
+        <OnekoCat />
         {children}
       </div>
     );
