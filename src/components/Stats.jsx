@@ -6,42 +6,50 @@ import { appConfig } from '../config';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const originalStats = [
+    { _id: '1', label: 'Commits this Year', value: 1100, suffix: '+' },
+    { _id: '2', label: 'Open Source Contribs', value: 10, suffix: '+' },
+    { _id: '3', label: 'Projects Completed', value: 20, suffix: '+' },
+    { _id: '4', label: 'Years Experience', value: 1, suffix: '+' }
+];
+
 const Stats = () => {
     const containerRef = useRef(null);
-    const [statsData, setStatsData] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [statsData, setStatsData] = useState(originalStats);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
                 const response = await fetch(`${appConfig.apiBaseUrl}/api/stats?personaId=developer`);
-                const data = await response.json();
-                setStatsData(Array.isArray(data) ? data : []);
-                setLoading(false);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        setStatsData(data);
+                    }
+                }
             } catch (error) {
-                console.error("Failed to fetch stats:", error);
-                setLoading(false);
+                console.warn("Using default stats for Developer persona:", error);
             }
         };
         fetchStats();
     }, []);
 
     useGSAP(() => {
-        if (loading || statsData.length === 0) return;
-
         const cards = gsap.utils.toArray('.stat-card');
+        if (cards.length === 0) return;
 
         cards.forEach((card, index) => {
             const numberElement = card.querySelector('.stat-number');
-            const targetValue = statsData[index]?.value || 0;
+            const targetValue = parseInt(statsData[index]?.value, 10) || originalStats[index]?.value || 0;
+            const suffix = statsData[index]?.suffix || '+';
 
-            // Fade and slide up the card
+            // Card fade-in
             gsap.fromTo(card, 
                 { opacity: 0, y: 20 },
                 {
                     scrollTrigger: {
                         trigger: card,
-                        start: "top 95%", // Made it 95% to trigger easier
+                        start: "top 95%",
                         toggleActions: "play none none none"
                     },
                     opacity: 1,
@@ -51,40 +59,49 @@ const Stats = () => {
                 }
             );
 
-            // Animate the number
+            // Counter animation
             const obj = { val: 0 };
             gsap.to(obj, {
                 val: targetValue,
                 scrollTrigger: {
                     trigger: card,
-                    start: "top 90%",
+                    start: "top 95%",
                     toggleActions: "play none none none"
                 },
-                duration: 2,
+                duration: 1.8,
                 ease: "power2.out",
                 onUpdate: () => {
                     if (numberElement) {
-                        numberElement.innerText = Math.floor(obj.val) + "+";
+                        numberElement.innerText = Math.floor(obj.val) + suffix;
                     }
                 }
             });
         });
 
-        // Add a global refresh after a short delay to handle any late layout shifts
-        setTimeout(() => ScrollTrigger.refresh(), 500);
+        setTimeout(() => ScrollTrigger.refresh(), 300);
 
-    }, { scope: containerRef, dependencies: [statsData, loading] });
+    }, { scope: containerRef, dependencies: [statsData] });
 
-    if (loading) return null; // Or a loader
+    const displayStats = statsData.length > 0 ? statsData : originalStats;
 
     return (
-        <div ref={containerRef} className="w-full py-8 px-4">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Stats</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {statsData.map((stat) => (
-                    <div key={stat._id} className="stat-card bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-                        <div className="stat-number text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">0+</div>
-                        <div className="text-gray-600 dark:text-gray-400 text-sm font-medium">{stat.label}</div>
+        <div ref={containerRef} className="w-full">
+            <h2 className="text-3xl md:text-4xl font-bold font-display text-slate-900 dark:text-white mb-6">
+                Stats
+            </h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                {displayStats.map((stat, idx) => (
+                    <div 
+                        key={stat._id || idx} 
+                        className="stat-card bg-white dark:bg-slate-900/50 p-6 rounded-2xl text-center border border-slate-100 dark:border-slate-800/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col justify-center items-center min-h-[140px]"
+                    >
+                        <div className="stat-number text-3xl sm:text-4xl font-extrabold text-primary-600 dark:text-primary-400 mb-2 font-display">
+                            {stat.value || 0}{stat.suffix || '+'}
+                        </div>
+                        <div className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium leading-tight max-w-[110px] mx-auto">
+                            {stat.label}
+                        </div>
                     </div>
                 ))}
             </div>

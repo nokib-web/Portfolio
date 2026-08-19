@@ -37,7 +37,7 @@ const Hero = ({ heroAnchorRef }) => {
       <div className="absolute inset-0 bg-[radial-gradient(#e5e5e0_1px,transparent_1px)] dark:bg-[radial-gradient(#2d2d2a_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none z-0" />
 
       {/* Hero content container */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-8 py-4 md:py-6">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-2 sm:px-6 md:px-8 py-4 md:py-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center w-full">
           {/* Left Column (Text & Bio) */}
           <motion.div 

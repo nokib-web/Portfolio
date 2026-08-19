@@ -76,8 +76,8 @@ const DeveloperLayout = ({ children }) => {
       <Header activeSection={activeSection} activePersonaId="developer" />
 
       {/* Content wrapper with spacer for fixed sidebar */}
-      <div className="flex-1 w-full relative z-10 pt-8 lg:pt-12">
-        <div className={`${isBlogPage ? 'w-full' : 'w-11/12 max-w-[1800px] mx-auto px-4 md:px-6 transition-all duration-550 ease-out'} flex gap-8 relative items-start`}>
+      <div className="flex-1 w-full relative z-10 pt-4 sm:pt-8 lg:pt-12">
+        <div className={`${isBlogPage ? 'w-full' : 'w-full max-w-[1800px] mx-auto px-3 sm:px-6 lg:px-8 transition-all duration-550 ease-out'} flex gap-0 lg:gap-8 relative items-start`}>
           
           {!isBlogPage && (
             <>

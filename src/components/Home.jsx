@@ -15,7 +15,7 @@ const Home = () => {
     const aboutAnchorRef = useRef(null);
 
     return (
-        <div className="w-full mx-auto px-4 md:px-8 lg:px-12 flex flex-col space-y-12 md:space-y-20 relative">
+        <div className="w-full mx-auto px-1 sm:px-4 md:px-8 lg:px-12 flex flex-col space-y-12 md:space-y-20 relative">
             {/* Scroll-traveling Profile Photo */}
             <FloatingProfilePhoto 
                 heroAnchorRef={heroAnchorRef} 

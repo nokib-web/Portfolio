@@ -70,7 +70,7 @@ const About = ({ aboutAnchorRef }) => {
                 </h1>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-12">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-12">
 
                 <div className="lg:w-1/3 about-image relative">
                     <div className="sticky top-[25vh] mt-8 flex justify-center">
