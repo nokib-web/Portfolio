@@ -618,12 +618,12 @@ const FriendHome = ({ persona }) => {
             </div>
 
             {/* Transcript Receipt Box for Current Tape */}
-            <div className="mt-4 bg-white border-2 border-black border-dashed p-4 font-mono">
-              <div className="flex items-center justify-between text-[10px] font-black uppercase text-neutral-500 pb-2 border-b border-neutral-300 mb-2">
-                <span>TRANSCRIPT // {currentTrack?.tag || 'AUDIO LOG'}</span>
-                <span>{currentTrack?.timestamp || 'TODAY'}</span>
+            <div className="mt-4 bg-white text-black border-2 border-black border-dashed p-4 font-mono">
+              <div className="flex items-center justify-between text-[10px] font-black uppercase text-neutral-600 pb-2 border-b border-neutral-300 mb-2">
+                <span className="text-neutral-600">TRANSCRIPT // {currentTrack?.tag || 'AUDIO LOG'}</span>
+                <span className="text-neutral-600">{currentTrack?.timestamp || 'TODAY'}</span>
               </div>
-              <p className="text-xs text-neutral-800 leading-relaxed font-semibold">
+              <p className="text-xs text-neutral-900 leading-relaxed font-semibold">
                 "{currentTrack?.transcript || 'No transcript provided for this audio log.'}"
               </p>
             </div>
@@ -682,15 +682,23 @@ const FriendHome = ({ persona }) => {
                     </div>
 
                     <div className="mb-2">
-                      <span className="inline-block font-mono font-bold text-[10px] uppercase text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-black/40 px-2 py-0.5 mb-1">
+                      <span className={`inline-block font-mono font-bold text-[10px] uppercase border px-2 py-0.5 mb-1 ${
+                        isSelected 
+                          ? 'text-black bg-white/80 border-black' 
+                          : 'text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border-black/40'
+                      }`}>
                         {track.category || 'Podcast'}
                       </span>
-                      <h3 className="text-lg font-black text-black dark:text-white leading-snug">
+                      <h3 className={`text-lg font-black leading-snug ${isSelected ? 'text-black' : 'text-black dark:text-white'}`}>
                         {track.title}
                       </h3>
                     </div>
 
-                    <p className="text-neutral-700 dark:text-neutral-300 text-xs font-medium line-clamp-3 leading-relaxed mt-2 font-mono">
+                    <p className={`text-xs font-medium line-clamp-3 leading-relaxed mt-2 font-mono ${
+                      isSelected 
+                        ? 'text-neutral-900 font-semibold' 
+                        : 'text-neutral-700 dark:text-neutral-300'
+                    }`}>
                       "{track.transcript}"
                     </p>
                   </div>
@@ -698,8 +706,8 @@ const FriendHome = ({ persona }) => {
                   {/* Tape Load Action Button */}
                   <div className="mt-6 pt-4 border-t-2 border-black flex items-center justify-between font-mono text-xs font-black">
                     {isSelected ? (
-                      <span className="flex items-center gap-1.5 text-black">
-                        <span className="w-2 h-2 rounded-full bg-[#2ED573] animate-ping" />
+                      <span className="flex items-center gap-1.5 text-black font-black">
+                        <span className="w-2 h-2 rounded-full bg-black animate-ping" />
                         <span>NOW LOADED ON DECK</span>
                       </span>
                     ) : (
@@ -707,7 +715,7 @@ const FriendHome = ({ persona }) => {
                         CLICK TO LOAD ▷
                       </span>
                     )}
-                    <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-bold">
+                    <span className={`text-[10px] font-bold ${isSelected ? 'text-neutral-800' : 'text-neutral-500 dark:text-neutral-400'}`}>
                       {track.timestamp || 'ARCHIVED'}
                     </span>
                   </div>
@@ -741,7 +749,7 @@ const FriendHome = ({ persona }) => {
             <motion.div 
               {...fadeUp(0.15)}
               whileHover={{ y: -6 }}
-              className="bg-[#FFE600] border-3 border-black shadow-[6px_6px_0px_#000000] p-6 flex flex-col justify-between hover:shadow-[8px_8px_0px_#000] transition-all"
+              className="bg-[#FFE600] text-black border-3 border-black shadow-[6px_6px_0px_#000000] p-6 flex flex-col justify-between hover:shadow-[8px_8px_0px_#000] transition-all"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -750,11 +758,11 @@ const FriendHome = ({ persona }) => {
                     Adda Fuel
                   </span>
                 </div>
-                <h3 className="text-xl font-black uppercase mb-1">Tong-er Cha &amp; Brews</h3>
-                <p className="font-mono text-xs font-bold text-neutral-800 mb-4">Malta Cha, Lemon Tea &amp; V60</p>
-                <div className="space-y-1.5 bg-white border-2 border-black p-3 font-mono text-xs font-bold">
-                  <div className="flex justify-between">
-                    <span>Cups Today:</span>
+                <h3 className="text-xl font-black uppercase mb-1 text-black">Tong-er Cha &amp; Brews</h3>
+                <p className="font-mono text-xs font-bold text-black/90 mb-4">Malta Cha, Lemon Tea &amp; V60</p>
+                <div className="space-y-1.5 bg-white text-black border-2 border-black p-3 font-mono text-xs font-bold">
+                  <div className="flex justify-between text-black">
+                    <span className="text-black">Cups Today:</span>
                     <span className="text-[#FF4757] font-black">{teaCups} / 5</span>
                   </div>
                   <div className="w-full bg-neutral-200 h-3.5 border border-black overflow-hidden flex">
@@ -777,7 +785,7 @@ const FriendHome = ({ persona }) => {
             <motion.div 
               {...fadeUp(0.2)}
               whileHover={{ y: -6 }}
-              className="bg-[#00C2CB] border-3 border-black shadow-[6px_6px_0px_#000000] p-6 flex flex-col justify-between hover:shadow-[8px_8px_0px_#000] transition-all"
+              className="bg-[#00C2CB] text-black border-3 border-black shadow-[6px_6px_0px_#000000] p-6 flex flex-col justify-between hover:shadow-[8px_8px_0px_#000] transition-all"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -786,20 +794,20 @@ const FriendHome = ({ persona }) => {
                     On Two Wheels
                   </span>
                 </div>
-                <h3 className="text-xl font-black uppercase mb-1">Cycling &amp; Trails</h3>
-                <p className="font-mono text-xs font-bold text-neutral-800 mb-4">Sunrise riverbanks, bridges &amp; quiet lanes</p>
+                <h3 className="text-xl font-black uppercase mb-1 text-black">Cycling &amp; Trails</h3>
+                <p className="font-mono text-xs font-bold text-black/90 mb-4">Sunrise riverbanks, bridges &amp; quiet lanes</p>
                 
-                <div className="bg-white border-2 border-black p-3 font-mono text-xs space-y-1">
-                  <div className="flex items-center justify-between font-bold">
-                    <span>Usual Route:</span>
-                    <span className="bg-[#FFE600] px-1.5 border border-black">Hatirjheel &amp; Trails</span>
+                <div className="bg-white text-black border-2 border-black p-3 font-mono text-xs space-y-1">
+                  <div className="flex items-center justify-between font-bold text-black">
+                    <span className="text-black">Usual Route:</span>
+                    <span className="bg-[#FFE600] text-black px-1.5 border border-black">Hatirjheel &amp; Trails</span>
                   </div>
-                  <p className="text-[10px] text-neutral-600">Routine: Weekend Morning Rides</p>
+                  <p className="text-[10px] text-neutral-800 font-semibold">Routine: Weekend Morning Rides</p>
                 </div>
               </div>
 
               <div className="mt-6 pt-4 border-t-2 border-black">
-                <span className="font-mono font-black text-xs uppercase bg-white border border-black px-2 py-1 block text-center">
+                <span className="font-mono font-black text-xs uppercase bg-white text-black border border-black px-2 py-1 block text-center">
                   STATUS: READY TO PEDAL
                 </span>
               </div>
@@ -822,11 +830,11 @@ const FriendHome = ({ persona }) => {
                 <p className="font-mono text-xs font-bold text-white/90 mb-4">Philosophy, Non-Fiction &amp; Tech Essays</p>
                 
                 <div className="bg-black text-white border-2 border-white p-3 font-mono text-xs space-y-1">
-                  <div className="flex justify-between font-bold">
+                  <div className="flex justify-between font-bold text-white">
                     <span>Current Read:</span>
                     <span className="text-[#FFE600]">Philosophy &amp; Essays</span>
                   </div>
-                  <div className="flex justify-between text-[10px] text-neutral-400">
+                  <div className="flex justify-between text-[10px] text-neutral-300 font-bold">
                     <span>Pace:</span>
                     <span>2-3 Books / Month</span>
                   </div>
@@ -844,7 +852,7 @@ const FriendHome = ({ persona }) => {
             <motion.div 
               {...fadeUp(0.3)}
               whileHover={{ y: -6 }}
-              className="bg-[#2ED573] border-3 border-black shadow-[6px_6px_0px_#000000] p-6 flex flex-col justify-between hover:shadow-[8px_8px_0px_#000] transition-all"
+              className="bg-[#2ED573] text-black border-3 border-black shadow-[6px_6px_0px_#000000] p-6 flex flex-col justify-between hover:shadow-[8px_8px_0px_#000] transition-all"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -853,20 +861,20 @@ const FriendHome = ({ persona }) => {
                     Outdoors
                   </span>
                 </div>
-                <h3 className="text-xl font-black uppercase mb-1">Travel &amp; Mountains</h3>
-                <p className="font-mono text-xs font-bold text-neutral-800 mb-4">Sajek, Bandarban, Nafakhum &amp; Hills</p>
+                <h3 className="text-xl font-black uppercase mb-1 text-black">Travel &amp; Mountains</h3>
+                <p className="font-mono text-xs font-bold text-black/90 mb-4">Sajek, Bandarban, Nafakhum &amp; Hills</p>
                 
-                <div className="bg-white border-2 border-black p-3 font-mono text-xs space-y-1">
-                  <div className="flex justify-between font-bold">
-                    <span>Next Destination:</span>
-                    <span className="bg-[#2ED573] px-1 border border-black">Hill Tracts</span>
+                <div className="bg-white text-black border-2 border-black p-3 font-mono text-xs space-y-1">
+                  <div className="flex justify-between font-bold text-black">
+                    <span className="text-black">Next Destination:</span>
+                    <span className="bg-[#2ED573] text-black px-1 border border-black font-bold">Hill Tracts</span>
                   </div>
-                  <p className="text-[10px] text-neutral-600">Mode: Backpack &amp; Hiking Boots</p>
+                  <p className="text-[10px] text-neutral-800 font-semibold">Mode: Backpack &amp; Hiking Boots</p>
                 </div>
               </div>
 
               <div className="mt-6 pt-4 border-t-2 border-black">
-                <span className="font-mono font-black text-xs uppercase bg-white border border-black px-2 py-1 block text-center">
+                <span className="font-mono font-black text-xs uppercase bg-white text-black border border-black px-2 py-1 block text-center font-bold">
                   TRAIL: ACTIVE
                 </span>
               </div>
@@ -1063,15 +1071,15 @@ const FriendHome = ({ persona }) => {
                       </div>
 
                       {/* Polaroid Bottom Chin with Sharpie / Marker Handwriting */}
-                      <div className="mt-4 pt-1 space-y-2">
+                      <div className="mt-4 pt-1 space-y-2 text-black">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-handwritten text-2xl font-bold text-neutral-900 leading-none tracking-wide">
+                          <h3 className="font-handwritten text-2xl font-bold text-black leading-none tracking-wide">
                             {img.caption}
                           </h3>
                         </div>
 
                         {/* Stamp & Metadata */}
-                        <div className="flex items-center justify-between pt-2 border-t border-dashed border-neutral-300 font-mono text-[10px]">
+                        <div className="flex items-center justify-between pt-2 border-t border-dashed border-neutral-300 font-mono text-[10px] text-black">
                           <span className="border-2 border-red-700 text-red-700 font-black uppercase px-2 py-0.5 rotate-[-2deg]">
                             {stampDate}
                           </span>
@@ -1088,7 +1096,7 @@ const FriendHome = ({ persona }) => {
             </div>
 
             {/* Bottom Corkboard Watermark */}
-            <div className="mt-8 pt-4 border-t-2 border-black/30 flex flex-col sm:flex-row items-center justify-between text-xs font-mono font-black uppercase text-neutral-700 gap-2">
+            <div className="mt-8 pt-4 border-t-2 border-black/30 flex flex-col sm:flex-row items-center justify-between text-xs font-mono font-black uppercase text-neutral-700 dark:text-neutral-300 gap-2">
               <span>BOARD REF // DHAKA 35MM RETRO LOG</span>
               <span className="bg-black text-white px-2 py-0.5">ALL SHOTS AUTHENTIC</span>
             </div>
@@ -1101,7 +1109,7 @@ const FriendHome = ({ persona }) => {
         <motion.section 
           id="coffee-invite"
           {...fadeUp(0.1)}
-          className="bg-[#FFE600] border-4 border-black shadow-[10px_10px_0px_#000000] p-8 sm:p-12 md:p-16 relative overflow-hidden space-y-6"
+          className="bg-[#FFE600] text-black border-4 border-black shadow-[10px_10px_0px_#000000] p-8 sm:p-12 md:p-16 relative overflow-hidden space-y-6"
         >
           <div className="relative z-10 max-w-3xl space-y-5">
             <div className="inline-block bg-black text-white font-mono font-black text-xs uppercase px-3 py-1 border-2 border-black">
@@ -1112,7 +1120,7 @@ const FriendHome = ({ persona }) => {
               ALWAYS DOWN FOR TONG-ER CHA &amp; ADDA.
             </h2>
 
-            <p className="text-neutral-900 font-medium text-base sm:text-lg leading-relaxed">
+            <p className="text-neutral-900 font-semibold text-base sm:text-lg leading-relaxed">
               Visiting Dhaka or looking to chat about open-source tech, favorite books, cycling routes, travel stories from Sajek, or just need a good friend for adda? Drop a line and let's grab a hot cup of roadside lemon tea.
             </p>
 
