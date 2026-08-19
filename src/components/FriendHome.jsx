@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaLinkedin, FaFacebook, FaInstagram, FaGithub, FaEnvelope, FaPaperPlane, FaCheck, FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
+import { FaLinkedin, FaFacebook, FaInstagram, FaGithub, FaEnvelope, FaPaperPlane, FaCheck, FaPlay, FaPause, FaStepForward, FaStepBackward, FaVolumeUp, FaVolumeMute, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import emailjs from '@emailjs/browser';
 import Swal from 'sweetalert2';
 import { appConfig } from '../config';
@@ -49,6 +49,420 @@ const WashiTape = ({ color = '#FFE600', angle = -3, className = '' }) => (
     }}
   />
 );
+
+// ── BUTTER-SMOOTH BIDIRECTIONAL INFINITE MARQUEE FOR CHAPTERS ─────
+const ChaptersInfiniteMarquee = ({ timeline, onSelectChapter }) => {
+  const trackRef = useRef(null);
+  const singleSetRef = useRef(null);
+  const pos = useRef(0);
+  const isDragging = useRef(false);
+  const isHovered = useRef(false);
+  const startX = useRef(0);
+  const dragDist = useRef(0);
+  const singleSetWidth = useRef(0);
+
+  useEffect(() => {
+    let animationFrameId;
+
+    const measure = () => {
+      if (singleSetRef.current) {
+        singleSetWidth.current = singleSetRef.current.offsetWidth;
+      }
+    };
+    measure();
+    window.addEventListener('resize', measure);
+
+    const loop = () => {
+      const w = singleSetWidth.current || (timeline.length * 480);
+
+      if (!isDragging.current && !isHovered.current) {
+        pos.current += 0.55; // gentle, ultra-smooth auto-marquee
+      }
+
+      // Seamless bidirectional wrap around: never runs out, works left and right!
+      if (pos.current >= w) {
+        pos.current -= w;
+      } else if (pos.current < 0) {
+        pos.current += w;
+      }
+
+      if (trackRef.current) {
+        trackRef.current.style.transform = `translate3d(-${pos.current}px, 0, 0)`;
+      }
+
+      animationFrameId = requestAnimationFrame(loop);
+    };
+
+    animationFrameId = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', measure);
+    };
+  }, [timeline]);
+
+  const onMouseDown = (e) => {
+    isDragging.current = true;
+    startX.current = e.pageX;
+    dragDist.current = 0;
+  };
+
+  const onMouseMove = (e) => {
+    if (!isDragging.current) return;
+    const delta = e.pageX - startX.current;
+    startX.current = e.pageX;
+    dragDist.current += Math.abs(delta);
+    pos.current -= delta * 1.3;
+  };
+
+  const onMouseUp = () => {
+    isDragging.current = false;
+  };
+
+  const onTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      isDragging.current = true;
+      startX.current = e.touches[0].pageX;
+      dragDist.current = 0;
+    }
+  };
+
+  const onTouchMove = (e) => {
+    if (!isDragging.current || e.touches.length !== 1) return;
+    const delta = e.touches[0].pageX - startX.current;
+    startX.current = e.touches[0].pageX;
+    dragDist.current += Math.abs(delta);
+    pos.current -= delta * 1.3;
+  };
+
+  const onTouchEnd = () => {
+    isDragging.current = false;
+  };
+
+  return (
+    <div
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={() => {
+        isDragging.current = false;
+        isHovered.current = false;
+      }}
+      onMouseEnter={() => {
+        isHovered.current = true;
+      }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className="overflow-hidden w-full py-4 select-none cursor-grab active:cursor-grabbing"
+    >
+      <div
+        ref={trackRef}
+        className="flex gap-8 will-change-transform"
+        style={{ width: 'max-content' }}
+      >
+        {[0, 1, 2, 3].map((copyIndex) => (
+          <div
+            key={`chapter-set-${copyIndex}`}
+            ref={copyIndex === 0 ? singleSetRef : null}
+            className="flex gap-8 shrink-0"
+          >
+            {timeline?.map((item, originalIdx) => {
+              const coverImg = resolveMediaUrl(item.coverImage || item.image);
+
+              return (
+                <div
+                  key={`chapter-card-${copyIndex}-${originalIdx}`}
+                  onClick={() => {
+                    if (dragDist.current > 6) return;
+                    onSelectChapter(originalIdx);
+                  }}
+                  className="w-[340px] sm:w-[420px] md:w-[460px] shrink-0 bg-white dark:bg-[#1C1D22] text-black dark:text-white border-4 border-black shadow-[8px_8px_0px_#000000] hover:shadow-[14px_14px_0px_#000000] hover:-translate-y-2 hover:-translate-x-1 p-5 sm:p-6 flex flex-col justify-between transition-all relative overflow-hidden group cursor-pointer select-none"
+                >
+                  <div>
+                    {/* Chunky Neo-Brutalist Cover Image Banner */}
+                    <div className="relative w-full h-52 sm:h-60 bg-neutral-900 border-3 border-black overflow-hidden mb-4 shadow-inner">
+                      {coverImg ? (
+                        <img
+                          src={coverImg}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-neutral-800 text-neutral-400 font-mono text-sm font-bold">
+                          NO COVER IMAGE
+                        </div>
+                      )}
+
+                      {/* Bold Year Badge Floating Top-Left */}
+                      <div className="absolute top-3 left-3 z-10 bg-[#FFE600] text-black font-mono font-black text-sm sm:text-base px-3.5 py-1 border-3 border-black shadow-[3px_3px_0px_#000]">
+                        {item.year}
+                      </div>
+
+                      {/* Tag Badge Floating Top-Right */}
+                      {item.tag && (
+                        <div className="absolute top-3 right-3 z-10">
+                          <span className="bg-[#00C2CB] text-black font-mono font-black text-[11px] uppercase px-3 py-1 border-2 border-black shadow-[2px_2px_0px_#000]">
+                            #{item.tag}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Hover Overlay Hint */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <span className="bg-white text-black font-mono font-black text-xs sm:text-sm px-4 py-2 border-3 border-black shadow-[3px_3px_0px_#000]">
+                          READ FULL STORY ➔
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Location & Read Time Metadata Bar */}
+                    <div className="flex items-center justify-between gap-2 mb-2 font-mono text-xs text-neutral-700 dark:text-neutral-300 font-bold border-b border-dashed border-neutral-300 dark:border-neutral-700 pb-2">
+                      <span className="truncate">{item.location || 'Dhaka, Bangladesh'}</span>
+                      {item.readTime && <span className="bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 border border-black">{item.readTime}</span>}
+                    </div>
+
+                    <h3 className="text-xl sm:text-2xl font-black text-black dark:text-white leading-snug mb-2 group-hover:text-[#FF00FF] transition-colors line-clamp-1">
+                      {item.title}
+                    </h3>
+
+                    <p className="text-neutral-800 dark:text-neutral-200 text-sm leading-relaxed font-medium line-clamp-2">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  {/* Bottom Footer Section */}
+                  <div className="mt-5 pt-3 border-t-3 border-black flex justify-between items-center font-mono">
+                    <span className="bg-[#FFE600] text-black px-2.5 py-1 border-2 border-black font-black text-xs shadow-[2px_2px_0px_#000]">
+                      CHAPTER 0{originalIdx + 1}
+                    </span>
+                    <button className="bg-black text-white px-4 py-1.5 font-mono font-black text-xs border-2 border-black shadow-[2px_2px_0px_#FFF] group-hover:bg-[#FF00FF] group-hover:text-white transition-colors flex items-center gap-1.5 pointer-events-none">
+                      <span>READ STORY</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ── BUTTER-SMOOTH BIDIRECTIONAL INFINITE MARQUEE FOR CASSETTES ────
+const CassetteMarqueeShelf = ({ audioTracks, currentTrackIndex, isPlaying, handleSelectTrack }) => {
+  const trackRef = useRef(null);
+  const singleSetRef = useRef(null);
+  const pos = useRef(0);
+  const isDragging = useRef(false);
+  const isHovered = useRef(false);
+  const startX = useRef(0);
+  const dragDist = useRef(0);
+  const singleSetWidth = useRef(0);
+
+  useEffect(() => {
+    let animationFrameId;
+
+    const measure = () => {
+      if (singleSetRef.current) {
+        singleSetWidth.current = singleSetRef.current.offsetWidth;
+      }
+    };
+    measure();
+    window.addEventListener('resize', measure);
+
+    const loop = () => {
+      const w = singleSetWidth.current || (audioTracks.length * 300);
+
+      if (!isDragging.current && !isHovered.current) {
+        pos.current += 0.5; // gentle continuous slide
+      }
+
+      if (pos.current >= w) {
+        pos.current -= w;
+      } else if (pos.current < 0) {
+        pos.current += w;
+      }
+
+      if (trackRef.current) {
+        trackRef.current.style.transform = `translate3d(-${pos.current}px, 0, 0)`;
+      }
+
+      animationFrameId = requestAnimationFrame(loop);
+    };
+
+    animationFrameId = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', measure);
+    };
+  }, [audioTracks]);
+
+  const onMouseDown = (e) => {
+    isDragging.current = true;
+    startX.current = e.pageX;
+    dragDist.current = 0;
+  };
+
+  const onMouseMove = (e) => {
+    if (!isDragging.current) return;
+    const delta = e.pageX - startX.current;
+    startX.current = e.pageX;
+    dragDist.current += Math.abs(delta);
+    pos.current -= delta * 1.3;
+  };
+
+  const onMouseUp = () => {
+    isDragging.current = false;
+  };
+
+  const onTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      isDragging.current = true;
+      startX.current = e.touches[0].pageX;
+      dragDist.current = 0;
+    }
+  };
+
+  const onTouchMove = (e) => {
+    if (!isDragging.current || e.touches.length !== 1) return;
+    const delta = e.touches[0].pageX - startX.current;
+    startX.current = e.touches[0].pageX;
+    dragDist.current += Math.abs(delta);
+    pos.current -= delta * 1.3;
+  };
+
+  const onTouchEnd = () => {
+    isDragging.current = false;
+  };
+
+  return (
+    <div
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={() => {
+        isDragging.current = false;
+        isHovered.current = false;
+      }}
+      onMouseEnter={() => {
+        isHovered.current = true;
+      }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className="overflow-hidden w-full py-1 select-none cursor-grab active:cursor-grabbing"
+    >
+      <div
+        ref={trackRef}
+        className="flex gap-6 will-change-transform"
+        style={{ width: 'max-content' }}
+      >
+        {[0, 1, 2, 3].map((copyIndex) => (
+          <div
+            key={`cassette-set-${copyIndex}`}
+            ref={copyIndex === 0 ? singleSetRef : null}
+            className="flex gap-6 shrink-0"
+          >
+            {audioTracks?.map((track, originalIdx) => {
+              const isSelected = currentTrackIndex === originalIdx;
+
+              return (
+                <div
+                  key={`tape-${copyIndex}-${originalIdx}`}
+                  onClick={() => {
+                    if (dragDist.current > 6) return;
+                    handleSelectTrack(originalIdx);
+                  }}
+                  className={`w-[270px] sm:w-[290px] shrink-0 group relative p-3.5 rounded-xl border-3 border-black transition-all cursor-pointer flex flex-col justify-between select-none ${
+                    isSelected
+                      ? 'bg-[#FFE600] text-black shadow-[6px_6px_0px_#000000] ring-3 ring-black'
+                      : 'bg-[#EAE4D7] dark:bg-[#1A1B20] text-black dark:text-white shadow-[4px_4px_0px_#000000] hover:shadow-[8px_8px_0px_#000000] hover:-translate-y-1.5'
+                  }`}
+                >
+                  {/* 4 Corner Screw Rivets */}
+                  <div className="absolute top-1.5 left-1.5 w-2 h-2 rounded-full border border-black/30 bg-neutral-300 dark:bg-neutral-600 flex items-center justify-center text-[6px] font-mono leading-none text-black/60">+</div>
+                  <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full border border-black/30 bg-neutral-300 dark:bg-neutral-600 flex items-center justify-center text-[6px] font-mono leading-none text-black/60">+</div>
+                  <div className="absolute bottom-1.5 left-1.5 w-2 h-2 rounded-full border border-black/30 bg-neutral-300 dark:bg-neutral-600 flex items-center justify-center text-[6px] font-mono leading-none text-black/60">+</div>
+                  <div className="absolute bottom-1.5 right-1.5 w-2 h-2 rounded-full border border-black/30 bg-neutral-300 dark:bg-neutral-600 flex items-center justify-center text-[6px] font-mono leading-none text-black/60">+</div>
+
+                  {/* Cassette Header Bar */}
+                  <div className="flex items-center justify-between pb-1.5 border-b border-black/20 text-[10px] font-mono font-black uppercase">
+                    <span className="bg-black text-white px-2 py-0.5 rounded-sm">
+                      {track.category || track.tag || 'TAPE'}
+                    </span>
+                    <span className="bg-white/90 dark:bg-black/50 text-black dark:text-white px-2 py-0.5 border border-black/30 font-bold">
+                      {track.duration || '1:00'}
+                    </span>
+                  </div>
+
+                  {/* Clean Cassette Paper Label */}
+                  <div className="my-2.5 bg-white dark:bg-neutral-900 border-2 border-black p-2.5 shadow-inner rounded-md">
+                    {/* Title */}
+                    <h3 className="font-sans font-black text-sm text-black dark:text-white leading-tight line-clamp-1 mb-1">
+                      {track.title}
+                    </h3>
+
+                    {/* Short Description */}
+                    {track.transcript && (
+                      <p className="text-[11px] font-mono text-neutral-600 dark:text-neutral-300 line-clamp-2 leading-snug">
+                        {track.transcript}
+                      </p>
+                    )}
+
+                    {/* Central Tape Spools Reel Window */}
+                    <div className="mt-2 bg-neutral-950 border-2 border-black py-1.5 px-2.5 flex items-center justify-between rounded relative overflow-hidden shadow-inner">
+                      <div className="absolute inset-x-4 inset-y-1.5 bg-[#422513] opacity-80 rounded-sm" />
+
+                      {/* Left Spool */}
+                      <div className="w-7 h-7 rounded-full border-2 border-white bg-neutral-900 flex items-center justify-center relative z-10 shadow">
+                        <div className={`w-4 h-4 border-2 border-dashed border-[#FFE600] rounded-full ${isSelected && isPlaying ? 'animate-spin' : ''}`} />
+                        <div className="w-1.5 h-1.5 bg-white rounded-full absolute" />
+                      </div>
+
+                      {/* Center Window Area */}
+                      <div className="relative z-10 w-10 h-2 bg-neutral-800/80 rounded-full border border-neutral-700" />
+
+                      {/* Right Spool */}
+                      <div className="w-7 h-7 rounded-full border-2 border-white bg-neutral-900 flex items-center justify-center relative z-10 shadow">
+                        <div className={`w-4 h-4 border-2 border-dashed border-[#00C2CB] rounded-full ${isSelected && isPlaying ? 'animate-spin' : ''}`} />
+                        <div className="w-1.5 h-1.5 bg-white rounded-full absolute" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Action Footer */}
+                  <div className="pt-1 flex items-center justify-between font-mono text-[11px] font-black">
+                    {isSelected ? (
+                      <span className="flex items-center gap-1 text-black dark:text-[#FFE600]">
+                        <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                        <span>{isPlaying ? 'PLAYING 🔊' : 'LOADED'}</span>
+                      </span>
+                    ) : (
+                      <span className="text-neutral-600 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white flex items-center gap-1">
+                        <span>LOAD TAPE</span>
+                        <span>▷</span>
+                      </span>
+                    )}
+                    {track.timestamp && (
+                      <span className="text-[9px] text-neutral-500 font-bold">
+                        {track.timestamp}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const FriendHome = ({ persona }) => {
   // Audio & Podcast Tracks State
@@ -103,7 +517,25 @@ const FriendHome = ({ persona }) => {
   const [isMuted, setIsMuted] = useState(false);
 
   const audioRef = useRef(null);
+  const rackScrollRef = useRef(null);
   const currentTrack = audioTracks[currentTrackIndex] || audioTracks[0] || defaultTracks[0];
+
+  const scrollRack = (direction) => {
+    if (rackScrollRef.current) {
+      const scrollAmount = direction === 'left' ? -350 : 350;
+      rackScrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    if (rackScrollRef.current && rackScrollRef.current.children[currentTrackIndex]) {
+      rackScrollRef.current.children[currentTrackIndex].scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center'
+      });
+    }
+  }, [currentTrackIndex]);
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedChapterIndex, setSelectedChapterIndex] = useState(null);
@@ -648,84 +1080,126 @@ const FriendHome = ({ persona }) => {
                 CASSETTE TAPE RACK
               </h2>
             </div>
+            
+            {/* Shelf Info */}
             <div className="flex items-center gap-3">
-              <span className="bg-[#FFE600] text-black font-mono text-xs uppercase font-black px-3 py-1 border-2 border-black shadow-[2px_2px_0px_#000]">
-                TOTAL: {audioTracks.length} TAPES UPLOADED
+              <span className="bg-[#FFE600] text-black font-mono text-xs uppercase font-black px-3 py-1.5 border-2 border-black shadow-[2px_2px_0px_#000]">
+                TOTAL: {audioTracks.length} TAPES
               </span>
               <span className="font-mono text-xs uppercase font-bold text-neutral-600 dark:text-neutral-400">
-                [ CLICK TO LOAD TAPE ]
+                [ ACTIVE FIXED &bull; SLIDING SHELF ]
               </span>
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {audioTracks.map((track, idx) => {
-              const isSelected = currentTrackIndex === idx;
+          {/* Layout: Fixed Active Tape on Left + Infinite Draggable Marquee on Right */}
+          <div className="flex flex-col lg:flex-row gap-6 items-stretch overflow-hidden py-2">
+            
+            {/* 1. FIXED ACTIVE LOADED TAPE (STAYS FIXED ON LEFT) */}
+            {(() => {
+              const activeTrack = audioTracks[currentTrackIndex] || audioTracks[0] || defaultTracks[0];
 
               return (
-                <motion.div
-                  key={track.id || idx}
-                  {...fadeUp(0.08 + idx * 0.05)}
-                  whileHover={{ y: -6, x: -2 }}
-                  onClick={() => handleSelectTrack(idx)}
-                  className={`p-6 border-3 border-black flex flex-col justify-between cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-[#FFE600] text-black shadow-[8px_8px_0px_#000000] ring-2 ring-black'
-                      : 'bg-white dark:bg-[#1C1D22] text-black dark:text-white shadow-[5px_5px_0px_#000000] hover:shadow-[8px_8px_0px_#000000]'
-                  }`}
-                >
-                  <div>
-                    {/* Tape Header Tag */}
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="bg-black text-white font-mono font-black text-xs px-2.5 py-0.5 uppercase">
-                        {track.tag || `TAPE #0${idx + 1}`}
-                      </span>
-                      <span className="font-mono font-black text-[10px] bg-white text-black border border-black px-2 py-0.5 uppercase">
-                        {track.duration || '1:00'}
-                      </span>
-                    </div>
-
-                    <div className="mb-2">
-                      <span className={`inline-block font-mono font-bold text-[10px] uppercase border px-2 py-0.5 mb-1 ${
-                        isSelected 
-                          ? 'text-black bg-white/80 border-black' 
-                          : 'text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border-black/40'
-                      }`}>
-                        {track.category || 'Podcast'}
-                      </span>
-                      <h3 className={`text-lg font-black leading-snug ${isSelected ? 'text-black' : 'text-black dark:text-white'}`}>
-                        {track.title}
-                      </h3>
-                    </div>
-
-                    <p className={`text-xs font-medium line-clamp-3 leading-relaxed mt-2 font-mono ${
-                      isSelected 
-                        ? 'text-neutral-900 font-semibold' 
-                        : 'text-neutral-700 dark:text-neutral-300'
-                    }`}>
-                      "{track.transcript}"
-                    </p>
-                  </div>
-
-                  {/* Tape Load Action Button */}
-                  <div className="mt-6 pt-4 border-t-2 border-black flex items-center justify-between font-mono text-xs font-black">
-                    {isSelected ? (
-                      <span className="flex items-center gap-1.5 text-black font-black">
-                        <span className="w-2 h-2 rounded-full bg-black animate-ping" />
-                        <span>NOW LOADED ON DECK</span>
-                      </span>
-                    ) : (
-                      <span className="text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white">
-                        CLICK TO LOAD ▷
-                      </span>
-                    )}
-                    <span className={`text-[10px] font-bold ${isSelected ? 'text-neutral-800' : 'text-neutral-500 dark:text-neutral-400'}`}>
-                      {track.timestamp || 'ARCHIVED'}
+                <div className="w-full lg:w-[320px] shrink-0 flex flex-col">
+                  <div className="bg-black text-[#FFE600] font-mono text-xs font-black uppercase px-3 py-1 border-2 border-black flex items-center justify-between mb-2 shadow-[2px_2px_0px_#FFE600]">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                      <span>NOW LOADED TAPE</span>
                     </span>
+                    <span>ACTIVE</span>
                   </div>
-                </motion.div>
+
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    onClick={togglePlay}
+                    className="flex-1 group relative p-4 rounded-xl border-4 border-black transition-all cursor-pointer flex flex-col justify-between bg-[#FFE600] text-black shadow-[8px_8px_0px_#000000] ring-3 ring-black select-none"
+                  >
+                    {/* 4 Corner Screw Rivets */}
+                    <div className="absolute top-2 left-2 w-2.5 h-2.5 rounded-full border border-black/40 bg-neutral-300 flex items-center justify-center text-[7px] font-mono leading-none text-black/70 font-bold">+</div>
+                    <div className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full border border-black/40 bg-neutral-300 flex items-center justify-center text-[7px] font-mono leading-none text-black/70 font-bold">+</div>
+                    <div className="absolute bottom-2 left-2 w-2.5 h-2.5 rounded-full border border-black/40 bg-neutral-300 flex items-center justify-center text-[7px] font-mono leading-none text-black/70 font-bold">+</div>
+                    <div className="absolute bottom-2 right-2 w-2.5 h-2.5 rounded-full border border-black/40 bg-neutral-300 flex items-center justify-center text-[7px] font-mono leading-none text-black/70 font-bold">+</div>
+
+                    {/* Cassette Header Bar */}
+                    <div className="flex items-center justify-between pb-2 border-b border-black/20 text-[11px] font-mono font-black uppercase">
+                      <span className="bg-black text-white px-2.5 py-0.5 rounded-sm">
+                        {activeTrack?.category || activeTrack?.tag || 'ACTIVE TAPE'}
+                      </span>
+                      <span className="bg-white text-black px-2 py-0.5 border border-black font-bold">
+                        {activeTrack?.duration || '1:00'}
+                      </span>
+                    </div>
+
+                    {/* Clean Cassette Paper Label */}
+                    <div className="my-3 bg-white text-black border-3 border-black p-3.5 shadow-inner rounded-md">
+                      {/* Title */}
+                      <h3 className="font-sans font-black text-lg text-black leading-tight line-clamp-1 mb-1">
+                        {activeTrack?.title}
+                      </h3>
+
+                      {/* Short Description */}
+                      {activeTrack?.transcript && (
+                        <p className="text-xs font-mono text-neutral-700 line-clamp-2 leading-snug">
+                          {activeTrack?.transcript}
+                        </p>
+                      )}
+
+                      {/* Central Tape Spools Reel Window */}
+                      <div className="mt-3 bg-neutral-950 border-2 border-black py-2.5 px-3 flex items-center justify-between rounded relative overflow-hidden shadow-inner">
+                        {/* Magnetic Tape Ribbon */}
+                        <div className="absolute inset-x-6 inset-y-2 bg-[#422513] opacity-80 rounded-sm" />
+
+                        {/* Left Spool */}
+                        <div className="w-9 h-9 rounded-full border-2 border-white bg-neutral-900 flex items-center justify-center relative z-10 shadow">
+                          <div className={`w-6 h-6 border-2 border-dashed border-[#FFE600] rounded-full ${isPlaying ? 'animate-spin' : ''}`} />
+                          <div className="w-2.5 h-2.5 bg-white rounded-full absolute" />
+                        </div>
+
+                        {/* Center Window Area */}
+                        <div className="relative z-10 w-14 h-2.5 bg-neutral-800/80 rounded-full border border-neutral-700 flex items-center justify-center">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        </div>
+
+                        {/* Right Spool */}
+                        <div className="w-9 h-9 rounded-full border-2 border-white bg-neutral-900 flex items-center justify-center relative z-10 shadow">
+                          <div className={`w-6 h-6 border-2 border-dashed border-[#00C2CB] rounded-full ${isPlaying ? 'animate-spin' : ''}`} />
+                          <div className="w-2.5 h-2.5 bg-white rounded-full absolute" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Footer */}
+                    <div className="pt-1 flex items-center justify-between font-mono text-xs font-black">
+                      <span className="flex items-center gap-1.5 text-black">
+                        <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                        <span>{isPlaying ? 'PLAYING 🔊 (CLICK TO PAUSE)' : 'LOADED ▷ (CLICK TO PLAY)'}</span>
+                      </span>
+                      {activeTrack?.timestamp && (
+                        <span className="text-[10px] text-neutral-700 font-bold">
+                          {activeTrack?.timestamp}
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                </div>
               );
-            })}
+            })()}
+
+            {/* 2. INFINITE DRAGGABLE MARQUEE RACK (MOVES RIGHT TO LEFT) */}
+            <div className="flex-1 min-w-0 flex flex-col justify-between overflow-hidden">
+              <div className="bg-neutral-200 dark:bg-neutral-800 text-black dark:text-white font-mono text-xs font-bold uppercase px-3 py-1 border-2 border-black flex items-center justify-between mb-2">
+                <span>CASSETTE ARCHIVE RACK</span>
+                <span className="text-[10px] text-neutral-600 dark:text-neutral-400">[ HOVER TO PAUSE &bull; CLICK TO LOAD ]</span>
+              </div>
+
+              <CassetteMarqueeShelf
+                audioTracks={audioTracks}
+                currentTrackIndex={currentTrackIndex}
+                isPlaying={isPlaying}
+                handleSelectTrack={handleSelectTrack}
+              />
+            </div>
+
           </div>
 
         </section>
@@ -769,18 +1243,19 @@ const FriendHome = ({ persona }) => {
                     <span className="text-black">Cups Today:</span>
                     <span className="text-[#FF4757] font-black">{teaCups} / 5</span>
                   </div>
-                  <div className="w-full bg-neutral-200 h-3.5 border border-black overflow-hidden flex">
-                    <div className="bg-[#FF4757] h-full transition-all duration-300" style={{ width: `${Math.min((teaCups / 5) * 100, 100)}%` }} />
+                  <div className="flex justify-between text-[10px] text-neutral-600 font-semibold">
+                    <span>Tong Location:</span>
+                    <span>Roadside Stalls</span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t-2 border-black flex justify-between items-center">
-                <button
-                  onClick={() => setTeaCups(c => (c < 6 ? c + 1 : 1))}
-                  className="w-full bg-black text-white font-mono font-bold text-xs uppercase py-2 border border-black hover:bg-neutral-800 active:scale-95 transition-all text-center cursor-pointer"
+              <div className="mt-6 pt-4 border-t-2 border-black">
+                <button 
+                  onClick={() => setTeaCups((prev) => prev + 1)}
+                  className="w-full bg-black text-white font-mono font-bold text-xs uppercase py-2 hover:bg-[#FF00FF] transition-colors border border-black shadow-[2px_2px_0px_#FFF] cursor-pointer"
                 >
-                  + Brew Another Cup
+                  + Have Another Cha
                 </button>
               </div>
             </motion.div>
@@ -795,7 +1270,7 @@ const FriendHome = ({ persona }) => {
                 <div className="flex items-center justify-between mb-4">
                   <span className="font-mono font-black text-lg bg-black text-white px-2 py-0.5">RIDE</span>
                   <span className="bg-black text-white font-mono font-bold text-[10px] px-2 py-0.5 uppercase">
-                    On Two Wheels
+                    Outdoor Track
                   </span>
                 </div>
                 <h3 className="text-xl font-black uppercase mb-1 text-black">Cycling &amp; Trails</h3>
@@ -888,8 +1363,8 @@ const FriendHome = ({ persona }) => {
 
         </section>
 
-        {/* ── SECTION 4: CHAPTERS OF LIFE (TIMELINE) ─────────────── */}
-        <section id="chapters" className="space-y-8">
+        {/* ── SECTION 4: CHAPTERS OF LIFE (INFINITE DRAGGABLE MARQUEE) ─ */}
+        <section id="chapters" className="space-y-6 overflow-hidden">
           
           <motion.div {...fadeUp(0.1)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b-3 border-black dark:border-neutral-700">
             <div>
@@ -900,60 +1375,21 @@ const FriendHome = ({ persona }) => {
                 CHAPTERS OF MY LIFE
               </h2>
             </div>
-            <span className="font-mono text-xs uppercase font-bold text-neutral-600 dark:text-neutral-400">
-              [ 2015 → PRESENT ]
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="bg-[#FFE600] text-black font-mono text-xs uppercase font-black px-3 py-1.5 border-2 border-black shadow-[2px_2px_0px_#000]">
+                {timeline?.length || 0} CHAPTERS
+              </span>
+              <span className="font-mono text-xs uppercase font-bold text-neutral-600 dark:text-neutral-400">
+                [ DRAG LEFT &bull; RIGHT &bull; CLICK TO READ ]
+              </span>
+            </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {timeline?.map((item, idx) => (
-              <motion.div
-                key={idx}
-                {...fadeUp(0.08 + idx * 0.05)}
-                whileHover={{ y: -6, x: -2 }}
-                onClick={() => setSelectedChapterIndex(idx)}
-                className="bg-white dark:bg-[#1C1D22] text-black dark:text-white border-3 border-black shadow-[6px_6px_0px_#000000] p-6 sm:p-7 flex flex-col justify-between hover:shadow-[10px_10px_0px_#000] transition-all relative overflow-hidden group cursor-pointer"
-              >
-                {/* Year Header Block */}
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="bg-[#FFE600] text-black font-mono font-black text-base px-3 py-1 border-2 border-black shadow-[3px_3px_0px_#000]">
-                      {item.year}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      {item.readTime && (
-                        <span className="font-mono font-bold text-[10px] text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 border border-black px-2 py-0.5">
-                          {item.readTime}
-                        </span>
-                      )}
-                      {item.tag && (
-                        <span className="bg-neutral-100 dark:bg-neutral-800 font-mono font-bold text-[10px] uppercase px-2 py-0.5 border-2 border-black text-black dark:text-white">
-                          #{item.tag}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <h3 className="text-xl sm:text-2xl font-black text-black dark:text-white leading-snug mb-3 group-hover:text-[#FF00FF] transition-colors">
-                    {item.title}
-                  </h3>
-
-                  <p className="text-neutral-700 dark:text-neutral-300 text-sm leading-relaxed font-medium">
-                    {item.description}
-                  </p>
-                </div>
-
-                {/* Bottom Index Stamp */}
-                <div className="mt-6 pt-4 border-t-2 border-black flex justify-between items-center font-mono text-xs text-neutral-500 dark:text-neutral-400 font-bold">
-                  <span className="bg-[#00C2CB] text-black px-2 py-0.5 border border-black">CHAPTER 0{idx + 1}</span>
-                  <span className="text-black dark:text-white font-black flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                    <span>READ STORY</span>
-                    <span>→</span>
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {/* Butter-Smooth Bidirectional Infinite Marquee */}
+          <ChaptersInfiniteMarquee
+            timeline={timeline}
+            onSelectChapter={(idx) => setSelectedChapterIndex(idx)}
+          />
 
         </section>
 

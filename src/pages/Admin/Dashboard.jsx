@@ -554,7 +554,12 @@ const Dashboard = () => {
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className={labelClass}>Category / Blog Type</label>
-              <select name="category" value={formData.category || 'Development'} onChange={handleChange} className={selectClass}>
+              <select name="category" value={formData.category || (activePersonaTab === 'writer' ? 'Essay' : 'Development')} onChange={handleChange} className={selectClass}>
+                <option value="Essay">Essay</option>
+                <option value="Short Story">Short Story</option>
+                <option value="Content Writing">Content Writing</option>
+                <option value="Blog">Blog</option>
+                <option value="Philosophy">Philosophy</option>
                 <option value="Development">Development</option>
                 <option value="Dailylife">Dailylife</option>
                 <option value="Religion">Religion</option>
@@ -566,7 +571,57 @@ const Dashboard = () => {
             </div>
             <div>
               <label className={labelClass}>Other Tags (comma separated)</label>
-              <input type="text" name="tags" value={formData.tags || ''} onChange={handleChange} className={inputClass} placeholder="React, Node" />
+              <input type="text" name="tags" value={formData.tags || ''} onChange={handleChange} className={inputClass} placeholder="Story, Craft, Reflection" />
+            </div>
+          </div>
+
+          {/* Quick Tag / Category Toggles */}
+          <div className="space-y-2">
+            <label className={labelClass}>Quick Tag Toggles (Click to toggle in/out)</label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Content Writing',
+                'Short Story',
+                'Essay',
+                'Blog',
+                'Philosophy',
+                'Reflection',
+                'Reading',
+                'Life',
+                'Mindset',
+                'Craft',
+                'Nostalgia'
+              ].map(tagOption => {
+                const currentTags = typeof formData.tags === 'string'
+                  ? formData.tags.split(',').map(t => t.trim()).filter(Boolean)
+                  : Array.isArray(formData.tags) ? formData.tags : [];
+                const isSelected = currentTags.some(t => t.toLowerCase() === tagOption.toLowerCase());
+                return (
+                  <button
+                    key={tagOption}
+                    type="button"
+                    onClick={() => {
+                      let updated;
+                      if (isSelected) {
+                        updated = currentTags.filter(t => t.toLowerCase() !== tagOption.toLowerCase());
+                      } else {
+                        updated = [...currentTags, tagOption];
+                      }
+                      setFormData(prev => ({
+                        ...prev,
+                        tags: updated.join(', ')
+                      }));
+                    }}
+                    className={`px-2.5 py-1 text-xs font-mono rounded-lg border transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-amber-400 text-black border-amber-400 font-bold shadow-xs'
+                        : 'bg-slate-900 text-slate-300 border-slate-700 hover:border-slate-500'
+                    }`}
+                  >
+                    {isSelected ? '✓ ' : '+ '}{tagOption}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

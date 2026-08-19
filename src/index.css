@@ -471,3 +471,91 @@ h6 {
   animation: typewriter-blink 1s step-end infinite;
 }
 
+/* Infinite Marquee Animations for Chapters & Sections (Ultra-Smooth Slow Pace) */
+@keyframes marquee-to-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-to-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-to-left 80s linear infinite;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-to-right 80s linear infinite;
+}
+
+/* Pause ONLY the specific row that is currently hovered */
+.marquee-row-hover:hover .animate-marquee-left,
+.marquee-row-hover:hover .animate-marquee-right {
+  animation-play-state: paused;
+}
+
+/* Writer Persona Typography */
+.font-typewriter {
+  font-family: 'Space Mono', 'Courier Prime', monospace;
+  letter-spacing: -0.01em;
+}
+
+.font-editorial {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-body-serif {
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+}
+
+/* Vintage Paper Grid Pattern */
+.bg-vintage-paper {
+  background-color: #F6F2EA;
+  background-image: radial-gradient(#D5CBB9 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+.dark .bg-vintage-paper {
+  background-color: #0E0F12;
+  background-image: radial-gradient(#27282F 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+/* Typewriter Ribbon Blinking Cursor */
+@keyframes typewriter-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-typewriter-blink {
+  animation: typewriter-blink 0.8s infinite;
+}
+
+/* Ink Stamp Rotate Glow */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 2.5px solid currentColor;
+  padding: 0.25rem 0.6rem;
+  font-family: 'Special Elite', monospace;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+

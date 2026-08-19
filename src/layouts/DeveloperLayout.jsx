@@ -40,9 +40,6 @@ const DeveloperLayout = ({ children }) => {
           entries.forEach(entry => {
               if (entry.isIntersecting) {
                   setActiveSection(entry.target.id);
-                  if (window.location.pathname === '/' || window.location.pathname === '/developer' || window.location.pathname === '/developer/') {
-                      window.history.replaceState(null, null, `#${entry.target.id}`);
-                  }
               }
           });
       }, { threshold: [0, 0.2, 0.5], rootMargin: "-40% 0px -55% 0px" });

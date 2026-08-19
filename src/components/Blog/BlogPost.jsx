@@ -7,6 +7,7 @@ import Magnetic from '../Common/Magnetic'
 import Subscribe from './Subscribe'
 import BlogSidebar from './BlogSidebar'
 import { appConfig } from '../../config'
+import { getPersonaById } from '../../data/personasData'
 
 /* ── Table of Contents ────────────────────────────────────────── */
 function TOC({ headings, activeId }) {
@@ -231,28 +232,53 @@ export default function BlogPost() {
                 setLoading(false)
             })
             .catch(() => {
-                setError(true)
-                setLoading(false)
+                // Fallback to local persona essays if not found in database API
+                const currentPersona = getPersonaById(personaId)
+                const localEssay = currentPersona?.essays?.find(e => e.slug === slug)
+                if (localEssay) {
+                    setPost({
+                        ...localEssay,
+                        content: localEssay.content || localEssay.excerpt || '',
+                        createdAt: localEssay.date || localEssay.createdAt,
+                        readTime: String(localEssay.readTime || '6').replace(/[^0-9]/g, '') || '6'
+                    })
+                    setLoading(false)
+                } else {
+                    setError(true)
+                    setLoading(false)
+                }
             })
-    }, [slug])
+    }, [slug, personaId])
 
     if (loading) return (
         <div className="flex justify-center items-center min-h-[70vh]">
             <div className="flex flex-col items-center gap-6">
                 <div className="relative w-24 h-24">
-                    <div className="absolute inset-0 border-4 border-primary-500/20 rounded-full" />
-                    <div className="absolute inset-0 border-4 border-t-primary-500 rounded-full animate-spin" />
-                    <div className="text-slate-400 font-display text-xl animate-pulse mt-32 tracking-widest font-bold uppercase text-center w-full">Rendering...</div>
+                    <div className="absolute inset-0 border-4 border-amber-500/20 rounded-full" />
+                    <div className="absolute inset-0 border-4 border-t-amber-500 rounded-full animate-spin" />
+                    <div className="text-neutral-500 font-typewriter text-sm animate-pulse mt-32 tracking-widest font-bold uppercase text-center w-full">
+                        Loading Dispatch...
+                    </div>
                 </div>
             </div>
         </div>
     )
 
     if (error || !post) return (
-        <div className="flex flex-col justify-center items-center min-h-[70vh] gap-6">
-            <span className="material-icons-outlined text-6xl text-slate-800 dark:text-slate-200">error_outline</span>
-            <div className="text-slate-500 dark:text-slate-400 font-display text-2xl uppercase tracking-[0.2em] text-center">Post Not Found.</div>
-            <Link to={backUrl} className="px-10 py-4 bg-primary-600 text-white rounded-[2rem] text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl hover:scale-105 transition-transform">Back to Blog</Link>
+        <div className="flex flex-col justify-center items-center min-h-[70vh] gap-6 px-4 text-center">
+            <span className="font-typewriter text-5xl sm:text-6xl text-amber-800 font-bold">404</span>
+            <div className="font-editorial italic font-bold text-3xl sm:text-4xl text-neutral-900 dark:text-neutral-100 tracking-tight">
+                Essay Not Found.
+            </div>
+            <p className="font-body-serif text-neutral-600 dark:text-neutral-400 max-w-md text-base leading-relaxed">
+                The manuscript or article you are looking for has not been published yet or has been archived.
+            </p>
+            <Link 
+                to={backUrl} 
+                className="px-8 py-3.5 bg-black text-[#C6F135] font-typewriter font-bold text-xs uppercase border-2 border-black shadow-[4px_4px_0px_#C6F135] hover:bg-[#D97706] hover:text-white transition-all cursor-pointer"
+            >
+                ← Return to Writer Archive
+            </Link>
         </div>
     )
 
@@ -260,12 +286,20 @@ export default function BlogPost() {
         month: 'long', day: 'numeric', year: 'numeric'
     })
 
+    const cleanTitle = typeof post.title === 'string' ? post.title.replace(/\s*&\s*/g, ' and ') : post.title
+
     return (
-        <div className="min-h-screen transition-colors duration-300">
+        <div className={`min-h-screen transition-colors duration-300 ${
+            personaId === 'writer' ? 'bg-vintage-paper text-black dark:text-[#F3F4F6] font-body-serif' : ''
+        }`}>
 
             {/* ── Reading Progress Bar ── */}
             <div
-                className="fixed top-16 left-0 z-50 h-[3px] bg-gradient-to-r from-primary-500 to-purple-500 transition-all duration-100"
+                className={`fixed top-16 left-0 z-50 h-[3px] transition-all duration-100 ${
+                    personaId === 'writer'
+                        ? 'bg-gradient-to-r from-amber-600 via-[#C6F135] to-amber-700'
+                        : 'bg-gradient-to-r from-primary-500 to-purple-500'
+                }`}
                 style={{ width: `${readProgress}%` }}
             />
 
@@ -288,10 +322,14 @@ export default function BlogPost() {
                             <Magnetic strength={0.2}>
                                 <Link
                                     to={backUrl}
-                                    className="inline-flex items-center gap-2 group text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all font-bold uppercase tracking-[0.2em] text-[10px]"
+                                    className={`inline-flex items-center gap-2 group font-typewriter font-bold uppercase tracking-[0.15em] text-xs transition-all ${
+                                        personaId === 'writer'
+                                            ? 'bg-black text-[#C6F135] px-4 py-2 border border-black shadow-[2px_2px_0px_#C6F135] hover:bg-[#D97706] hover:text-white'
+                                            : 'text-slate-400 hover:text-primary-600 dark:hover:text-primary-400'
+                                    }`}
                                 >
-                                    <span className="material-icons-outlined text-sm group-hover:-translate-x-1 transition-transform">west</span>
-                                    {isDeveloper ? 'All Posts' : 'Back to Home'}
+                                    <span>←</span>
+                                    <span>{isDeveloper ? 'All Posts' : 'Back to Writer Archive'}</span>
                                 </Link>
                             </Magnetic>
                         </div>
@@ -299,18 +337,17 @@ export default function BlogPost() {
                         {/* Tags */}
                         <div className="flex gap-2.5 flex-wrap mb-5">
                             {post.tags?.map(tag => (
-                                <span key={tag} className="px-3 py-1 bg-primary-500/10 border border-primary-500/25 rounded-full text-[10px] font-black text-primary-600 dark:text-primary-400 uppercase tracking-widest">
-                                    {tag}
+                                <span key={tag} className="px-3 py-1 bg-black text-[#C6F135] border-2 border-black font-typewriter text-[11px] font-bold uppercase tracking-wider shadow-[2px_2px_0px_#000]">
+                                    #{tag}
                                 </span>
                             ))}
                         </div>
 
                         {/* Title */}
                         <h1
-                            className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tight font-display mb-5"
-                            style={{ fontFamily: "'Lora', 'Georgia', serif" }}
+                            className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-5 font-editorial italic"
                         >
-                            {post.title}
+                            {cleanTitle}
                         </h1>
 
                         {/* Description / Excerpt */}

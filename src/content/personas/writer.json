@@ -4,81 +4,120 @@
   "slug": "writer",
   "route": "/writer",
   "tagline": "Here are my thoughts.",
-  "description": "I write articles, essays, and technical guides about technology, philosophy, and the human experience.",
+  "description": "Essays, stories, philosophy, and reflections on life and literature.",
   "theme": {
-    "accentColor": "text-amber-700",
-    "bgColor": "bg-[#fdfbf7]",
+    "accentColor": "text-lime-700",
+    "bgColor": "bg-[#F7FBEB]",
     "textColor": "text-stone-900",
     "fontFamily": "font-serif",
-    "gradient": "from-amber-300 to-orange-200",
-    "borderColor": "border-stone-200",
-    "mutedText": "text-stone-500",
+    "gradient": "from-lime-300 to-lime-100",
+    "borderColor": "border-black",
+    "mutedText": "text-stone-600",
     "cardBg": "bg-white"
   },
-  "heroIntro": "I believe words are the most powerful technology we have. I write to think clearly, to share what I learn, and to make the complex feel simple.",
-  "about": "I'm a developer who writes — not just code, but ideas. My essays sit at the crossroads of technology, philosophy, and everyday experience. I believe in slow reading, careful thinking, and writing that respects the reader's time.",
+  "heroIntro": "I believe words are the most powerful medium we have. I write to think clearly, to share observations, and to explore the subtleties of human experience.",
+  "about": "I write to explore ideas, reflect on literature, and understand the world more deeply. My writings sit at the crossroads of everyday observation, philosophy, and personal stories. I believe in slow reading, careful thinking, and writing that respects the reader's time.",
+  "bio": "Writing allows us to observe life closely, distill complex emotions into simple sentences, and build genuine connections across distance and time.",
   "epigraph": {
     "quote": "The scariest moment is always just before you start.",
     "attribution": "Stephen King"
   },
   "essays": [
     {
-      "title": "Understanding React 19 Server Components",
-      "slug": "react-19-server-components",
-      "excerpt": "Server components blur the line between the server and the browser. In this deep dive, I explore what that means for the way we think about rendering, state, and the future of the web.",
-      "date": "2024-11-12",
-      "readTime": "9 min read",
-      "tags": ["React", "Technical"],
-      "content": "The React team has been working on server components for years. Now that they are here in React 19, it is worth taking a step back and asking: what problem do they actually solve?",
+      "title": "The Art of Slow Reading and Deep Thinking",
+      "slug": "art-of-slow-reading",
+      "excerpt": "In an era of endless scrolling and rapid skimming, returning to slow reading is an act of quiet rebellion. It changes not just what we absorb, but how our thoughts take shape.",
+      "date": "2026-08-10",
+      "readTime": "7 min read",
+      "tags": ["Reading", "Mindset"],
+      "content": "When was the last time you sat with a single paragraph for five full minutes? Slow reading invites us into a deeper dialogue with the author's mind.",
       "issue": 4
     },
     {
-      "title": "The Philosophy of Clean Code",
-      "slug": "philosophy-of-clean-code",
-      "excerpt": "Writing clean code is not merely a technical discipline — it is an ethical one. Every function you name, every abstraction you choose, is a message to the next person who reads it.",
-      "date": "2024-09-04",
-      "readTime": "7 min read",
-      "tags": ["Philosophy", "Software"],
-      "content": "There is a particular kind of pride a developer takes in a well-crafted function. Not pride of authorship, but something closer to the satisfaction of a sentence that says exactly what it means.",
+      "title": "On Finding Simple Words for Complex Feelings",
+      "slug": "finding-simple-words",
+      "excerpt": "Great writing is not about using obscure vocabulary; it is about finding the exact, ordinary word that carries the extraordinary weight of human truth.",
+      "date": "2026-06-25",
+      "readTime": "6 min read",
+      "tags": ["Craft", "Philosophy"],
+      "content": "There is a quiet power in simplicity. The most memorable passages across centuries are almost always written in plain, unmistakable language.",
       "issue": 3
     },
     {
-      "title": "On Learning in Public",
-      "slug": "learning-in-public",
-      "excerpt": "Sharing your process before you have the answers is uncomfortable. It is also one of the most effective ways to learn, connect, and build something that lasts.",
-      "date": "2024-07-22",
-      "readTime": "5 min read",
-      "tags": ["Career", "Learning"],
-      "content": "I started writing publicly because I was afraid to. That fear, it turned out, was the exact reason I needed to do it.",
+      "title": "Why We Need Solitude in a Connected World",
+      "slug": "need-for-solitude",
+      "excerpt": "Solitude is not loneliness. It is the necessary quiet space where ideas settle, memories clarify, and original thinking begins to flourish.",
+      "date": "2026-05-18",
+      "readTime": "8 min read",
+      "tags": ["Life", "Reflection"],
+      "content": "Without regular periods of uninterrupted quiet, we only react to other people's thoughts rather than formulating our own.",
       "issue": 2
     },
     {
-      "title": "Why Developers Should Read More Fiction",
-      "slug": "developers-read-fiction",
-      "excerpt": "Fiction teaches empathy. And empathy, as it turns out, is the most underrated engineering skill there is.",
-      "date": "2024-05-15",
-      "readTime": "6 min read",
-      "tags": ["Books", "Craft"],
-      "content": "The best systems I have ever worked with were designed by people who understood how other people think. Not algorithms — people.",
+      "title": "The Stories We Tell Ourselves in the Dark",
+      "slug": "stories-in-the-dark",
+      "excerpt": "Memory is not a video recording; it is an interpretive tale we continuously edit. Exploring why nostalgic memories feel so vivid and timeless.",
+      "date": "2026-04-02",
+      "readTime": "5 min read",
+      "tags": ["Nostalgia", "Stories"],
+      "content": "Every memory that stays with us is preserved for a reason. Storytelling is the architecture through which we give meaning to the passage of time.",
       "issue": 1
     }
   ],
   "skills": [
     {
-      "category": "Writing Styles",
+      "category": "Writing Genres and Focus",
       "items": [
-        { "name": "Technical Essays", "level": "Guides & deep dives" },
-        { "name": "Blogging", "level": "SEO-aware" },
-        { "name": "Analytical Writing", "level": "Philosophy & ideas" }
+        { "name": "Long-form Essays", "level": "Deep Dives and Critiques" },
+        { "name": "Personal Narratives", "level": "Life, Memory and Experience" },
+        { "name": "Literary Philosophy", "level": "Culture, Books and Human Ideas" }
       ]
     },
     {
-      "category": "Platforms & Tools",
+      "category": "Formats and Mediums",
       "items": [
-        { "name": "Markdown / MDX", "level": "Formatting" },
-        { "name": "Substack / Medium", "level": "Publishing" },
-        { "name": "Git & GitHub Docs", "level": "Open source docs" }
+        { "name": "Periodical Dispatches", "level": "Structured Publications" },
+        { "name": "Manuscript Drafts", "level": "Slow Observation and Notes" },
+        { "name": "Book Reviews and Critiques", "level": "In-depth Reading Logs" }
       ]
+    }
+  ],
+  "gallery": [
+    {
+      "id": "scrap-1",
+      "title": "Midnight Drafts and Warm Tea",
+      "caption": "The first draft is just you telling yourself the story before sharing it with the world.",
+      "quote": "Write with the door closed, rewrite with the door open.",
+      "url": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&auto=format&fit=crop&q=80",
+      "date": "Aug 2026",
+      "tag": "DRAFT NOTE"
+    },
+    {
+      "id": "scrap-2",
+      "title": "Marginalia and Dog-Eared Pages",
+      "caption": "Notes scribbled in book margins reveal how our minds evolve over years of reading.",
+      "quote": "A book must be the axe for the frozen sea within us.",
+      "url": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80",
+      "date": "Jul 2026",
+      "tag": "LITERARY SCRAP"
+    },
+    {
+      "id": "scrap-3",
+      "title": "Vintage Mechanical Typewriter",
+      "caption": "The satisfying tactile clack of steel on ribbon forces intentional rhythm into every sentence.",
+      "quote": "There is nothing to writing. All you do is sit down and bleed.",
+      "url": "https://images.unsplash.com/photo-1519791883288-dc8bd696e667?w=800&auto=format&fit=crop&q=80",
+      "date": "Jun 2026",
+      "tag": "TYPEWRITER LOG"
+    },
+    {
+      "id": "scrap-4",
+      "title": "Rainy Window and Quiet Journal",
+      "caption": "Watching the afternoon rain, collecting fleeting thoughts into a notebook.",
+      "quote": "Observation is the lifeblood of memorable storytelling.",
+      "url": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=80",
+      "date": "May 2026",
+      "tag": "OBSERVATION"
     }
   ]
 }

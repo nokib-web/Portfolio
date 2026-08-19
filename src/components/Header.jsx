@@ -222,9 +222,9 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
             case 'writer':
                 return {
                     name: 'nokib.write',
-                    icon: 'history_edu',
-                    font: 'font-serif tracking-wide',
-                    accent: 'text-amber-700'
+                    icon: 'edit_note',
+                    font: 'font-editorial font-black italic tracking-tight',
+                    accent: 'text-black bg-[#C6F135] px-1.5 py-0.5 border-2 border-black shadow-[2px_2px_0px_#000]'
                 };
             case 'friend':
                 return {
@@ -263,27 +263,34 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
     const personaHome = getPersonaHomeLink();
 
     const isFriendPersona = activePersonaId === 'friend';
-    const isLightMode = (light || isFriendPersona) && !isDarkMode;
+    const isWriterPersona = activePersonaId === 'writer';
+    const isLightMode = (light || isFriendPersona || isWriterPersona) && !isDarkMode;
 
     // Renders the specific persona links
     const renderPersonaLinks = () => {
         if (activePersonaId === 'writer') {
+            const linkClass = isDarkMode
+                ? "text-neutral-200 hover:text-black hover:bg-[#C6F135] border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0px_#C6F135]"
+                : "text-black hover:text-black hover:bg-[#C6F135] border-2 border-transparent hover:border-black hover:shadow-[2px_2px_0px_#000]";
             return (
-                <nav className="hidden md:flex items-center space-x-1 font-serif">
-                    <a className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        isDarkMode ? "text-stone-300 hover:text-white hover:bg-stone-800/60" : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/50"
-                    }`} href="#essays">
-                        Selected Writing
+                <nav className="hidden lg:flex items-center space-x-2 font-mono">
+                    <a className={`px-2.5 py-1 text-xs uppercase font-bold tracking-wider transition-all ${linkClass}`} href="#hero">
+                        Manifesto
                     </a>
-                    <a className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        isDarkMode ? "text-stone-300 hover:text-white hover:bg-stone-800/60" : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/50"
-                    }`} href="#about">
-                        About the Writer
+                    <a className={`px-2.5 py-1 text-xs uppercase font-bold tracking-wider transition-all ${linkClass}`} href="#scraps">
+                        Pinned Scraps
                     </a>
-                    <a className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        isDarkMode ? "text-stone-300 hover:text-white hover:bg-stone-800/60" : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/50"
-                    }`} href="#contact">
-                        Send a Letter
+                    <a className={`px-2.5 py-1 text-xs uppercase font-bold tracking-wider transition-all ${linkClass}`} href="#skills">
+                        Genres
+                    </a>
+                    <a className={`px-2.5 py-1 text-xs uppercase font-bold tracking-wider transition-all ${linkClass}`} href="#essays">
+                        Selected Essays
+                    </a>
+                    <a className={`px-2.5 py-1 text-xs uppercase font-bold tracking-wider transition-all ${linkClass}`} href="#about">
+                        About
+                    </a>
+                    <a className="px-3.5 py-1 text-xs uppercase font-bold tracking-wider bg-[#C6F135] text-black border-2 border-black shadow-[2px_2px_0px_#000] hover:bg-[#A3E635] transition-all ml-1" href="#contact">
+                        Send Letter
                     </a>
                 </nav>
             );
@@ -418,24 +425,27 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
             </nav>
         );
     };
-
     // Responsive styling classes depending on theme (high-contrast, borderless or neo-brutal)
     const headerClass = isFriendPersona
         ? (isDarkMode 
             ? "bg-[#18181B] text-white border-b-3 border-black shadow-[0_4px_0px_#000000]"
             : "bg-[#FAF6EE] text-black border-b-3 border-black shadow-[0_4px_0px_#000000]")
-        : isLightMode
-            ? "bg-[#FDF6F0]/95 text-stone-850 supports-[backdrop-filter]:bg-[#FDF6F0]/90 shadow-sm"
-            : "bg-[#0B0F19]/95 text-slate-200 supports-[backdrop-filter]:bg-[#0B0F19]/90 shadow-md";
+        : isWriterPersona
+            ? (isDarkMode
+                ? "bg-[#15161A]/95 text-white border-b-3 border-black dark:border-neutral-700 shadow-[0_3px_0px_#000]"
+                : "bg-[#FAF8F5]/95 text-black border-b-3 border-black shadow-[0_3px_0px_#000]")
+            : isLightMode
+                ? "bg-[#FDF6F0]/95 text-stone-850 supports-[backdrop-filter]:bg-[#FDF6F0]/90 shadow-sm"
+                : "bg-[#0B0F19]/95 text-slate-200 supports-[backdrop-filter]:bg-[#0B0F19]/90 shadow-md";
 
     return (
         <header className={`fixed top-0 w-full z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform backdrop-blur-md ${headerClass} ${
             isVisible ? 'translate-y-0' : '-translate-y-full'
         }`}>
-            <div className={`w-full ${isFriendPersona ? 'max-w-[1920px] px-4 sm:px-6 md:px-10 lg:px-16' : 'w-11/12 max-w-[1800px] px-4 md:px-6'} mx-auto h-20 flex items-center justify-between`}>
+            <div className={`w-full ${isFriendPersona || isWriterPersona ? 'max-w-[1920px] px-4 sm:px-6 md:px-10 lg:px-16' : 'w-11/12 max-w-[1800px] px-4 md:px-6'} mx-auto h-20 flex items-center justify-between`}>
                 
                 {/* Brand Logo & Nav */}
-                <div className="flex items-center space-x-8 lg:space-x-10">
+                <div className="flex items-center space-x-6 lg:space-x-8">
                     <Link
                         to={personaHome}
                         onClick={() => {
@@ -450,7 +460,7 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                             className={`flex items-center space-x-2.5 text-xl font-black ${brand.font}`}
                         >
                             <span className={`material-icons-outlined ${brand.accent}`}>{brand.icon}</span>
-                            <span className={isFriendPersona ? (isDarkMode ? "text-white" : "text-black") : isLightMode ? "text-stone-800" : "text-white"}>{brand.name}</span>
+                            <span className={isFriendPersona || isWriterPersona ? (isDarkMode ? "text-white" : "text-black") : isLightMode ? "text-stone-800" : "text-white"}>{brand.name}</span>
                         </motion.div>
                     </Link>
  
@@ -470,8 +480,8 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                             onFocus={() => setShowResults(true)}
                             onBlur={() => setTimeout(() => setShowResults(false), 200)}
                             className={`rounded-full py-2 pl-4 pr-12 text-sm transition-all w-40 md:w-56 focus:outline-none
-                                ${isFriendPersona
-                                    ? 'bg-white border-2 border-black text-black placeholder:text-neutral-500 font-mono shadow-[2px_2px_0px_#000] focus:bg-white focus:border-black rounded-none'
+                                ${isFriendPersona || isWriterPersona
+                                    ? 'bg-white dark:bg-neutral-900 border-2 border-black text-black dark:text-white placeholder:text-neutral-500 font-mono shadow-[2px_2px_0px_#000] focus:bg-white focus:border-black rounded-none'
                                     : isLightMode
                                         ? 'bg-stone-200/60 focus:bg-white focus:ring-amber-500/25 text-stone-900 placeholder:text-stone-400 border-0'
                                         : 'bg-slate-900/60 focus:bg-slate-900/90 focus:ring-primary-500/25 text-slate-100 placeholder:text-slate-500 border-0'
@@ -481,7 +491,7 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none">
                             <kbd className={`inline-flex items-center px-2 py-0.5 text-[10px] font-mono rounded-md border-0
-                                ${isFriendPersona
+                                ${isFriendPersona || isWriterPersona
                                     ? 'text-black bg-[#FFE600] border border-black font-black'
                                     : isLightMode
                                         ? 'text-stone-550 bg-stone-250/50'
@@ -492,8 +502,8 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                         {/* Search Results Dropdown */}
                         {showResults && searchResults.length > 0 && (
                             <div className={`absolute top-full right-0 mt-3.5 w-80 rounded-2xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl border-0
-                                ${isFriendPersona
-                                    ? 'bg-white text-black border-3 border-black shadow-[6px_6px_0px_#000] rounded-none'
+                                ${isFriendPersona || isWriterPersona
+                                    ? 'bg-white dark:bg-neutral-900 text-black dark:text-white border-3 border-black shadow-[6px_6px_0px_#000] rounded-none'
                                     : isLightMode
                                         ? 'bg-white text-stone-850 shadow-stone-200/40'
                                         : 'bg-slate-950/95 text-slate-100 shadow-black/80'
@@ -507,15 +517,15 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                                             handleResultClick(result);
                                         }}
                                         className={`flex items-center space-x-3.5 px-5 py-4 transition-colors border-b last:border-0
-                                            ${isFriendPersona
-                                                ? 'hover:bg-[#FFE600] border-black font-mono'
+                                            ${isFriendPersona || isWriterPersona
+                                                ? 'hover:bg-[#FFE600] hover:text-black border-black font-mono'
                                                 : isLightMode
                                                     ? 'hover:bg-stone-50 border-stone-100'
                                                     : 'hover:bg-slate-900 border-slate-900/60'
                                             }`}
                                     >
                                         <span className={`p-2 rounded-xl flex items-center justify-center
-                                            ${isFriendPersona
+                                            ${isFriendPersona || isWriterPersona
                                                 ? 'bg-black text-white rounded-none border border-black'
                                                 : isLightMode
                                                     ? 'bg-stone-100 text-stone-500'
@@ -535,11 +545,13 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
  
                     {/* Live Clock Widget */}
                     <div className={`hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-mono font-medium
-                        ${isFriendPersona
-                            ? 'bg-[#FFE600] text-black font-mono font-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
-                            : isLightMode
-                                ? 'text-stone-600 border-0 bg-transparent'
-                                : 'text-slate-400 border-0 bg-transparent'
+                        ${isWriterPersona
+                            ? 'bg-[#C6F135] text-black font-mono font-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
+                            : isFriendPersona
+                                ? 'bg-[#FFE600] text-black font-mono font-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
+                                : isLightMode
+                                    ? 'text-stone-600 border-0 bg-transparent'
+                                    : 'text-slate-400 border-0 bg-transparent'
                         }`}>
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                         <span>{formatTime(currentTime)}</span>
@@ -550,14 +562,18 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                         whileHover={{ scale: 1.05, rotate: 15 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={toggleDarkMode}
-                        className={`p-2 rounded-full transition-colors
-                            ${isFriendPersona
-                                ? (isDarkMode 
-                                    ? 'bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none' 
-                                    : 'bg-white hover:bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none')
-                                : isLightMode
-                                    ? 'hover:bg-stone-150/40 text-stone-600 hover:text-stone-900 border-0 bg-transparent'
-                                    : 'hover:bg-slate-800/35 text-slate-400 hover:text-white border-0 bg-transparent'
+                        className={`p-2 rounded-full transition-colors cursor-pointer
+                            ${isWriterPersona
+                                ? (isDarkMode
+                                    ? 'bg-[#C6F135] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
+                                    : 'bg-white hover:bg-[#C6F135] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none')
+                                : isFriendPersona
+                                    ? (isDarkMode 
+                                        ? 'bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none' 
+                                        : 'bg-white hover:bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none')
+                                    : isLightMode
+                                        ? 'hover:bg-stone-150/40 text-stone-600 hover:text-stone-900 border-0 bg-transparent'
+                                        : 'hover:bg-slate-800/35 text-slate-400 hover:text-white border-0 bg-transparent'
                             }`}
                         aria-label="Toggle dark mode"
                         title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
@@ -572,11 +588,13 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                         whileHover={{ scale: 1.05, y: -1 }}
                         whileTap={{ scale: 0.95 }}
                         className={`p-2 rounded-full transition-colors flex items-center justify-center
-                            ${isFriendPersona
-                                ? 'bg-white hover:bg-[#00C2CB] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
-                                : isLightMode
-                                    ? 'hover:bg-stone-150/40 text-stone-600 hover:text-stone-900 border-0 bg-transparent'
-                                    : 'hover:bg-slate-800/35 text-slate-400 hover:text-white border-0 bg-transparent'
+                            ${isWriterPersona
+                                ? 'bg-white hover:bg-[#C6F135] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
+                                : isFriendPersona
+                                    ? 'bg-white hover:bg-[#00C2CB] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
+                                    : isLightMode
+                                        ? 'hover:bg-stone-150/40 text-stone-600 hover:text-stone-900 border-0 bg-transparent'
+                                        : 'hover:bg-slate-800/35 text-slate-400 hover:text-white border-0 bg-transparent'
                             }`}
                         href="https://github.com/nokib-web"
                         target="_blank"
@@ -589,12 +607,14 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     {/* Persona Switcher Pill */}
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className={`flex items-center space-x-1.5 px-3.5 py-2 text-[11px] font-sans font-bold uppercase tracking-widest transition-all duration-300
+                        className={`flex items-center space-x-1.5 px-3.5 py-2 text-[11px] font-sans font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer
                             ${isFriendPersona
                                 ? 'bg-[#FF00FF] hover:bg-[#ff24ff] text-white border-2 border-black font-mono font-black shadow-[2px_2px_0px_#000] rounded-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'
-                                : isLightMode
-                                    ? 'bg-stone-200/60 hover:bg-stone-200 text-stone-700 hover:text-black rounded-full border-0'
-                                    : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-350 hover:text-white rounded-full border-0'
+                                : isWriterPersona
+                                    ? 'bg-black text-[#C6F135] hover:bg-[#A3E635] hover:text-black border-2 border-black font-mono font-black shadow-[2px_2px_0px_#000] rounded-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'
+                                    : isLightMode
+                                        ? 'bg-stone-200/60 hover:bg-stone-200 text-stone-700 hover:text-black rounded-full border-0'
+                                        : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-350 hover:text-white rounded-full border-0'
                             }`}
                     >
                         <span className="material-icons-outlined text-sm">grid_view</span>
@@ -604,10 +624,12 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                     {/* Mobile Menu Toggle */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className={`lg:hidden p-2 rounded-full border-0
-                            ${isLightMode
-                                ? 'bg-stone-200/60 hover:bg-stone-250 text-stone-600'
-                                : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-450'
+                        className={`lg:hidden p-2 rounded-full border-0 cursor-pointer
+                            ${isFriendPersona || isWriterPersona
+                                ? 'bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0px_#000] rounded-none'
+                                : isLightMode
+                                    ? 'bg-stone-200/60 hover:bg-stone-250 text-stone-600'
+                                    : 'bg-slate-900/60 hover:bg-slate-800/60 text-slate-450'
                             }`}
                         aria-label="Toggle menu"
                     >
