@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { personas } from '../../data/personasData';
 import { appConfig } from '../../config';
+import { resolveMediaUrl } from '../../utils/mediaUtils';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('projects');
@@ -38,6 +39,7 @@ const Dashboard = () => {
         ];
       case 'friend':
         return [
+          { id: 'audioTracks', label: 'Audio & Podcasts', icon: 'podcasts' },
           { id: 'timeline', label: 'Timeline (Moments)', icon: 'calendar_today' },
           { id: 'gallery', label: 'Gallery (Pixels)', icon: 'photo_camera' },
           { id: 'voiceNote', label: 'Voice Greeting', icon: 'mic' }
@@ -65,7 +67,7 @@ const Dashboard = () => {
   const fetchItems = async () => {
     setLoading(true);
 
-    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote') {
+    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote' || activeTab === 'audioTracks') {
       try {
         const res = await fetch(`${appConfig.apiBaseUrl}/api/personas`);
         if (res.ok) {
@@ -180,10 +182,11 @@ const Dashboard = () => {
         title: '', slug: '', excerpt: '', content: '', 
         tags: '', readTime: '5 min read', coverImage: '', published: true, category: 'Development', personaId: activePersonaTab
       };
-      case 'timeline': return { year: '', title: '', description: '', personaId: activePersonaTab };
+      case 'timeline': return { year: '', title: '', tag: 'Travel & Hills', location: '', readTime: '3 min read', coverImage: '', description: '', story: '', personaId: activePersonaTab };
       case 'gallery': return { url: '', caption: '', span: 'col-span-1 row-span-1', personaId: activePersonaTab };
       case 'quote': return { quote: '', attribution: '', personaId: activePersonaTab };
       case 'voiceNote': return { transcript: '', duration: '0:00', timestamp: '', personaId: activePersonaTab };
+      case 'audioTracks': return { title: '', category: 'Podcast', tag: 'SIDE A // 01', duration: '1:00', timestamp: 'Today', url: '', transcript: '', personaId: activePersonaTab };
       default: return {};
     }
   };
@@ -224,7 +227,7 @@ const Dashboard = () => {
     
     const token = localStorage.getItem('adminToken');
 
-    if (activeTab === 'timeline' || activeTab === 'gallery') {
+    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'audioTracks') {
       const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
       if (!activeObj) {
         alert('Active persona not found.');
@@ -286,7 +289,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
 
-      if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote') {
+      if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote' || activeTab === 'audioTracks') {
         const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
         if (!activeObj) {
           setFormError('Active persona not found.');
@@ -432,6 +435,29 @@ const Dashboard = () => {
       );
     }
     
+    // Universal helper for local file upload (images, videos)
+    const handleMediaFileUpload = (e, fieldName = 'url') => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setFormData(prev => ({
+          ...prev,
+          [fieldName]: uploadEvent.target.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    };
+
+    const handleMediaUrlChange = (e, fieldName = 'url') => {
+      const resolved = resolveMediaUrl(e.target.value);
+      setFormData(prev => ({
+        ...prev,
+        [fieldName]: resolved
+      }));
+    };
+
     if (activeTab === 'projects') {
       return (
         <div className="space-y-5">
@@ -447,11 +473,38 @@ const Dashboard = () => {
             <label className={labelClass}>Tech Stack (comma separated)</label>
             <input type="text" name="techStack" value={formData.techStack || ''} onChange={handleChange} className={inputClass} placeholder="React, Node.js, MongoDB" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Image URL</label>
-              <input type="text" name="image" value={formData.image || ''} onChange={handleChange} className={inputClass} />
+
+          {/* Project Image & Upload */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className={labelClass}>Project Image (Google Drive link or Direct Upload)</label>
+              <label className="text-[10px] font-mono text-indigo-400 cursor-pointer hover:underline flex items-center gap-1">
+                <span className="material-icons-outlined text-xs">upload_file</span>
+                <span>Upload from PC</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleMediaFileUpload(e, 'image')}
+                  className="hidden"
+                />
+              </label>
             </div>
+            <input
+              type="text"
+              name="image"
+              value={formData.image || ''}
+              onChange={(e) => handleMediaUrlChange(e, 'image')}
+              className={inputClass}
+              placeholder="Paste Google Drive share link or image URL"
+            />
+            {formData.image && (
+              <div className="mt-2 w-32 h-20 rounded-xl overflow-hidden border border-slate-700 bg-black">
+                <img src={resolveMediaUrl(formData.image)} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Category</label>
               <select name="category" value={formData.category || 'software'} onChange={handleChange} className={selectClass}>
@@ -460,16 +513,14 @@ const Dashboard = () => {
                 <option value="other">Other</option>
               </select>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Live Link</label>
               <input type="text" name="liveLink" value={formData.liveLink || ''} onChange={handleChange} className={inputClass} />
             </div>
-            <div>
-              <label className={labelClass}>GitHub Link</label>
-              <input type="text" name="githubLink" value={formData.githubLink || ''} onChange={handleChange} className={inputClass} />
-            </div>
+          </div>
+          <div>
+            <label className={labelClass}>GitHub Link</label>
+            <input type="text" name="githubLink" value={formData.githubLink || ''} onChange={handleChange} className={inputClass} />
           </div>
           <div className="flex items-center space-x-2.5 pt-2">
             <input type="checkbox" name="featured" id="featured" checked={formData.featured || false} onChange={handleChange} className="w-4 h-4 rounded-lg text-indigo-600 focus:ring-indigo-500/30 bg-slate-950 border-slate-800" />
@@ -518,10 +569,37 @@ const Dashboard = () => {
               <input type="text" name="tags" value={formData.tags || ''} onChange={handleChange} className={inputClass} placeholder="React, Node" />
             </div>
           </div>
-          <div>
-            <label className={labelClass}>Cover Image URL</label>
-            <input type="text" name="coverImage" value={formData.coverImage || ''} onChange={handleChange} className={inputClass} />
+
+          {/* Blog Cover Image & Direct Upload */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className={labelClass}>Cover Image (Google Drive link or Direct Upload)</label>
+              <label className="text-[10px] font-mono text-indigo-400 cursor-pointer hover:underline flex items-center gap-1">
+                <span className="material-icons-outlined text-xs">upload_file</span>
+                <span>Upload from PC</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleMediaFileUpload(e, 'coverImage')}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <input
+              type="text"
+              name="coverImage"
+              value={formData.coverImage || ''}
+              onChange={(e) => handleMediaUrlChange(e, 'coverImage')}
+              className={inputClass}
+              placeholder="Paste Google Drive share link or image URL"
+            />
+            {formData.coverImage && (
+              <div className="mt-2 w-32 h-20 rounded-xl overflow-hidden border border-slate-700 bg-black">
+                <img src={resolveMediaUrl(formData.coverImage)} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+            )}
           </div>
+
           <div className="flex items-center space-x-2.5 pt-2">
             <input type="checkbox" name="published" id="published" checked={formData.published !== false} onChange={handleChange} className="w-4 h-4 rounded-lg text-indigo-600 focus:ring-indigo-500/30 bg-slate-950 border-slate-800" />
             <label htmlFor="published" className="text-[10px] font-display font-bold uppercase tracking-wider text-slate-350 cursor-pointer">Published</label>
@@ -533,17 +611,70 @@ const Dashboard = () => {
     if (activeTab === 'timeline') {
       return (
         <div className="space-y-5">
-          <div>
-            <label className={labelClass}>Year</label>
-            <input type="text" name="year" value={formData.year || ''} onChange={handleChange} className={inputClass} placeholder="e.g. 2023" />
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className={labelClass}>Year</label>
+              <input type="text" name="year" value={formData.year || ''} onChange={handleChange} className={inputClass} placeholder="e.g. 2023" />
+            </div>
+            <div>
+              <label className={labelClass}>Category / Tag</label>
+              <input type="text" name="tag" value={formData.tag || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Travel & Hills" />
+            </div>
+            <div>
+              <label className={labelClass}>Read Time (e.g. 3 min read)</label>
+              <input type="text" name="readTime" value={formData.readTime || ''} onChange={handleChange} className={inputClass} placeholder="3 min read" />
+            </div>
           </div>
-          <div>
-            <label className={labelClass}>Title</label>
-            <input type="text" name="title" value={formData.title || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Trek to Sajek Valley" />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Chapter Title</label>
+              <input type="text" name="title" value={formData.title || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Trekking Above Clouds in Sajek Valley" />
+            </div>
+            <div>
+              <label className={labelClass}>Location</label>
+              <input type="text" name="location" value={formData.location || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Sajek Valley, Rangamati" />
+            </div>
           </div>
+
+          {/* Timeline Cover Image & Direct Upload */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className={labelClass}>Cover Image / Photo (Google Drive link or Direct Upload)</label>
+              <label className="text-[10px] font-mono text-indigo-400 cursor-pointer hover:underline flex items-center gap-1">
+                <span className="material-icons-outlined text-xs">upload_file</span>
+                <span>Upload from PC</span>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(e) => handleMediaFileUpload(e, 'coverImage')}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <input
+              type="text"
+              name="coverImage"
+              value={formData.coverImage || ''}
+              onChange={(e) => handleMediaUrlChange(e, 'coverImage')}
+              className={inputClass}
+              placeholder="Paste Google Drive share link or image URL"
+            />
+            {formData.coverImage && (
+              <div className="mt-2 w-32 h-20 rounded-xl overflow-hidden border border-slate-700 bg-black">
+                <img src={resolveMediaUrl(formData.coverImage)} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+
           <div>
-            <label className={labelClass}>Description</label>
-            <textarea name="description" value={formData.description || ''} onChange={handleChange} className={inputClass} rows="4" placeholder="Describe the moment..."></textarea>
+            <label className={labelClass}>Short Teaser Description (Shown on Card)</label>
+            <textarea name="description" value={formData.description || ''} onChange={handleChange} className={inputClass} rows="2" placeholder="Brief teaser summary..."></textarea>
+          </div>
+
+          <div>
+            <label className={labelClass}>Full Story Content (Shown in Chapter Reader Modal)</label>
+            <textarea name="story" value={formData.story || ''} onChange={handleChange} className={inputClass} rows="6" placeholder="Write the full memory and story here..."></textarea>
           </div>
         </div>
       );
@@ -552,14 +683,52 @@ const Dashboard = () => {
     if (activeTab === 'gallery') {
       return (
         <div className="space-y-5">
-          <div>
-            <label className={labelClass}>Image URL</label>
-            <input type="text" name="url" value={formData.url || ''} onChange={handleChange} className={inputClass} placeholder="e.g. https://images.unsplash.com/..." />
+          {/* Gallery Media (Image or Video) Direct Upload & Drive Converter */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className={labelClass}>Polaroid Image / Video (Google Drive or Direct PC Upload)</label>
+              <label className="text-[10px] font-mono text-indigo-400 cursor-pointer hover:underline flex items-center gap-1">
+                <span className="material-icons-outlined text-xs">cloud_upload</span>
+                <span>Upload Photo/Video from PC</span>
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={(e) => handleMediaFileUpload(e, 'url')}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <input
+              type="text"
+              name="url"
+              value={formData.url || ''}
+              onChange={(e) => handleMediaUrlChange(e, 'url')}
+              className={inputClass}
+              placeholder="Paste Google Drive link (e.g. https://drive.google.com/file/d/.../view) or image URL"
+            />
+            {formData.url && (
+              <div className="mt-2.5 p-2 bg-slate-950 rounded-2xl border border-slate-800 flex items-center gap-3">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border border-slate-700 bg-black shrink-0">
+                  <img src={resolveMediaUrl(formData.url)} alt="Polaroid Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="text-xs font-mono text-slate-400 space-y-1">
+                  <span className="text-emerald-400 font-bold block">✓ Media Preview Active</span>
+                  <span className="text-[10px] text-slate-500 block truncate max-w-xs">{formData.url.slice(0, 50)}...</span>
+                </div>
+              </div>
+            )}
           </div>
+
           <div>
-            <label className={labelClass}>Caption</label>
+            <label className={labelClass}>Caption / Polaroid Handwritten Note</label>
             <input type="text" name="caption" value={formData.caption || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Morning mist in the mountains" />
           </div>
+
+          <div>
+            <label className={labelClass}>Corner Badge Sticker</label>
+            <input type="text" name="sticker" value={formData.sticker || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Sajek Hills / Cycling Life" />
+          </div>
+
           <div>
             <label className={labelClass}>Span Layout</label>
             <select name="span" value={formData.span || 'col-span-1 row-span-1'} onChange={handleChange} className={selectClass}>
@@ -608,6 +777,129 @@ const Dashboard = () => {
               <label className={labelClass}>Timestamp Label</label>
               <input type="text" name="timestamp" value={formData.timestamp || ''} onChange={handleChange} className={inputClass} placeholder="Today, 10:42 AM" />
             </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'audioTracks') {
+      const handleAudioFile = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Auto-extract audio duration using HTML5 Audio
+        const objectUrl = URL.createObjectURL(file);
+        const tempAudio = new Audio(objectUrl);
+        tempAudio.onloadedmetadata = () => {
+          const totalSec = Math.floor(tempAudio.duration);
+          const m = Math.floor(totalSec / 60);
+          const s = totalSec % 60;
+          const formattedDuration = `${m}:${s < 10 ? '0' : ''}${s}`;
+          
+          const reader = new FileReader();
+          reader.onload = (uploadEvent) => {
+            setFormData(prev => ({
+              ...prev,
+              title: prev.title || file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '),
+              duration: formattedDuration,
+              url: uploadEvent.target.result // Base64 Data URL for local file
+            }));
+          };
+          reader.readAsDataURL(file);
+        };
+      };
+
+      const handleUrlInput = (e) => {
+        let val = e.target.value;
+        // Auto convert Google Drive links to direct streaming URL
+        const driveMatch = val.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || val.match(/id=([a-zA-Z0-9_-]+)/);
+        if (driveMatch && driveMatch[1]) {
+          val = `https://docs.google.com/uc?export=download&id=${driveMatch[1]}`;
+        }
+        setFormData(prev => ({ ...prev, url: val }));
+      };
+
+      return (
+        <div className="space-y-5">
+          {/* Hosting Guide Alert Box */}
+          <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4 text-xs text-indigo-200 space-y-2">
+            <div className="flex items-center gap-2 font-bold text-white uppercase tracking-wider text-[11px]">
+              <span className="material-icons-outlined text-indigo-400 text-sm">cloud_upload</span>
+              <span>Audio Hosting Options (Google Drive / File Upload / Cloud):</span>
+            </div>
+            <ul className="list-disc list-inside space-y-1 text-slate-300">
+              <li><strong className="text-white">Option 1 (Google Drive):</strong> Upload MP3 to Google Drive &rarr; Click Share &rarr; Set to <em>"Anyone with the link"</em> &rarr; Paste link below (system auto-converts it for streaming).</li>
+              <li><strong className="text-white">Option 2 (Direct PC Upload):</strong> Click "Upload Audio from PC" below to select an MP3/WAV file directly.</li>
+              <li><strong className="text-white">Option 3 (Cloudinary / S3 / External URL):</strong> Paste any direct audio link.</li>
+            </ul>
+          </div>
+
+          {/* Local Audio File Upload Input */}
+          <div className="bg-slate-950/70 border border-dashed border-slate-700 hover:border-indigo-500/60 rounded-2xl p-4 text-center transition-all">
+            <label className="cursor-pointer block">
+              <span className="material-icons-outlined text-2xl text-indigo-400 block mb-1">library_music</span>
+              <span className="text-xs font-display font-bold uppercase tracking-wider text-slate-300 block mb-0.5">
+                Upload Audio File from Computer
+              </span>
+              <span className="text-[10px] text-slate-500 block">
+                Supports MP3, WAV, M4A, OGG &bull; Auto-detects track duration
+              </span>
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={handleAudioFile}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Audio / Podcast Title</label>
+              <input type="text" name="title" value={formData.title || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Sajek Morning Silence & Tea" />
+            </div>
+            <div>
+              <label className={labelClass}>Category</label>
+              <select name="category" value={formData.category || 'Podcast'} onChange={handleChange} className={selectClass}>
+                <option value="Voice Greeting">Voice Greeting</option>
+                <option value="Podcast">Podcast</option>
+                <option value="Travel Audio">Travel Audio</option>
+                <option value="Story & Adda">Story &amp; Adda</option>
+                <option value="Book Log">Book Log</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className={labelClass}>Tape Tag (e.g. SIDE A // 01)</label>
+              <input type="text" name="tag" value={formData.tag || ''} onChange={handleChange} className={inputClass} placeholder="SIDE A // 01" />
+            </div>
+            <div>
+              <label className={labelClass}>Duration (e.g. 1:20)</label>
+              <input type="text" name="duration" value={formData.duration || ''} onChange={handleChange} className={inputClass} placeholder="1:20" />
+            </div>
+            <div>
+              <label className={labelClass}>Date / Timestamp</label>
+              <input type="text" name="timestamp" value={formData.timestamp || ''} onChange={handleChange} className={inputClass} placeholder="Aug 19, 2026" />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Audio URL or Google Drive Link</label>
+            <input
+              type="text"
+              name="url"
+              value={formData.url || ''}
+              onChange={handleUrlInput}
+              className={inputClass}
+              placeholder="Paste Google Drive share link or direct MP3 URL"
+            />
+          </div>
+
+          <div>
+            <label className={labelClass}>Transcript / Episode Notes</label>
+            <textarea name="transcript" value={formData.transcript || ''} onChange={handleChange} className={inputClass} rows="4" placeholder="Full transcript or summary of the audio..."></textarea>
           </div>
         </div>
       );
@@ -739,9 +1031,12 @@ const Dashboard = () => {
                       <h3 className="font-display font-bold text-slate-200 group-hover:text-indigo-400 transition-colors text-base tracking-wide">
                         {item.title || item.caption || item.label || item.id || 'Unnamed Item'}
                       </h3>
-                      {(item.slug || item.value !== undefined || item.personaId || item.year || item.span || item.attribution) && (
+                      {(item.slug || item.value !== undefined || item.personaId || item.year || item.span || item.attribution || item.category || item.tag || item.duration) && (
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {item.slug && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Slug: {item.slug}</span>}
+                          {item.category && <span className="text-[9px] font-mono bg-indigo-950/60 border border-indigo-800/80 text-indigo-300 px-2 py-0.5 rounded-md">{item.category}</span>}
+                          {item.tag && <span className="text-[9px] font-mono bg-amber-950/60 border border-amber-800/80 text-amber-300 px-2 py-0.5 rounded-md">{item.tag}</span>}
+                          {item.duration && <span className="text-[9px] font-mono bg-emerald-950/60 border border-emerald-800/80 text-emerald-300 px-2 py-0.5 rounded-md">{item.duration}</span>}
                           {item.value !== undefined && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Value: {item.value}</span>}
                           {item.year && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Year: {item.year}</span>}
                           {item.span && <span className="text-[9px] font-mono bg-slate-900/60 border border-slate-800/80 text-slate-400 px-2 py-0.5 rounded-md">Span: {item.span}</span>}

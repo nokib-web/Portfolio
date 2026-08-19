@@ -62,7 +62,8 @@ const EssayCard = ({ essay, index, personaId }) => (
 /* ─── WriterHome (main export) ───────────────────────────────── */
 const WriterHome = ({ persona }) => {
   const [typewriterDone, setTypewriterDone] = useState(false);
-  const [essays, setEssays] = useState([]);
+  const [essays, setEssays] = useState(persona.essays || []);
+  const [epigraph, setEpigraph] = useState(persona?.epigraph || null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -81,7 +82,20 @@ const WriterHome = ({ persona }) => {
         setEssays(persona.essays || []);
         setLoading(false);
       });
-  }, [persona.essays]);
+
+    // Optionally check if epigraph was updated in database
+    fetch(`${appConfig.apiBaseUrl}/api/personas`)
+      .then(res => res.json())
+      .then(personasData => {
+        if (Array.isArray(personasData)) {
+          const writerDb = personasData.find(p => p.personaId === 'writer' || p.id === 'writer');
+          if (writerDb?.epigraph?.quote) {
+            setEpigraph(writerDb.epigraph);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [persona]);
 
   return (
     <div
@@ -133,16 +147,16 @@ const WriterHome = ({ persona }) => {
         )}
 
         {/* Epigraph (Quote) */}
-        {typewriterDone && persona.epigraph && persona.epigraph.quote && (
+        {typewriterDone && epigraph && epigraph.quote && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
             className="mt-12 pl-6 border-l-2 border-amber-500/70 dark:border-amber-600/70 italic max-w-2xl text-stone-700 dark:text-stone-300"
           >
-            <p className="text-xl font-serif mb-2.5">"{persona.epigraph.quote}"</p>
-            {persona.epigraph.attribution && (
-              <cite className="text-xs font-sans uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 not-italic block font-bold">— {persona.epigraph.attribution}</cite>
+            <p className="text-xl font-serif mb-2.5">"{epigraph.quote}"</p>
+            {epigraph.attribution && (
+              <cite className="text-xs font-sans uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 not-italic block font-bold">— {epigraph.attribution}</cite>
             )}
           </motion.div>
         )}

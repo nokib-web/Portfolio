@@ -42,12 +42,19 @@ export default {
         "background-light": "#F8FAFC", // slate-50
         "background-dark": "#0F172A", // slate-900
         "navy-card": "#1a1f2e",        // dark navy UI cards
+        'brutal-teal': '#00C2CB',
+        'brutal-magenta': '#FF00FF',
+        'brutal-yellow': '#FFD700',
+        'brutal-beige': '#FAF6EE',
+        'brutal-green': '#2ED573',
       },
       fontFamily: {
         display: ["Outfit", "sans-serif"],
         body: ["Inter", "sans-serif"], // Adding Inter for body text if needed
         'writer-display': ['"Playfair Display"', 'Georgia', 'serif'],
         'writer-body': ['Lora', 'Georgia', '"Times New Roman"', 'serif'],
+        handwritten: ['Caveat', 'cursive'],
+        marker: ['"Permanent Marker"', 'cursive'],
       },
       borderRadius: {
         DEFAULT: "0.5rem",
@@ -59,6 +66,10 @@ export default {
         'glass-hover': '0 8px 32px 0 rgba(0, 0, 0, 0.2)',
         'neumorphic': '20px 20px 60px #d1d9e6, -20px -20px 60px #ffffff',
         'neumorphic-dark': '20px 20px 60px #0d1322, -20px -20px 60px #111b32',
+        'brutal-sm': '2px 2px 0px #000000',
+        'brutal': '4px 4px 0px #000000',
+        'brutal-lg': '8px 8px 0px #000000',
+        'brutal-xl': '12px 12px 0px #000000',
       },
       backdropBlur: {
         'glass': '10px',
@@ -76,11 +87,16 @@ export default {
           '0%, 49%': { opacity: '1' },
           '50%, 100%': { opacity: '0' },
         },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
       },
       animation: {
         float: 'float 6s ease-in-out infinite',
         'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
         'typewriter-blink': 'typewriter-blink 1s step-end infinite',
+        marquee: 'marquee 25s linear infinite',
       },
     },
   },

@@ -54,8 +54,19 @@ const MobileMenu = ({ isOpen, onClose, activeSection, activePersonaId = 'develop
         }
     };
 
+    const getPersonaHomeLink = () => {
+        switch (activePersonaId) {
+            case 'friend': return '/friend';
+            case 'writer': return '/writer';
+            case 'philosopher': return '/philosopher';
+            case 'developer': return '/developer';
+            default: return '/';
+        }
+    };
+
     const navItems = getNavItems();
     const brand = getBrandConfig();
+    const personaHome = getPersonaHomeLink();
 
     return createPortal(
         <AnimatePresence>
@@ -78,7 +89,7 @@ const MobileMenu = ({ isOpen, onClose, activeSection, activePersonaId = 'develop
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
-                            <Link to="/" onClick={onClose} className="flex items-center space-x-2 text-lg font-bold font-display text-slate-900 dark:text-white">
+                            <Link to={personaHome} onClick={onClose} className="flex items-center space-x-2 text-lg font-bold font-display text-slate-900 dark:text-white">
                                 <span className="material-icons-outlined text-primary-500">{brand.icon}</span>
                                 <span>{brand.name}</span>
                             </Link>

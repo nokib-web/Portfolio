@@ -3,69 +3,171 @@
   "title": "Friends",
   "slug": "friend",
   "route": "/friend",
-  "tagline": "Coffee Enthusiast, Gamer, and Life Adventurer",
-  "description": "Get to know me outside the IDE. I love talking about gaming, coffee, travel, and sci-fi movies.",
+  "tagline": "Roadside Tong-er Cha, Weekend Cycling, Books & Life Beyond Code",
+  "description": "Get to know me outside the terminal — tea sessions, Sajek adventures, cycling trails, reading books & heartfelt addas.",
   "theme": {
-    "accentColor": "text-rose-500",
-    "bgColor": "bg-[#faf9f6]",
-    "textColor": "text-stone-700",
+    "accentColor": "text-black",
+    "bgColor": "bg-[#FAF6EE]",
+    "textColor": "text-black",
     "fontFamily": "font-sans",
-    "gradient": "from-rose-400 to-orange-300",
-    "borderColor": "border-rose-100"
+    "gradient": "from-yellow-300 via-pink-400 to-cyan-400",
+    "borderColor": "border-black"
   },
-  "about": "Hey there! I'm Nokib. Beyond compiling code and writing articles, I'm just a guy who enjoys a freshly brewed cup of pour-over coffee, playing cooperative role-playing games, and traveling to quiet mountain terrains. I believe the best parts of life happen off-screen, usually accompanied by good friends and a great soundtrack.",
+  "about": "Hey there! I'm Nokib, based in Dhaka, Bangladesh. Beyond debugging code and building web apps, I'm all about roadside hot lemon tea, evening addas with close friends, mountain treks to Sajek & Bandarban, early morning cycling, and getting lost in good books. I believe life's best memories happen off-screen over great conversations and a warm cup of tea.",
   "voiceNote": {
     "timestamp": "Today, 10:42 AM",
     "duration": "0:45",
-    "transcript": "Hey! Thanks for stopping by this corner of the site. I built this part because resumes and portfolios can feel so sterile. If you're ever in my city, let's grab a coffee. I'm always down to chat about the latest sci-fi movie or just share some good vibes."
+    "transcript": "Hey! Thanks for stopping by this corner of the site. Resumes and portfolios can feel way too formal, so I made this friend space. If you're ever in Dhaka, let's grab some Tong-er cha or coffee. Always down for travel stories, cycling trails, book exchanges, and casual chats."
   },
+  "audioTracks": [
+    {
+      "id": "track-1",
+      "title": "Welcome to the Friend Space // Dhaka Intro",
+      "category": "Voice Greeting",
+      "tag": "SIDE A // 01",
+      "duration": "0:45",
+      "timestamp": "Today, 10:42 AM",
+      "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      "transcript": "Hey! Thanks for stopping by this corner of the site. Resumes and portfolios can feel way too formal, so I made this friend space. If you're ever in Dhaka, let's grab some Tong-er cha or coffee. Always down for travel stories, cycling trails, and book discussions."
+    },
+    {
+      "id": "track-2",
+      "title": "Sajek Valley Morning Silence & Hillside Tea",
+      "category": "Travel Audio",
+      "tag": "SIDE A // 02",
+      "duration": "1:20",
+      "timestamp": "Aug 12, 2026",
+      "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+      "transcript": "Sitting atop the helipad in Sajek at 5:30 AM before the clouds disperse. There is a deep, quiet calm you only find on top of these hills with a piping hot cup of tea."
+    },
+    {
+      "id": "track-3",
+      "title": "Early Morning Cycling Routes Across Dhaka",
+      "category": "Podcast / Story",
+      "tag": "SIDE B // 01",
+      "duration": "2:10",
+      "timestamp": "Jul 28, 2026",
+      "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+      "transcript": "Early morning rides across empty Dhaka bridges. Before the city wakes up, the river breeze and open roads feel like another world entirely."
+    },
+    {
+      "id": "track-4",
+      "title": "Late Night Thoughts on Books & Timeless Ideas",
+      "category": "Podcast / Reflection",
+      "tag": "SIDE B // 02",
+      "duration": "1:55",
+      "timestamp": "Jun 15, 2026",
+      "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+      "transcript": "Reflecting on Haruki Murakami and Dostoevsky. The best books aren't just entertainment; they offer a lens to understand human emotion and time."
+    }
+  ],
   "timeline": [
     {
       "year": "2023",
-      "title": "Trek to Sajek Valley",
-      "description": "A week-long trekking journey through the beautiful clouds of Sajek. Discovered a new love for high altitudes."
+      "title": "Trekking Above Clouds in Sajek Valley",
+      "description": "A week-long adventure through the peaks of Sajek, sitting on helipads under starry night skies and sipping hillside tea.",
+      "tag": "Travel & Hills",
+      "badgeColor": "bg-[#FFE600]",
+      "location": "Sajek Valley, Rangamati",
+      "readTime": "3 min read",
+      "coverImage": "https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "story": "There is a surreal feeling when you wake up at 5:00 AM on the hills of Ruilui Para in Sajek. The entire valley below is enveloped in a sea of thick white clouds, while the sun slowly paints the mountain silhouettes in orange and gold.\n\nWe spent days exploring the winding hilly roads on foot, sitting on the army helipad at midnight counting shooting stars, and having endless conversations over roadside ginger tea. It was a reminder of why stepping away from the keyboard is essential to recharge one's creativity and soul."
     },
     {
       "year": "2022",
-      "title": "First Mechanical Keyboard",
-      "description": "Fell down the rabbit hole and built a custom 65% keyboard. My fingers have never been happier, though my wallet disagrees."
+      "title": "Long-Distance Cycling & Trail Discovery",
+      "description": "Started regular 30km+ early morning cycling routes through quiet Dhaka bridges, riverbanks, and countryside lanes.",
+      "tag": "Cycling & Outdoors",
+      "badgeColor": "bg-[#00C2CB]",
+      "location": "Dhaka River Trails & Hatirjheel",
+      "readTime": "2 min read",
+      "coverImage": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "story": "Dhaka during the day is loud, buzzing, and full of chaotic energy. But at 5:30 AM on a Friday, the city transforms into something magical.\n\nI bought my hybrid road bike and started riding along the quiet Hatirjheel waterfront, crossing the 300 Feet expressway, and pushing deep into the green rural outskirts towards the Balu river. Cycling taught me rhythm, endurance, and the joy of exploring the world at 20 kilometers per hour."
     },
     {
       "year": "2020",
-      "title": "Adopted a Cat (or she adopted me)",
-      "description": "Luna walked into my apartment and decided it was hers now. The best lockdown companion."
+      "title": "Deep Dive into Books & Philosophy",
+      "description": "Built a personal library of non-fiction, philosophy, and tech essays. Discovering how timeless ideas shape our modern world.",
+      "tag": "Books & Thought",
+      "badgeColor": "bg-[#FF00FF]",
+      "location": "Home Library, Dhaka",
+      "readTime": "3 min read",
+      "coverImage": "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "story": "During the stillness of 2020, I started devouring books on human history, philosophy, and timeless design principles. From Marcus Aurelius' Meditations to Haruki Murakami's novels and classic software architecture essays, reading became my daily meditation.\n\nI realized that code is just a medium to express thought; understanding human philosophy is what actually helps us build meaningful software and live fulfilling lives."
     },
     {
       "year": "2018",
-      "title": "Graduation Trip",
-      "description": "Backpacked across three countries with my best friends. We got lost twice, but the food was incredible."
+      "title": "Bandarban Road Trip with Friends",
+      "description": "Open-hood Chander Gari rides through Nilgiri hills, hiking down to Nafakhum falls, and eating steaming hot roadside khichuri in monsoon rain.",
+      "tag": "Friendship",
+      "badgeColor": "bg-[#2ED573]",
+      "location": "Bandarban & Nilgiri Hills",
+      "readTime": "3 min read",
+      "coverImage": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "story": "Nothing bonds friends quite like an unpredictable monsoon trip to the remote hills of Bandarban. Standing on the roof of a Chander Gari as it climbed steep winding roads through dense green clouds was pure adrenaline.\n\nWe hiked 4 hours across rocky streams to reach the roaring Nafakhum waterfall, completely disconnected from mobile networks, Wi-Fi, and deadlines. We ate steaming hot roadside khichuri with dim bhaji under tin roofs listening to the monsoon rain."
     },
     {
       "year": "2015",
-      "title": "First Line of Code",
-      "description": "Wrote my first HTML script. It was terrible, but seeing 'Hello World' on screen changed my life trajectory."
+      "title": "The Very First 'Hello World' Moment",
+      "description": "Fired up an old desktop and wrote my first HTML & C programs. Seeing the black terminal respond sparked a spark that redefined everything.",
+      "tag": "Origin Story",
+      "badgeColor": "bg-[#FF7675]",
+      "location": "First Computer Desk",
+      "readTime": "2 min read",
+      "coverImage": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "story": "It all started in a small room on an old clunky desktop computer. I typed my first lines of C code and clicked compile. When the black terminal window popped up with `Hello, World!`, something clicked in my brain.\n\nThe realization that you could type English words and logical instructions to make a machine solve complex problems, build interactive screens, and connect with people across the globe felt like actual magic. That curiosity has fueled everything I build today."
     }
   ],
   "gallery": [
     {
       "url": "https://images.unsplash.com/photo-1501555088652-021faa106b9b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      "caption": "Morning mist in the mountains",
-      "span": "col-span-2 row-span-2"
+      "caption": "Misty morning atop Sajek peaks",
+      "sticker": "Sajek Hills"
     },
     {
-      "url": "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      "caption": "The thocky keyboard",
-      "span": "col-span-1 row-span-1"
+      "url": "https://images.unsplash.com/photo-1485965120184-e220f721d03e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "caption": "Morning ride along open trails",
+      "sticker": "Cycling Life"
     },
     {
-      "url": "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      "caption": "Perfect pour-over coffee",
-      "span": "col-span-1 row-span-1"
+      "url": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "caption": "Evening Tong-er Cha & Adda session",
+      "sticker": "Tong-er Cha"
     },
     {
-      "url": "https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-      "caption": "Gaming night setup",
-      "span": "col-span-2 row-span-1"
+      "url": "https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "caption": "Quiet evening with good books",
+      "sticker": "Book Club"
+    }
+  ],
+  "hobbies": [
+    {
+      "name": "Roadside Tong-er Cha",
+      "icon": "local_cafe",
+      "stat": "4-5 Cups / Day",
+      "color": "bg-[#FFE600]",
+      "note": "Malta Cha, Lemon Tea & V60 Pour-over"
+    },
+    {
+      "name": "Cycling & Morning Rides",
+      "icon": "directions_bike",
+      "stat": "Weekend Cyclist",
+      "color": "bg-[#00C2CB]",
+      "note": "Exploring sunrise riverbanks & Dhaka trails"
+    },
+    {
+      "name": "Reading Books & Philosophy",
+      "icon": "auto_stories",
+      "stat": "Avid Reader",
+      "color": "bg-[#FF00FF]",
+      "note": "Non-fiction, Tech History & Philosophy"
+    },
+    {
+      "name": "Travel & Hill Treks",
+      "icon": "landscape",
+      "stat": "Backpacker",
+      "color": "bg-[#2ED573]",
+      "note": "Sajek Valley, Bandarban & Countryside"
     }
   ]
 }
