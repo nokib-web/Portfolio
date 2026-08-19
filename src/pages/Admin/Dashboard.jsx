@@ -784,39 +784,54 @@ const Dashboard = () => {
 
     if (activeTab === 'audioTracks') {
       const handleAudioFile = (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files && e.target.files[0];
         if (!file) return;
 
-        // Auto-extract audio duration using HTML5 Audio
-        const objectUrl = URL.createObjectURL(file);
-        const tempAudio = new Audio(objectUrl);
-        tempAudio.onloadedmetadata = () => {
-          const totalSec = Math.floor(tempAudio.duration);
-          const m = Math.floor(totalSec / 60);
-          const s = totalSec % 60;
-          const formattedDuration = `${m}:${s < 10 ? '0' : ''}${s}`;
-          
-          const reader = new FileReader();
-          reader.onload = (uploadEvent) => {
-            setFormData(prev => ({
-              ...prev,
-              title: prev.title || file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '),
-              duration: formattedDuration,
-              url: uploadEvent.target.result // Base64 Data URL for local file
-            }));
-          };
-          reader.readAsDataURL(file);
+        const fileNameClean = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+        const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
+
+        // Immediate FileReader read (unconditional)
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          setFormData(prev => ({
+            ...prev,
+            title: prev.title || fileNameClean,
+            url: uploadEvent.target.result, // Base64 Data URL
+            fileNameInfo: `${file.name} (${fileSizeMb} MB)`
+          }));
         };
+        reader.readAsDataURL(file);
+
+        // Asynchronous duration extraction
+        try {
+          const objectUrl = URL.createObjectURL(file);
+          const tempAudio = new Audio();
+          tempAudio.preload = 'metadata';
+          tempAudio.src = objectUrl;
+          tempAudio.onloadedmetadata = () => {
+            if (tempAudio.duration && !isNaN(tempAudio.duration)) {
+              const totalSec = Math.floor(tempAudio.duration);
+              const m = Math.floor(totalSec / 60);
+              const s = totalSec % 60;
+              const formattedDuration = `${m}:${s < 10 ? '0' : ''}${s}`;
+              setFormData(prev => ({
+                ...prev,
+                duration: formattedDuration
+              }));
+            }
+            URL.revokeObjectURL(objectUrl);
+          };
+          tempAudio.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+          };
+        } catch (err) {
+          console.warn('Could not auto-extract audio duration:', err);
+        }
       };
 
       const handleUrlInput = (e) => {
         let val = e.target.value;
-        // Auto convert Google Drive links to direct streaming URL
-        const driveMatch = val.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || val.match(/id=([a-zA-Z0-9_-]+)/);
-        if (driveMatch && driveMatch[1]) {
-          val = `https://docs.google.com/uc?export=download&id=${driveMatch[1]}`;
-        }
-        setFormData(prev => ({ ...prev, url: val }));
+        setFormData(prev => ({ ...prev, url: val, fileNameInfo: '' }));
       };
 
       return (
@@ -825,12 +840,11 @@ const Dashboard = () => {
           <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-4 text-xs text-indigo-200 space-y-2">
             <div className="flex items-center gap-2 font-bold text-white uppercase tracking-wider text-[11px]">
               <span className="material-icons-outlined text-indigo-400 text-sm">cloud_upload</span>
-              <span>Audio Hosting Options (Google Drive / File Upload / Cloud):</span>
+              <span>Audio Hosting Options (Direct PC Upload / Google Drive / Cloud):</span>
             </div>
             <ul className="list-disc list-inside space-y-1 text-slate-300">
-              <li><strong className="text-white">Option 1 (Google Drive):</strong> Upload MP3 to Google Drive &rarr; Click Share &rarr; Set to <em>"Anyone with the link"</em> &rarr; Paste link below (system auto-converts it for streaming).</li>
-              <li><strong className="text-white">Option 2 (Direct PC Upload):</strong> Click "Upload Audio from PC" below to select an MP3/WAV file directly.</li>
-              <li><strong className="text-white">Option 3 (Cloudinary / S3 / External URL):</strong> Paste any direct audio link.</li>
+              <li><strong className="text-emerald-400">Recommended (Direct PC Upload):</strong> Click "Upload Audio File from Computer" below to select any MP3/WAV file directly.</li>
+              <li><strong className="text-white">Option 2 (Google Drive / Dropbox):</strong> Paste share link below (Ensure "Anyone with the link can view" is enabled).</li>
             </ul>
           </div>
 
@@ -851,6 +865,12 @@ const Dashboard = () => {
                 className="hidden"
               />
             </label>
+            {formData.url && formData.url.startsWith('data:audio') && (
+              <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-[11px] font-mono">
+                <span className="material-icons-outlined text-xs">check_circle</span>
+                <span>Audio File Ready: {formData.fileNameInfo || 'Base64 Audio Loaded'}</span>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

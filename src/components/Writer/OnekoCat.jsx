@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 /**
- * Web Audio API synthesized cute Meow Sound
- * Generates an authentic multi-formant "Mee-ooww~" sound with zero external assets.
+ * High-quality Web Audio API synthesized Meow Sound
+ * Uses formant modulation and harmonic oscillators to produce an authentic "Mee-ooww~" sound.
  */
-const playSynthesizedMeow = () => {
+const playMeowSound = () => {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
@@ -14,81 +14,80 @@ const playSynthesizedMeow = () => {
     }
 
     const now = ctx.currentTime;
-    const duration = 0.45;
+    const duration = 0.55;
 
-    // Main Carrier Oscillator (Simulates Cat Vocal Tract)
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+    // Main voice oscillator
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
 
-    // Secondary sub-oscillator for richness & warmth
-    const subOsc = ctx.createOscillator();
-    const subGain = ctx.createGain();
+    // Harmonic overtone oscillator
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
 
-    // Pitch formant filter for "ee" -> "ow" vowel transition
+    // Vowel formant filter ("M-E-O-W")
     const filter = ctx.createBiquadFilter();
     filter.type = 'bandpass';
-    filter.Q.setValueAtTime(3.5, now);
+    filter.Q.setValueAtTime(4.0, now);
 
-    // Vibrato / Purr modulation (LFO)
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-    lfo.frequency.setValueAtTime(6.5, now);
-    lfoGain.gain.setValueAtTime(14, now);
-    lfo.connect(osc.frequency);
-    lfo.start(now);
-    lfo.stop(now + duration);
+    // Subtle pitch vibrato
+    const vibrato = ctx.createOscillator();
+    const vibratoGain = ctx.createGain();
+    vibrato.frequency.setValueAtTime(7.0, now);
+    vibratoGain.gain.setValueAtTime(18, now);
+    vibrato.connect(osc1.frequency);
+    vibrato.connect(osc2.frequency);
+    vibrato.start(now);
+    vibrato.stop(now + duration);
 
-    // Pitch envelope: starts around 480Hz, slides up to 880Hz ("ee"), then glides down to 420Hz ("ow")
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(460, now);
-    osc.frequency.exponentialRampToValueAtTime(860, now + 0.12);
-    osc.frequency.exponentialRampToValueAtTime(420, now + duration);
+    // Pitch Curve: Starts ~420Hz, rises up to 880Hz ("Eee"), then swoops down to 380Hz ("Oww")
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(420, now);
+    osc1.frequency.linearRampToValueAtTime(880, now + 0.16);
+    osc1.frequency.exponentialRampToValueAtTime(380, now + duration);
 
-    subOsc.type = 'triangle';
-    subOsc.frequency.setValueAtTime(460, now);
-    subOsc.frequency.exponentialRampToValueAtTime(860, now + 0.12);
-    subOsc.frequency.exponentialRampToValueAtTime(420, now + duration);
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(420, now);
+    osc2.frequency.linearRampToValueAtTime(880, now + 0.16);
+    osc2.frequency.exponentialRampToValueAtTime(380, now + duration);
 
-    // Filter frequency sweep for feline vocalization
-    filter.frequency.setValueAtTime(900, now);
-    filter.frequency.exponentialRampToValueAtTime(1800, now + 0.14);
-    filter.frequency.exponentialRampToValueAtTime(650, now + duration);
+    // Formant sweep
+    filter.frequency.setValueAtTime(800, now);
+    filter.frequency.linearRampToValueAtTime(2100, now + 0.18);
+    filter.frequency.exponentialRampToValueAtTime(600, now + duration);
 
-    // Volume Envelope
-    gainNode.gain.setValueAtTime(0.001, now);
-    gainNode.gain.linearRampToValueAtTime(0.35, now + 0.06);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    // Amplitude envelope
+    gain1.gain.setValueAtTime(0.0001, now);
+    gain1.gain.linearRampToValueAtTime(0.5, now + 0.08);
+    gain1.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-    subGain.gain.setValueAtTime(0.001, now);
-    subGain.gain.linearRampToValueAtTime(0.2, now + 0.06);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    gain2.gain.setValueAtTime(0.0001, now);
+    gain2.gain.linearRampToValueAtTime(0.3, now + 0.08);
+    gain2.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-    // Connect Audio Graph
-    osc.connect(gainNode);
-    gainNode.connect(filter);
+    // Connect graph
+    osc1.connect(gain1);
+    gain1.connect(filter);
 
-    subOsc.connect(subGain);
-    subGain.connect(filter);
+    osc2.connect(gain2);
+    gain2.connect(filter);
 
     filter.connect(ctx.destination);
 
-    osc.start(now);
-    subOsc.start(now);
-    osc.stop(now + duration);
-    subOsc.stop(now + duration);
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + duration);
+    osc2.stop(now + duration);
 
     setTimeout(() => {
       ctx.close();
     }, (duration + 0.1) * 1000);
   } catch (err) {
-    console.warn('Audio playback not supported:', err);
+    console.warn('Could not play synthesized meow:', err);
   }
 };
 
 const OnekoCat = () => {
   const nekoRef = useRef(null);
-  const [meowBubble, setMeowBubble] = useState(null);
-  const bubbleTimeoutRef = useRef(null);
 
   useEffect(() => {
     const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -103,7 +102,7 @@ const OnekoCat = () => {
     let idleTime = 0;
     let idleAnimation = null;
     let idleAnimationFrame = 0;
-    const nekoSpeed = 11;
+    const nekoSpeed = 10;
 
     const spriteSets = {
       idle: [[-3, -3]],
@@ -146,7 +145,6 @@ const OnekoCat = () => {
     const idle = () => {
       idleTime += 1;
 
-      // Every few idle cycles, trigger a random cute behavior
       if (idleTime > 10 && Math.floor(Math.random() * 200) === 0 && idleAnimation === null) {
         const availableAnimations = ['scratchSelf'];
         if (nekoPosX < 32) availableAnimations.push('scratchWallW');
@@ -190,8 +188,7 @@ const OnekoCat = () => {
       const diffY = nekoPosY - mousePosY;
       const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
 
-      // If near cursor, idle
-      if (distance < nekoSpeed || distance < 38) {
+      if (distance < nekoSpeed || distance < 36) {
         idle();
         return;
       }
@@ -216,7 +213,6 @@ const OnekoCat = () => {
       nekoPosX -= (diffX / distance) * nekoSpeed;
       nekoPosY -= (diffY / distance) * nekoSpeed;
 
-      // Keep within bounds
       nekoPosX = Math.min(Math.max(16, nekoPosX), window.innerWidth - 16);
       nekoPosY = Math.min(Math.max(16, nekoPosY), window.innerHeight - 16);
 
@@ -236,25 +232,16 @@ const OnekoCat = () => {
 
   const handleCatClick = (e) => {
     e.stopPropagation();
-    // Play synthesized meow sound
-    playSynthesizedMeow();
+    // Play meow sound
+    playMeowSound();
 
-    // Trigger cute floating meow bubble & jump
-    const meows = ['Meow! 🐾', 'Purr~ 😺', 'Nyaa~! ✨', 'Mew! ❤️'];
-    const randomMeow = meows[Math.floor(Math.random() * meows.length)];
-    setMeowBubble(randomMeow);
-
+    // Little playful jump
     if (nekoRef.current) {
       nekoRef.current.classList.add('animate-bounce');
       setTimeout(() => {
         nekoRef.current?.classList.remove('animate-bounce');
-      }, 600);
+      }, 500);
     }
-
-    if (bubbleTimeoutRef.current) clearTimeout(bubbleTimeoutRef.current);
-    bubbleTimeoutRef.current = setTimeout(() => {
-      setMeowBubble(null);
-    }, 1800);
   };
 
   return (
@@ -262,28 +249,20 @@ const OnekoCat = () => {
       ref={nekoRef}
       id="oneko-cat"
       onClick={handleCatClick}
-      title="Click me to Meow! 🐾"
-      aria-label="Interactive Cursor Cat Companion"
-      className="fixed z-[999] pointer-events-auto cursor-pointer select-none transition-transform duration-100 active:scale-125 hover:scale-110"
+      title="Click me to Meow!"
+      aria-label="Interactive Oneko Cat"
+      className="fixed z-[99999] pointer-events-auto cursor-pointer select-none transition-transform duration-75 active:scale-125 hover:scale-110"
       style={{
         width: '32px',
         height: '32px',
         position: 'fixed',
-        left: '48%',
+        left: '50%',
         top: '50%',
         backgroundImage: "url('/oneko.gif')",
         imageRendering: 'pixelated',
         transform: 'translate3d(0, 0, 0)',
       }}
-    >
-      {/* Floating Speech / Meow Bubble */}
-      {meowBubble && (
-        <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-amber-100 text-stone-900 dark:bg-stone-900 dark:text-amber-200 border-2 border-stone-800 dark:border-amber-400/50 shadow-md text-[11px] font-mono font-black px-2.5 py-0.5 rounded-full whitespace-nowrap animate-fade-in pointer-events-none">
-          {meowBubble}
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-amber-100 dark:bg-stone-900 border-r-2 border-b-2 border-stone-800 dark:border-amber-400/50 rotate-45" />
-        </div>
-      )}
-    </div>
+    />
   );
 };
 

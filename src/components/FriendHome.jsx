@@ -191,8 +191,8 @@ const FriendHome = ({ persona }) => {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play().then(() => setIsPlaying(true)).catch(() => {
-        // Fallback simulation if external link blocked
+      audio.play().then(() => setIsPlaying(true)).catch((err) => {
+        console.warn('Audio playback error:', err);
         setIsPlaying(true);
       });
     }
@@ -205,9 +205,12 @@ const FriendHome = ({ persona }) => {
     setTimeout(() => {
       if (audioRef.current) {
         audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {});
+        audioRef.current.load();
+        audioRef.current.play().catch((err) => {
+          console.warn('Playback error:', err);
+        });
       }
-    }, 100);
+    }, 150);
   };
 
   const handleNextTrack = () => {
@@ -333,10 +336,11 @@ const FriendHome = ({ persona }) => {
       
       {/* Hidden HTML5 Audio Element for Seamless Playback */}
       <audio
+        key={currentTrack?.url || currentTrackIndex}
         ref={audioRef}
         src={resolveAudioUrl(currentTrack?.url)}
         muted={isMuted}
-        preload="metadata"
+        preload="auto"
       />
 
       {/* ── 1920PX MAX WIDTH CONTAINER ─────────────────────────── */}

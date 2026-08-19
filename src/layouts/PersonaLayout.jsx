@@ -53,8 +53,9 @@ const PersonaLayout = () => {
   /* ── 2. FRIEND — Bespoke Layout & Theme ─────────────────────── */
   if (persona.id === 'friend' || persona.slug === 'friend') {
     const FriendThemeWrapper = ({ children }) => (
-      <div className="min-h-screen bg-[#FAF6EE] dark:bg-[#121214] text-black dark:text-white transition-colors duration-500 pt-20">
+      <div className="min-h-screen bg-[#FAF6EE] dark:bg-[#121214] text-black dark:text-white transition-colors duration-500 pt-20 relative">
         <Header activePersonaId="friend" light={true} />
+        <OnekoCat />
         {children}
       </div>
     );

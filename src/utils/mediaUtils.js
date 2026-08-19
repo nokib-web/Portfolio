@@ -1,3 +1,5 @@
+import { appConfig } from '../config';
+
 // Resolve Google Drive, Dropbox, or direct URLs for Images, Videos, and Audio
 export const resolveMediaUrl = (url) => {
   if (!url) return '';
@@ -24,10 +26,17 @@ export const resolveMediaUrl = (url) => {
 export const resolveAudioUrl = (url) => {
   if (!url) return '';
   
+  // Base64 direct audio data URI
+  if (url.startsWith('data:audio/')) {
+    return url;
+  }
+
+  // Google Drive link -> stream via our backend server-side audio proxy
   const driveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (driveMatch && driveMatch[1]) {
     const fileId = driveMatch[1];
-    return `https://docs.google.com/uc?export=download&id=${fileId}`;
+    const baseUrl = appConfig?.apiBaseUrl || '';
+    return `${baseUrl}/api/proxy-audio?id=${fileId}`;
   }
 
   if (url.includes('dropbox.com')) {
