@@ -3,53 +3,85 @@
   "title": "Deep Thinker",
   "slug": "philosopher",
   "route": "/philosopher",
-  "tagline": "Asking the big questions about life, logic, and consciousness.",
-  "description": "Reflections on epistemology, artificial agency, systems thinking, and ethics in the digital age.",
+  "tagline": "Asking the fundamental questions about mind, meaning, and computational reality.",
+  "description": "Explorations at the crossroads of epistemology, artificial agency, cognitive architecture, and ethics in the age of intelligence.",
   "theme": {
-    "accentColor": "text-purple-400",
-    "bgColor": "bg-neutral-950",
-    "textColor": "text-neutral-200",
-    "fontFamily": "font-serif",
-    "gradient": "from-purple-600 to-indigo-500",
-    "borderColor": "border-neutral-800"
+    "accentColor": "text-[#C89B6A]",
+    "bgColor": "bg-[#0E0F12]",
+    "textColor": "text-[#EDE8DF]",
+    "fontFamily": "font-cinzel",
+    "gradient": "from-[#C89B6A] via-[#B3804D] to-[#8C6239]",
+    "borderColor": "border-[#C89B6A]/30"
   },
-  "about": "I believe that technology is an extension of human intention. As we build increasingly autonomous and intelligent systems, understanding the philosophical frameworks under which they operate is paramount. Here I explore questions of mind, meaning, systemic complexity, and ethical reasoning.",
+  "about": "I believe technology is not merely a tool, but an epistemological lens that reshapes human cognition. As autonomous algorithms and neural architectures increasingly mediate our perception of truth, examining the foundational assumptions under which these systems operate becomes our most urgent philosophical task.",
+  "epigraph": {
+    "quote": "The unexamined algorithm is not worth executing; the unexamined life is not worth living.",
+    "attribution": "Nokib · Dialectical Reflections"
+  },
   "quote": {
-    "text": "The unexamined system is not worth computing.",
+    "text": "Consciousness may not be an emergent anomaly of matter, but the fundamental fabric through which reality questions itself.",
     "attribution": "Nokib"
   },
+  "inquiryStats": [
+    { "label": "Fields of Inquiry", "value": "04" },
+    { "label": "Philosophical Treatises", "value": "03" },
+    { "label": "Epistemological Paradigms", "value": "12+" },
+    { "label": "Dialectical Inquiries", "value": "Continuous" }
+  ],
   "projects": [
     {
-      "title": "A Treatise on Artificial Agency",
-      "description": "An inquiry into whether neural architectures can form intentional mental states and genuine subjective meaning.",
-      "tech": ["Philosophy of Mind", "Cognitive Science", "AI Ethics"],
-      "image": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "title": "A Treatise on Artificial Agency and Subjective Meaning",
+      "description": "An epistemological inquiry into whether deep transformer models and autonomous neural agents can form intentional semantic states, genuine understanding, or if they remain purely syntactic symbol manipulators.",
+      "tech": ["Philosophy of Mind", "Epistemology", "AI Ethics", "Cognitive Semantics"],
+      "image": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "readTime": "12 min read",
+      "status": "Published Treatise",
       "liveLink": ""
     },
     {
-      "title": "Systems Thinking & Emergent Order",
-      "description": "How simple local feedback loops give rise to immense global complexity in biological and software ecosystems.",
-      "tech": ["Complexity Theory", "Cybernetics", "Information Theory"],
-      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+      "title": "Systems Thinking and Emergent Complexity in Digital Ecology",
+      "description": "How elementary recursive feedback loops give rise to immense macroscopic intelligence, self-organizing order, and the illusion of central coordination in biological and distributed software ecosystems.",
+      "tech": ["Complexity Science", "Cybernetics", "Information Theory", "Emergence"],
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "readTime": "15 min read",
+      "status": "Monograph",
+      "liveLink": ""
+    },
+    {
+      "title": "The Epistemic Horizon: Truth in the Synthetic Media Era",
+      "description": "Investigating how high-fidelity generative simulations disrupt foundational theories of evidence, perceptual justification, and communal trust in digital societies.",
+      "tech": ["Social Epistemology", "Ethics of Tech", "Virtue Theory"],
+      "image": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+      "readTime": "10 min read",
+      "status": "Working Paper",
       "liveLink": ""
     }
   ],
   "skills": [
     {
-      "category": "Fields of Inquiry",
+      "category": "Fields of Core Inquiry",
       "items": [
-        { "name": "Epistemology", "level": "Theory of Knowledge" },
-        { "name": "AI Ethics & Alignment", "level": "Value Theory" },
-        { "name": "Philosophy of Mind", "level": "Consciousness & Agency" },
-        { "name": "Systems Thinking", "level": "Complexity Dynamics" }
+        { "name": "Epistemology", "level": "Theory of Knowledge, Evidence and Justification" },
+        { "name": "Philosophy of Mind", "level": "Consciousness, Qualia and Functionalism" },
+        { "name": "AI Alignment & Ethics", "level": "Normative Value Systems and Existential Agency" },
+        { "name": "Systems Dynamics", "level": "Cybernetic Loops, Emergence and Complexity" }
       ]
     },
     {
-      "category": "Foundational Influences",
+      "category": "Dialectical Frameworks",
       "items": [
-        { "name": "Alan Turing", "level": "Computation & Intelligence" },
-        { "name": "Norbert Wiener", "level": "Cybernetics" },
-        { "name": "Douglas Hofstadter", "level": "Self-Reference & Loops" }
+        { "name": "Socratic Questioning", "level": "Iterative First-Principles Dissection" },
+        { "name": "Phenomenological Inquiry", "level": "Lived Experience and Intentionality" },
+        { "name": "Bayesian Epistemology", "level": "Probabilistic Belief Updating and Priors" }
+      ]
+    },
+    {
+      "category": "Foundational Thinkers",
+      "items": [
+        { "name": "Alan Turing", "level": "Limits of Formal Computation & Intelligence" },
+        { "name": "Douglas Hofstadter", "level": "Strange Loops & Self-Referential Meaning" },
+        { "name": "Norbert Wiener", "level": "Cybernetics and Human Purpose" },
+        { "name": "Ludwig Wittgenstein", "level": "Language Games & Logical Boundaries" }
       ]
     }
   ]

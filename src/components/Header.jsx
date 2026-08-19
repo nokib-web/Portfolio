@@ -237,8 +237,8 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                 return {
                     name: 'nokib.think',
                     icon: 'psychology',
-                    font: 'font-serif tracking-wide',
-                    accent: 'text-purple-400'
+                    font: 'font-cinzel tracking-[0.15em] font-semibold',
+                    accent: 'text-[#EDE8DF] bg-[#1A1B22] px-2.5 py-0.5 rounded-full border border-[#C89B6A]/40 text-xs font-cinzel shadow-[0_0_15px_rgba(200,155,106,0.15)]'
                 };
             default:
                 return {
@@ -264,7 +264,8 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
 
     const isFriendPersona = activePersonaId === 'friend';
     const isWriterPersona = activePersonaId === 'writer';
-    const isLightMode = (light || isFriendPersona || isWriterPersona) && !isDarkMode;
+    const isPhilosopherPersona = activePersonaId === 'philosopher';
+    const isLightMode = (light || isFriendPersona || isWriterPersona) && !isDarkMode && !isPhilosopherPersona;
 
     // Renders the specific persona links
     const renderPersonaLinks = () => {
@@ -324,19 +325,26 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
         }
 
         if (activePersonaId === 'philosopher') {
+            const linkClass = "text-[#A39788] hover:text-[#EDE8DF] hover:bg-[#C89B6A]/10 px-3.5 py-1.5 rounded-full text-xs font-cinzel tracking-[0.15em] transition-all duration-300";
             return (
-                <nav className="hidden md:flex items-center space-x-1 font-serif">
-                    <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#intro">
-                        Dialectic
+                <nav className="hidden lg:flex items-center space-x-1 font-cinzel">
+                    <a className={linkClass} href="#intro">
+                        Prologue
                     </a>
-                    <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#inquiry">
+                    <a className={linkClass} href="#inquiry">
                         Inquiry
                     </a>
-                    <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#treatises">
+                    <a className={linkClass} href="#treatises">
                         Treatises
                     </a>
-                    <a className="px-4 py-2 rounded-full text-sm font-medium text-neutral-400 hover:text-purple-400 hover:bg-neutral-900 transition-all" href="#writings">
-                        Writings
+                    <a className={linkClass} href="#paradoxes">
+                        Paradoxes
+                    </a>
+                    <a className={linkClass} href="#writings">
+                        Discourses
+                    </a>
+                    <a className="px-4 py-1.5 rounded-full text-xs font-cinzel tracking-[0.15em] bg-[#C89B6A]/20 text-[#EDE8DF] border border-[#C89B6A]/40 hover:bg-[#C89B6A] hover:text-[#0E0F12] transition-all ml-1 shadow-[0_0_15px_rgba(200,155,106,0.2)] font-semibold" href="#discourse">
+                        Symposium
                     </a>
                 </nav>
             );

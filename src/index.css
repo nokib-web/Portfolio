@@ -552,10 +552,40 @@ h6 {
   gap: 0.25rem;
   border: 2.5px solid currentColor;
   padding: 0.25rem 0.6rem;
-  font-family: 'Special Elite', monospace;
+  font-family: 'Space Mono', monospace;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+/* ── DARK ACADEMIA & CLASSICAL MARBLE (PHILOSOPHER) ────────── */
+.font-cinzel {
+  font-family: 'Cinzel', 'Playfair Display', Georgia, serif;
+}
+
+.font-cinzel-decorative {
+  font-family: 'Cinzel Decorative', 'Cinzel', serif;
+}
+
+.font-garamond {
+  font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+}
+
+.bg-charcoal-stone {
+  background-color: #0E0F12;
+  background-image: radial-gradient(rgba(200, 155, 106, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-marble-slab {
+  background: linear-gradient(180deg, rgba(26, 28, 35, 0.85) 0%, rgba(14, 15, 18, 0.95) 100%);
+  border: 1px solid rgba(200, 155, 106, 0.15);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.6);
+}
+
+.bg-marble-slab:hover {
+  border-color: rgba(200, 155, 106, 0.35);
+  box-shadow: 0 15px 50px -10px rgba(200, 155, 106, 0.08);
 }
 
 
