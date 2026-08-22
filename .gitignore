@@ -28,3 +28,4 @@ temp_interactive_push.bat
 .vercel
 .env*
 db.txt
+branch_structure.json

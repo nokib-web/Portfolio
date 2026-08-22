@@ -377,58 +377,31 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                 </Link>
                 <motion.a
                     whileHover={{ y: -2 }}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1 ${
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
                         isLightMode
                             ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
                             : "text-slate-350 hover:text-white hover:bg-slate-800/40"
                     }`}
-                    href={isBlogPage ? "/developer/#projects" : "#projects"}
+                    href="https://www.linkedin.com/in/nazmulhasan-nokib/"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
-                    <span>Projects</span>
+                    <span>LinkedIn</span>
+                    <span className="material-icons-outlined text-[13px] opacity-75">open_in_new</span>
                 </motion.a>
                 <motion.a
                     whileHover={{ y: -2 }}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
+                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
                         isLightMode
                             ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
                             : "text-slate-350 hover:text-white hover:bg-slate-800/40"
                     }`}
-                    href={isBlogPage ? "/developer/#experience" : "#experience"}
+                    href="https://drive.google.com/uc?export=download&id=1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
-                    Experience
-                </motion.a>
-                <motion.a
-                    whileHover={{ y: -2 }}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                        isLightMode
-                            ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
-                            : "text-slate-350 hover:text-white hover:bg-slate-800/40"
-                    }`}
-                    href={isBlogPage ? "/developer/#skills" : "#skills"}
-                >
-                    Skills
-                </motion.a>
-                <motion.a
-                    whileHover={{ y: -2 }}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                        isLightMode
-                            ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
-                            : "text-slate-350 hover:text-white hover:bg-slate-800/40"
-                    }`}
-                    href={isBlogPage ? "/developer/#education" : "#education"}
-                >
-                    Education
-                </motion.a>
-                <motion.a
-                    whileHover={{ y: -2 }}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                        isLightMode
-                            ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
-                            : "text-slate-350 hover:text-white hover:bg-slate-800/40"
-                    }`}
-                    href={isBlogPage ? "/developer/#contact" : "#contact"}
-                >
-                    Contact
+                    <span>Resume</span>
+                    <span className="material-icons-outlined text-[14px] opacity-75">download</span>
                 </motion.a>
             </nav>
         );
