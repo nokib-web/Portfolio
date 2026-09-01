@@ -255,35 +255,120 @@ const loadPersonas = () => {
     
     const philosopher = {
         id: 'philosopher',
-        title: 'Deep Thinker / Philosopher',
+        title: 'Deep Thinker',
         slug: 'philosopher',
         route: '/philosopher',
-        tagline: "Asking the big questions about life and tech.",
-        description: "Reflections on logic, consciousness, systems, and ethics in the digital age.",
+        tagline: "Contemplation across Cosmology, Islamic Epistemology, Human Psychology, and Civilizational Economics.",
+        description: "A multidisciplinary exploration of Quranic reflection (Tadabbur), the intellectual history of Islamic thought (Ibn Khaldun, Al-Ghazali, Ibn Rushd), cosmological physics, cognitive psychology (Nafs & Aql), and ethical economic systems.",
         theme: {
-            accentColor: "text-purple-400",
-            bgColor: "bg-neutral-950",
-            textColor: "text-neutral-200",
-            fontFamily: "font-serif",
-            gradient: "from-purple-600 to-indigo-500"
+            accentColor: "text-[#FF5E7E]",
+            bgColor: "bg-[#14131F]",
+            textColor: "text-[#FAF4E8]",
+            fontFamily: "font-fraunces",
+            gradient: "from-[#FF5E7E] via-[#FFA94D] to-[#FFD166]"
         },
-        about: "I believe that technology is an extension of human intention. As we build increasingly advanced systems, understanding the philosophical frameworks under which they operate is paramount.",
-        projects: [
+        heroImage: "/images/philosopher/retro_cosmic_tadabbur.jpg",
+        horizonImage: "/images/philosopher/retro_cosmic_horizon.jpg",
+        thinkerImage: "/images/philosopher/retro_nature_thinker.jpg",
+        meditationImage: "/images/philosopher/retro_cosmic_meditation.jpg",
+        about: "True intellectual depth bridges the grand architecture of the cosmos with the internal landscape of human consciousness. Guided by Quranic reflection (Tadabbur), civilizational dynamics (Ibn Khaldun), epistemological certainty (Al-Ghazali), and the ethical stewardship of economic power.",
+        epigraph: {
+            quote: "We will show them Our signs in the horizons and within themselves until it becomes clear to them that it is the Truth.",
+            attribution: "Surah Fussilat (41:53) · The Cosmos & The Soul"
+        },
+        quote: {
+            text: "Civilizations rise not merely through physical abundance, but through moral cohesion (Asabiyyah), epistemic sincerity, and alignment with the cosmic order.",
+            attribution: "Ibn Khaldun · The Muqaddimah"
+        },
+        chapters: [
             {
-                title: "A Treatise on Artificial Agency",
-                description: "An essay on whether neural network architectures can form intentional mental states.",
-                tech: ["Philosophy", "Cognitive Science"],
-                image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                id: "cosmology",
+                chapterNum: "01",
+                title: "Cosmology & The Expanding Universe",
+                tagline: "Astrophysics, Fine-Tuning & Cosmic Orbits",
+                arabic: "Ayat fil-Afaq",
+                verse: "“And the heaven We constructed with strength, and indeed, We are its expander.” — Surah Adh-Dhariyat (51:47)",
+                summary: "The universe is not a static or accidental container, but a mathematically calibrated cosmos undergoing dynamic expansion. From gravitational fine-tuning to the choreography of celestial orbits (Falak), cosmological physics converges with timeless metaphysical reflection.",
+                points: [
+                    { title: "Metric Expansion of Space", text: "Cosmic metric expansion confirms that space itself is stretching across deep time." },
+                    { title: "Low Entropy Initial Conditions", text: "The universe began in an extraordinarily low-entropy state, demanding deep inquiry into prime cosmological order." },
+                    { title: "Gravitational Equilibrium (Falak)", text: "Planetary bodies swim in mathematically precise orbital planes (Surah Al-Anbiya 21:33)." }
+                ],
+                contemplation: "When you observe the night sky, do you see cold emptiness or an unfolding cosmic order inviting consciousness to recognize its Creator?"
+            },
+            {
+                id: "epistemology",
+                chapterNum: "02",
+                title: "Islamic History & Epistemology",
+                tagline: "Civilizational Cycles, Reason & Spiritual Certainty",
+                arabic: "Tarikh al-Fikr wal-Umran",
+                verse: "“Have they not traveled through the earth and observed the outcome of those before them?” — Surah Ar-Rum (30:9)",
+                summary: "The intellectual tradition of Islamic thought established holistic frameworks harmonizing empirical observation, rigorous deduction, and transcendent revelation.",
+                points: [
+                    { title: "Ibn Khaldun’s Science of Civilizations", text: "Social solidarity (Asabiyyah) births empires, which decline as luxury and injustice erode cohesion." },
+                    { title: "Al-Ghazali’s Epistemic Certainty", text: "Absolute certainty (Yaqeen) requires intuitive spiritual illumination of the heart (Qalb)." },
+                    { title: "Ibn Rushd & The Harmony of Truth", text: "Rational demonstration and divine revelation are complementary paths to the singular Truth." }
+                ],
+                contemplation: "How can modern technological civilizations sustain moral purpose and social cohesion as material luxury increases?"
+            },
+            {
+                id: "psychology",
+                chapterNum: "03",
+                title: "Human Psychology & The Soul",
+                tagline: "The Tripartite Psyche, Cognitive Biases & Moral Will",
+                arabic: "An-Nafs wal-Aql",
+                verse: "“And by the soul and He who proportioned it, and inspired it with discernment of its wickedness and its righteousness.” — Surah Ash-Shams (91:7-8)",
+                summary: "Classical thinkers mapped the human psyche—delineating the dynamic struggle between impulsive desires (Nafs), rational intellect (Aql), and the moral heart (Qalb).",
+                points: [
+                    { title: "The Three Stages of the Soul", text: "Al-Nafs al-Ammarah (ego), Al-Nafs al-Lawwamah (conscience), and Al-Nafs al-Mutma’innah (tranquil soul)." },
+                    { title: "Cognitive Biases & Self-Purification", text: "Addressing cognitive distortions through Tazkiyah (intentional self-purification)." },
+                    { title: "Qualia vs Mechanical Computation", text: "Subjective empathy and moral choice remain unique to living conscious souls." }
+                ],
+                contemplation: "Which dimension of your inner self directs your daily focus: impulsive distraction or tranquil higher intention?"
+            },
+            {
+                id: "economics",
+                chapterNum: "04",
+                title: "Civilizational Economics & Justice",
+                tagline: "Wealth Circulation, Labor Value & Ethical Stewardship",
+                arabic: "Al-Iqtisad wal-Adalah",
+                verse: "“So that wealth does not merely circulate among the rich among you.” — Surah Al-Hashr (59:7)",
+                summary: "Real prosperity requires productive circulation of real assets, labor dignity, and resistance to predatory debt exploitation.",
+                points: [
+                    { title: "Productive Wealth Circulation", text: "Mandating capital flow into tangible production while prohibiting usury (Riba) and hoarding (Kanz)." },
+                    { title: "Ibn Khaldun’s Labor Theory", text: "Human labor is the generator of value; excessive taxation destroys civilizational production." },
+                    { title: "Automation & Ethical Distribution", text: "Transitioning from artificial scarcity to distributing abundance with human dignity." }
+                ],
+                contemplation: "Can economic systems be successful if they concentrate power in monopolies while degrading communal trust?"
+            },
+            {
+                id: "ecosystems",
+                chapterNum: "05",
+                title: "Living Ecosystems & Cosmic Balance",
+                tagline: "The Universal Balance (Mizan) & Earth Stewardship",
+                arabic: "Al-Mizan fil-Khalq",
+                verse: "“And the heaven He raised and imposed the balance (Mizan), that you not transgress within the balance.” — Surah Ar-Rahman (55:7-8)",
+                summary: "Nature is an interconnected sanctuary of signs. Understanding ecological feedback loops and human stewardship (Khilafah).",
+                points: [
+                    { title: "The Cosmic Balance (Al-Mizan)", text: "Every ecosystem functions in homeostatic balance that human activity must respect." },
+                    { title: "Symbiotic Intelligence", text: "Forest mycorrhizal networks demonstrate that reciprocal mutualism is nature’s enduring architecture." },
+                    { title: "Tafakkur in Pristine Nature", text: "Solitary contemplation in nature re-centers the mind in humility and alignment." }
+                ],
+                contemplation: "How can modern computing operate in harmony with the sacred equilibrium of the natural world?"
             }
         ],
-        skills: [
+        projects: [
             {
-                category: "Interests",
-                items: [
-                    { name: "Epistemology", level: "Theory of knowledge" },
-                    { name: "Ethics of AI", level: "Value alignment" },
-                    { name: "Systems Thinking", level: "Complexity theory" }
-                ]
+                title: "A Treatise on Artificial Agency and Subjective Meaning",
+                description: "An epistemological inquiry into whether deep transformer models can form intentional semantic states or remain purely syntactic symbol manipulators.",
+                tech: ["Philosophy of Mind", "Epistemology", "AI Ethics"],
+                image: "/images/philosopher/retro_cosmic_tadabbur.jpg"
+            },
+            {
+                title: "Civilizational Dynamics & Economic Cycles in Digital Societies",
+                description: "Applying Ibn Khaldun's Asabiyyah and wealth circulation models to modern decentralized networks and algorithmic governance.",
+                tech: ["Ibn Khaldun", "Economics", "Complexity Science"],
+                image: "/images/philosopher/retro_nature_thinker.jpg"
             }
         ]
     };

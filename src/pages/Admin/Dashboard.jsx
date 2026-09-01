@@ -34,8 +34,10 @@ const Dashboard = () => {
         ];
       case 'philosopher':
         return [
+          { id: 'chapters', label: 'Philosophical Realms', icon: 'menu_book' },
           { id: 'projects', label: 'Treatises', icon: 'grid_view' },
-          { id: 'blogs', label: 'Writings', icon: 'article' }
+          { id: 'blogs', label: 'Writings', icon: 'article' },
+          { id: 'quote', label: 'Epigraph & Axiom', icon: 'format_quote' }
         ];
       case 'friend':
         return [
@@ -67,7 +69,7 @@ const Dashboard = () => {
   const fetchItems = async () => {
     setLoading(true);
 
-    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote' || activeTab === 'audioTracks') {
+    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote' || activeTab === 'audioTracks' || activeTab === 'chapters') {
       try {
         const res = await fetch(`${appConfig.apiBaseUrl}/api/personas`);
         if (res.ok) {
@@ -79,7 +81,7 @@ const Dashboard = () => {
             const quoteObj = personaObj?.epigraph || { quote: '', attribution: '' };
             setItems([{
               ...quoteObj,
-              _id: 'writer-epigraph',
+              _id: 'persona-epigraph',
               title: quoteObj.quote || 'No quote set yet',
               attribution: quoteObj.attribution || '',
               _index: 0
@@ -107,7 +109,7 @@ const Dashboard = () => {
           const quoteObj = activePersonaObj?.epigraph || { quote: '', attribution: '' };
           setItems([{
             ...quoteObj,
-            _id: 'writer-epigraph',
+            _id: 'persona-epigraph',
             title: quoteObj.quote || 'No quote set yet',
             attribution: quoteObj.attribution || '',
             _index: 0
@@ -130,25 +132,17 @@ const Dashboard = () => {
     else if (activeTab === 'blogs') endpoint = '/api/blogs/all';
     else if (activeTab === 'stats') endpoint = '/api/stats';
 
-    endpoint += `?personaId=${activePersonaTab}`;
-    
     try {
-      const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${appConfig.apiBaseUrl}${endpoint}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.status === 401) {
-        localStorage.removeItem('adminToken');
-        window.location.href = '/admin/login';
-        return;
+      const res = await fetch(`${appConfig.apiBaseUrl}${endpoint}?personaId=${activePersonaTab}`);
+      if (res.ok) {
+        const data = await res.json();
+        setItems(data);
       }
-      const data = await res.json();
-      if (res.ok) setItems(Array.isArray(data) ? data : []);
-      else setItems([]);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Initial load of personas Data
@@ -172,15 +166,25 @@ const Dashboard = () => {
   }, [activeTab, activePersonaTab]);
 
   const getDefaultData = (tab) => {
-    switch(tab) {
-      case 'stats': return { label: '', value: 0, personaId: activePersonaTab };
-      case 'projects': return { 
-        title: '', description: '', techStack: '', image: '', 
-        liveLink: '', githubLink: '', category: 'software', featured: false, personaId: activePersonaTab 
+    switch (tab) {
+      case 'projects': return {
+        title: '', description: '', techStack: '', liveLink: '', githubLink: '',
+        featured: false, category: 'software', image: '', personaId: activePersonaTab
       };
       case 'blogs': return {
         title: '', slug: '', excerpt: '', content: '', 
         tags: '', readTime: '5 min read', coverImage: '', published: true, category: 'Development', personaId: activePersonaTab
+      };
+      case 'chapters': return {
+        chapterNum: '01',
+        title: '',
+        tagline: '',
+        arabic: '',
+        verse: '',
+        summary: '',
+        contemplation: '',
+        pointsText: '',
+        personaId: activePersonaTab
       };
       case 'timeline': return { year: '', title: '', tag: 'Travel & Hills', location: '', readTime: '3 min read', coverImage: '', description: '', story: '', personaId: activePersonaTab };
       case 'gallery': return { url: '', caption: '', span: 'col-span-1 row-span-1', personaId: activePersonaTab };
@@ -211,6 +215,10 @@ const Dashboard = () => {
       const otherTags = tagsArray.filter(t => t.toLowerCase() !== category.toLowerCase());
       data.tags = otherTags.join(', ');
       data.category = category;
+    } else if (activeTab === 'chapters') {
+      if (Array.isArray(item.points)) {
+        data.pointsText = item.points.map(p => `${p.title}::${p.text}`).join('\n');
+      }
     }
 
     setFormData(data);
@@ -227,7 +235,7 @@ const Dashboard = () => {
     
     const token = localStorage.getItem('adminToken');
 
-    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'audioTracks') {
+    if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'audioTracks' || activeTab === 'chapters') {
       const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
       if (!activeObj) {
         alert('Active persona not found.');
@@ -289,7 +297,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem('adminToken');
 
-      if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote' || activeTab === 'audioTracks') {
+      if (activeTab === 'timeline' || activeTab === 'gallery' || activeTab === 'quote' || activeTab === 'voiceNote' || activeTab === 'audioTracks' || activeTab === 'chapters') {
         const activeObj = personasData.find(p => p.personaId === activePersonaTab || p.id === activePersonaTab);
         if (!activeObj) {
           setFormError('Active persona not found.');
@@ -312,6 +320,22 @@ const Dashboard = () => {
               timestamp: formData.timestamp || new Date().toLocaleString()
             }
           };
+        } else if (activeTab === 'chapters') {
+          const points = (formData.pointsText || '').split('\n').map(line => {
+            const [title, ...rest] = line.split('::');
+            return { title: (title || '').trim(), text: rest.join('::').trim() };
+          }).filter(p => p.title || p.text);
+          
+          const chapterData = { ...formData, points };
+          delete chapterData.pointsText;
+          
+          const updatedArray = [...(activeObj.chapters || [])];
+          if (editingItem) {
+            updatedArray[editingItem._index] = chapterData;
+          } else {
+            updatedArray.push(chapterData);
+          }
+          bodyUpdate = { chapters: updatedArray };
         } else {
           const updatedArray = [...(activeObj[activeTab] || [])];
           if (editingItem) {
@@ -792,6 +816,58 @@ const Dashboard = () => {
               <option value="col-span-1 row-span-2">Tall (1x2)</option>
               <option value="col-span-2 row-span-2">Large Square (2x2)</option>
             </select>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === 'chapters') {
+      return (
+        <div className="space-y-5">
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className={labelClass}>Chapter Number (e.g. 01)</label>
+              <input type="text" name="chapterNum" value={formData.chapterNum || ''} onChange={handleChange} className={inputClass} placeholder="01" />
+            </div>
+            <div>
+              <label className={labelClass}>Arabic / Concept Citation</label>
+              <input type="text" name="arabic" value={formData.arabic || ''} onChange={handleChange} className={inputClass} placeholder="e.g. Ayat fil-Afaq" />
+            </div>
+            <div>
+              <label className={labelClass}>Sphere ID</label>
+              <input type="text" name="id" value={formData.id || ''} onChange={handleChange} className={inputClass} placeholder="cosmology" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Chapter Title</label>
+              <input type="text" name="title" value={formData.title || ''} onChange={handleChange} className={inputClass} placeholder="Cosmology & The Expanding Universe" />
+            </div>
+            <div>
+              <label className={labelClass}>Tagline</label>
+              <input type="text" name="tagline" value={formData.tagline || ''} onChange={handleChange} className={inputClass} placeholder="Astrophysics, Fine-Tuning & Cosmic Orbits" />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Foundational Epigraph / Sacred Verse</label>
+            <textarea name="verse" value={formData.verse || ''} onChange={handleChange} className={inputClass} rows="2" placeholder="“And the heaven We constructed with strength...”"></textarea>
+          </div>
+
+          <div>
+            <label className={labelClass}>Comprehensive Exposition (Summary)</label>
+            <textarea name="summary" value={formData.summary || ''} onChange={handleChange} className={inputClass} rows="4" placeholder="Detailed philosophical overview..."></textarea>
+          </div>
+
+          <div>
+            <label className={labelClass}>Core Dialectical Points (Format: Title :: Detail description per line)</label>
+            <textarea name="pointsText" value={formData.pointsText || ''} onChange={handleChange} className={`${inputClass} font-mono text-xs`} rows="4" placeholder="Point Title :: Point explanation text..."></textarea>
+          </div>
+
+          <div>
+            <label className={labelClass}>Contemplation & Self-Examination Question</label>
+            <textarea name="contemplation" value={formData.contemplation || ''} onChange={handleChange} className={inputClass} rows="2" placeholder="Contemplation prompt question..."></textarea>
           </div>
         </div>
       );
