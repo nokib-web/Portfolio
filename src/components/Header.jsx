@@ -325,26 +325,20 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
         }
 
         if (activePersonaId === 'philosopher') {
-            const linkClass = "text-[#A39788] hover:text-[#EDE8DF] hover:bg-[#C89B6A]/10 px-3.5 py-1.5 rounded-full text-xs font-cinzel tracking-[0.15em] transition-all duration-300";
+            const linkClass = "text-white/70 hover:text-white hover:bg-white/10 px-3.5 py-1.5 rounded-full text-xs font-fraunces font-bold tracking-wider transition-all duration-300";
             return (
-                <nav className="hidden lg:flex items-center space-x-1 font-cinzel">
-                    <a className={linkClass} href="#intro">
-                        Prologue
+                <nav className="hidden lg:flex items-center space-x-1">
+                    <a className={linkClass} href="#overview">
+                        Overview
                     </a>
-                    <a className={linkClass} href="#inquiry">
-                        Inquiry
+                    <a className={linkClass} href="#realms">
+                        Five Realms
                     </a>
-                    <a className={linkClass} href="#treatises">
-                        Treatises
+                    <a className={linkClass} href="#epilogue">
+                        Epilogue
                     </a>
-                    <a className={linkClass} href="#paradoxes">
-                        Paradoxes
-                    </a>
-                    <a className={linkClass} href="#writings">
-                        Discourses
-                    </a>
-                    <a className="px-4 py-1.5 rounded-full text-xs font-cinzel tracking-[0.15em] bg-[#C89B6A]/20 text-[#EDE8DF] border border-[#C89B6A]/40 hover:bg-[#C89B6A] hover:text-[#0E0F12] transition-all ml-1 shadow-[0_0_15px_rgba(200,155,106,0.2)] font-semibold" href="#discourse">
-                        Symposium
+                    <a className="px-4 py-1.5 rounded-full text-xs font-fraunces font-bold tracking-wider bg-[#FF5E7E] text-white border border-[#201D28] hover:bg-[#FFA94D] transition-all ml-1 shadow-[2px_2px_0px_#201D28]" href="mailto:hello@nokib.dev">
+                        Contact
                     </a>
                 </nav>
             );
