@@ -583,9 +583,120 @@ h6 {
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.6);
 }
 
-.bg-marble-slab:hover {
-  border-color: rgba(200, 155, 106, 0.35);
-  box-shadow: 0 15px 50px -10px rgba(200, 155, 106, 0.08);
+/* ── 70s RETRO PSYCHEDELIC & COSMIC DEEP THINKER ────────── */
+.font-retro-pop {
+  font-family: 'Shrikhand', cursive;
+  letter-spacing: 0.02em;
+}
+
+.font-retro-serif {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.retro-title-3d {
+  text-shadow: 
+    3px 3px 0px #FF5E7E,
+    6px 6px 0px #FFA94D,
+    9px 9px 0px #FFD166,
+    12px 12px 0px #06D6A0,
+    15px 15px 0px #4CC9F0,
+    18px 18px 0px #201D28;
+}
+
+.retro-title-3d-sm {
+  text-shadow: 
+    2px 2px 0px #FF5E7E,
+    4px 4px 0px #FFA94D,
+    6px 6px 0px #FFD166,
+    8px 8px 0px #06D6A0,
+    10px 10px 0px #201D28;
+}
+
+.retro-title-sunset {
+  text-shadow: 
+    3px 3px 0px #FFA94D,
+    6px 6px 0px #FF5E7E,
+    9px 9px 0px #A06CD5,
+    12px 12px 0px #14131F;
+}
+
+.retro-badge-shadow {
+  box-shadow: 3px 3px 0px #201D28;
+}
+
+.retro-card-shadow {
+  box-shadow: 6px 6px 0px #201D28;
+}
+
+.retro-card-shadow-lg {
+  box-shadow: 8px 8px 0px #201D28;
+}
+
+.retro-card-shadow-hover {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.retro-card-shadow-hover:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px #201D28;
+}
+
+.retro-btn {
+  border: 2.5px solid #201D28;
+  box-shadow: 4px 4px 0px #201D28;
+  transition: all 0.15s ease;
+}
+
+.retro-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #201D28;
+}
+
+.retro-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #201D28;
+}
+
+.retro-rainbow-stripe {
+  background: linear-gradient(
+    90deg,
+    #FF5E7E 0%,
+    #FFA94D 20%,
+    #FFD166 40%,
+    #06D6A0 60%,
+    #4CC9F0 80%,
+    #A06CD5 100%
+  );
+}
+
+.retro-rainbow-vertical {
+  background: linear-gradient(
+    180deg,
+    #FF5E7E 0%,
+    #FFA94D 20%,
+    #FFD166 40%,
+    #06D6A0 60%,
+    #4CC9F0 80%,
+    #A06CD5 100%
+  );
+}
+
+@keyframes retro-wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.animate-retro-wiggle {
+  animation: retro-wiggle 3s ease-in-out infinite;
+}
+
+@keyframes retro-pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.animate-retro-pulse {
+  animation: retro-pulse-subtle 4s ease-in-out infinite;
 }
 
 
