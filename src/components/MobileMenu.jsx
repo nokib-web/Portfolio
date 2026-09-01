@@ -156,13 +156,13 @@ const MobileMenu = ({ isOpen, onClose, activeSection, activePersonaId = 'develop
                         <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                             <div className="flex justify-center space-x-6">
                                 <a
-                                    href="https://drive.google.com/uc?export=download&id=1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY"
+                                    href="https://drive.google.com/file/d/1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY/view"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex flex-col items-center space-y-1 text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                                 >
                                     <div className="p-3 bg-white dark:bg-slate-800 rounded-full shadow-sm">
-                                        <span className="material-icons-outlined">download</span>
+                                        <span className="material-icons-outlined">description</span>
                                     </div>
                                     <span className="text-xs font-medium">Resume</span>
                                 </a>

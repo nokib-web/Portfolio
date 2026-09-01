@@ -135,7 +135,7 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
         // Pro Commands (The "Command Palette" vibe)
         const commands = [
             { title: 'Toggle Dark Mode', icon: 'dark_mode', action: 'theme' },
-            { title: 'Download Resume', icon: 'download', action: 'resume', link: 'https://drive.google.com/uc?export=download&id=1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY' },
+            { title: 'View Resume', icon: 'description', action: 'resume', link: 'https://drive.google.com/file/d/1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY/view' },
             { title: 'Contact / Email Me', icon: 'mail', link: 'mailto:nokib.web@gmail.com' },
             { title: 'Go to LinkedIn', icon: 'open_in_new', link: 'https://www.linkedin.com/in/nazmulhasan-nokib/' },
             { title: 'Go to GitHub', icon: 'code', link: 'https://github.com/nokib-web' }
@@ -396,12 +396,12 @@ const Header = ({ activeSection, activePersonaId = 'developer', light = false })
                             ? "text-stone-600 hover:text-stone-900 hover:bg-stone-150/70"
                             : "text-slate-350 hover:text-white hover:bg-slate-800/40"
                     }`}
-                    href="https://drive.google.com/uc?export=download&id=1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY"
+                    href="https://drive.google.com/file/d/1DzzReSIxO0LUPYU5si0p-7c4Hy4ypEOY/view"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
                     <span>Resume</span>
-                    <span className="material-icons-outlined text-[14px] opacity-75">download</span>
+                    <span className="material-icons-outlined text-[14px] opacity-75">open_in_new</span>
                 </motion.a>
             </nav>
         );
